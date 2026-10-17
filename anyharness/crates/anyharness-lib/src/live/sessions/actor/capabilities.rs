@@ -78,8 +78,10 @@ pub(in crate::live::sessions::actor) fn action_capabilities_from_acp(
 }
 
 fn bounded_agent_family(agent_kind: &str) -> &'static str {
-    AgentKind::parse(agent_kind)
-        .map(|kind| kind.as_str())
+    AgentKind::all()
+        .iter()
+        .find(|kind| kind.as_str() == agent_kind)
+        .map(AgentKind::as_str)
         .unwrap_or("unknown")
 }
 

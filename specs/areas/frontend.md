@@ -12,6 +12,18 @@ These standards apply to all frontend app logic and shared frontend packages:
 
 ProductClient and Mobile use the layered folder logic below. Desktop and Web are thin hosts: Desktop keeps Tauri and local-runtime adapters, Web keeps browser adapters, and both mount the connected product owned by ProductClient.
 
+## Extension discovery source layout
+
+The [extension system](../systems/extensions/README.md) uses ProductClient's
+existing layers: presentation under `components/extensions/marketplace`, local
+interaction state under `hooks/extensions/ui`, queries under
+`hooks/access/extensions`, registry transport under `lib/access/extensions`,
+and pure rules under `lib/domain/extensions`. The route entry uses the existing
+workspace sidebar shell; its registry dependency is scoped by a provider.
+Installed package queries and removal use the current AnyHarness runtime through
+`lib/access/anyharness/extensions.ts` and the generated SDK. Cache identity includes
+the runtime URL and actor scope; removal requires confirmation for one version.
+
 ## Launch configuration authority
 
 Every pre-launch surface reads the selected target's `HarnessLaunchOptionsResponse` and may only decorate exact keys. It must not import static executable membership, seed missing values, filter unknown IDs, or apply a first-model fallback. When the response carries a `modelControls` row for the selected model, that exact row replaces the flat control statement; a present empty row means no controls. Pickers submit the raw `modelId` plus one `controlValues` entry for each selected rendered control and discard stale control selections when the model changes.

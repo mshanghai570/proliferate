@@ -75,10 +75,11 @@ export function useCoworkThreadWorkflow() {
   const runtimeLaunchOptions = useAgentLaunchOptionsQuery({ harnessKind: requestedHarnessKind });
   const launchAgents = useMemo(() => {
     const projected = runtimeLaunchOptions.data
-      ? projectHarnessLaunchOptions(runtimeLaunchOptions.data)
+      ? projectHarnessLaunchOptions(runtimeLaunchOptions.data,
+        agents.find((agent) => agent.kind === runtimeLaunchOptions.data?.harnessKind)?.displayName)
       : null;
     return projected ? [projected] : EMPTY_LAUNCH_AGENTS;
-  }, [runtimeLaunchOptions.data]);
+  }, [agents, runtimeLaunchOptions.data]);
   const showToast = useToastStore((state) => state.show);
   const { selectWorkspace } = useWorkspaceSelection();
   const { initForWorkspace } = useWorkspaceFileActions();

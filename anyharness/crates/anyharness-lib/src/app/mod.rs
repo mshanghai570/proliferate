@@ -11,6 +11,7 @@ mod workspaces;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+use crate::adapters::extensions::registry::OPEN_VSX_BASE_URL;
 use crate::adapters::git::WorkspaceFileSearchCache;
 use crate::adapters::hosting::PrStatusCache;
 use crate::adapters::processes::ProcessService;
@@ -36,6 +37,7 @@ use crate::domains::cowork::mcp::auth::CoworkMcpAuth;
 use crate::domains::cowork::runtime::{CoworkRuntime, CoworkSessionHooks};
 use crate::domains::cowork::service::CoworkService;
 use crate::domains::cowork::store::{CoworkDeleteParticipant, CoworkStore};
+use crate::domains::extensions::manager::ExtensionManager;
 use crate::domains::goals::hooks::GoalSessionHooks;
 use crate::domains::goals::runtime::GoalRuntime;
 use crate::domains::goals::service::GoalService;
@@ -173,6 +175,11 @@ pub struct AppState {
     pub mobility_runtime: Arc<MobilityRuntime>,
     pub materialization_runtime: Arc<MaterializationRuntime>,
     pub plan_service: Arc<PlanService>,
+    pub skill_manager: Arc<crate::domains::skills::SkillManager>,
+    pub extension_manager: Arc<ExtensionManager>,
+    /// Origin the registry install route fetches from. Production uses Open VSX;
+    /// tests point it at a local stub.
+    pub extension_registry_base_url: String,
     pub plan_runtime: Arc<PlanRuntime>,
     pub goal_service: Arc<GoalService>,
     pub goal_runtime: Arc<GoalRuntime>,
@@ -284,6 +291,10 @@ impl AppState {
             runtime_home.clone(),
         ));
         let plan_service = Arc::new(PlanService::new(PlanStore::new(db.clone())));
+        let skill_manager = Arc::new(crate::domains::skills::SkillManager::new(
+            runtime_home.clone(),
+        ));
+        let extension_manager = Arc::new(ExtensionManager::new(db.clone(), runtime_home.clone()));
         let goal_service = Arc::new(GoalService::new(GoalStore::new(db.clone())));
         let loop_service = Arc::new(LoopService::new(LoopStore::new(db.clone())));
         let activity_service = Arc::new(ActivityService::new(ActivityStore::new(db.clone())));
@@ -435,6 +446,7 @@ impl AppState {
             loop_session_hooks,
             activity_session_hooks,
             workflow_session_extension.clone(),
+            skill_manager.clone(),
         ];
         // Checkpoints precede SessionRuntime; workspace lifecycle wraps it later.
         let workspace_checkpoint_service =
@@ -623,6 +635,9 @@ impl AppState {
             mobility_runtime,
             materialization_runtime,
             plan_service,
+            skill_manager,
+            extension_manager,
+            extension_registry_base_url: OPEN_VSX_BASE_URL.to_string(),
             plan_runtime,
             goal_service,
             goal_runtime,

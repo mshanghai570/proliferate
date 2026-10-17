@@ -97,6 +97,7 @@ from proliferate.config import settings
 from proliferate.constants.agent_gateway import (
     AGENT_API_KEY_KIND_AWS_BEDROCK,
     AGENT_API_KEY_KIND_AZURE_OPENAI,
+    AGENT_API_KEY_KIND_OPENAI_COMPATIBLE,
     AGENT_AUTH_SEAT_CAPABLE_HARNESS_KINDS,
     AGENT_AUTH_SOURCE_API_KEY,
     AGENT_AUTH_SOURCE_GATEWAY,
@@ -377,7 +378,12 @@ def _render_provider_config_source(
         # api_key's revoked-key handling above.
         return None
     config_kind, fields = resolved
-    env = _translate_provider_config_env(selection.harness_kind, config_kind, fields)
+    env = _translate_provider_config_env(
+        selection.harness_kind,
+        config_kind,
+        fields,
+        provider_id=f"custom-{selection.api_key_id}",
+    )
     if env is None:
         logger.warning(
             "Skipping unsupported provider-config source harness=%s config_kind=%s",
@@ -422,6 +428,8 @@ def _translate_provider_config_env(
     harness_kind: str,
     config_kind: str,
     fields: Mapping[str, str],
+    *,
+    provider_id: str | None = None,
 ) -> dict[str, str] | None:
     """Generic vault fields -> this harness's real env-var names.
 
@@ -448,6 +456,34 @@ def _translate_provider_config_env(
     is a one-line fix in the block below if the live run shows either
     backwards.
     """
+    if config_kind == AGENT_API_KEY_KIND_OPENAI_COMPATIBLE:
+        if harness_kind != "opencode" or provider_id is None:
+            return None
+        if not all(fields.get(key) for key in ("name", "endpoint", "models")):
+            return None
+        # An omitted key lets the OpenAI SDK fall back to OPENAI_API_KEY.
+        options = {"baseURL": fields["endpoint"], "apiKey": ""}
+        env = {}
+        if fields.get("apiKey"):
+            key_env = f"PROLIFERATE_{provider_id.upper().replace('-', '_')}_KEY"
+            env[key_env] = fields["apiKey"]
+            options["apiKey"] = f"{{env:{key_env}}}"
+        env["OPENCODE_CONFIG_CONTENT"] = json.dumps(
+            {
+                "provider": {
+                    provider_id: {
+                        "name": fields["name"],
+                        "npm": "@ai-sdk/openai"
+                        if fields.get("apiFormat") == "responses"
+                        else "@ai-sdk/openai-compatible",
+                        "options": options,
+                        "models": {model: {} for model in fields["models"].splitlines()},
+                    }
+                }
+            }
+        )
+        return env
+
     if config_kind == AGENT_API_KEY_KIND_AWS_BEDROCK:
         region = fields.get("region")
         bearer_token = fields.get("bearerToken")

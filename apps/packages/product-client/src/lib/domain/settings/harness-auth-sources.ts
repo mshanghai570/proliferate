@@ -54,9 +54,9 @@ export function isGatewayCapableHarness(harnessKind: string): boolean {
 
 export interface EditableApiKeyRow {
   // Stable client id: persisted rows reuse the server selection id, drafts get a
-  // generated one. Never sent to the server — the store keys rows by env var name.
+  // generated one. Never sent to the server. Typed rows are keyed by vault entry.
   uid: string;
-  envVarName: string;
+  envVarName: string | null;
   apiKeyId: string | null;
   providerHint: string | null;
   enabled: boolean;
@@ -71,11 +71,11 @@ export interface HarnessAuthEditorState {
   rows: EditableApiKeyRow[];
 }
 
-// A row can be wired only once it names BOTH a key and a valid env var (the
-// store rejects an api_key source missing either). Incomplete draft rows live in
-// the editor and are never sent.
+// Bare keys need a valid env var. Typed entries carry null because the runtime
+// recipe supplies their mapping; preserve these rows in every desired-state PUT.
 export function isRowComplete(row: EditableApiKeyRow): boolean {
-  return row.apiKeyId !== null && isValidEnvVarName(row.envVarName);
+  return row.apiKeyId !== null
+    && (row.envVarName === null || isValidEnvVarName(row.envVarName));
 }
 
 /** Seed the editor from the persisted selections for one (harness, surface). */
@@ -98,7 +98,7 @@ export function deriveEditorState(
     .filter((selection) => selection.sourceKind === "api_key")
     .map((selection) => ({
       uid: selection.id,
-      envVarName: selection.envVarName ?? "",
+      envVarName: selection.envVarName,
       apiKeyId: selection.apiKeyId,
       providerHint: selection.providerHint,
       enabled: selection.enabled,

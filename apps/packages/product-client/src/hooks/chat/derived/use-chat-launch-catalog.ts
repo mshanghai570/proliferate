@@ -89,7 +89,8 @@ export function useChatLaunchCatalog({
     () => {
       const projected = [runtimeLaunchOptions.data, ...otherRuntimeLaunchOptions]
         .flatMap((response) => {
-          const agent = response ? projectHarnessLaunchOptions(response) : null;
+          const agent = response ? projectHarnessLaunchOptions(response,
+            hasCloudTargetReadiness ? undefined : agentCatalog.agentsByKind.get(response.harnessKind)?.displayName) : null;
           return agent ? [agent] : [];
         });
       return projected.length > 0 ? projected : EMPTY_AGENTS;
@@ -97,6 +98,8 @@ export function useChatLaunchCatalog({
     [
       otherRuntimeLaunchOptions,
       runtimeLaunchOptions.data,
+      agentCatalog.agentsByKind,
+      hasCloudTargetReadiness,
     ],
   );
 

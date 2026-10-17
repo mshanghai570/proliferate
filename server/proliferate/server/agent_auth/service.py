@@ -11,9 +11,11 @@ the post-Bifrost audit surface).
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime
+from urllib.parse import urlsplit
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,6 +24,7 @@ from proliferate.config import settings
 from proliferate.constants.agent_gateway import (
     AGENT_API_KEY_KIND_AWS_BEDROCK,
     AGENT_API_KEY_KIND_AZURE_OPENAI,
+    AGENT_API_KEY_KIND_OPENAI_COMPATIBLE,
     AGENT_API_KEY_TYPED_KINDS,
     AGENT_AUTH_POLICY_ROUTES,
     AGENT_AUTH_ROUTE_NATIVE,
@@ -143,6 +146,7 @@ _MAX_PROVIDER_CONFIG_FIELDS = 16
 _PROVIDER_CONFIG_REQUIRED_FIELDS: dict[str, frozenset[str]] = {
     AGENT_API_KEY_KIND_AWS_BEDROCK: frozenset({"region", "bearerToken"}),
     AGENT_API_KEY_KIND_AZURE_OPENAI: frozenset({"endpoint", "apiKey"}),
+    AGENT_API_KEY_KIND_OPENAI_COMPATIBLE: frozenset({"name", "endpoint", "models"}),
 }
 
 
@@ -182,7 +186,12 @@ async def create_provider_config(
         )
     required_fields = _PROVIDER_CONFIG_REQUIRED_FIELDS[kind]
     submitted_fields = frozenset(value.keys())
-    unknown_fields = submitted_fields - required_fields
+    optional_fields = (
+        frozenset({"apiKey", "apiFormat"})
+        if kind == AGENT_API_KEY_KIND_OPENAI_COMPATIBLE
+        else frozenset()
+    )
+    unknown_fields = submitted_fields - required_fields - optional_fields
     if unknown_fields:
         raise CloudApiError(
             "invalid_agent_provider_config_fields",
@@ -206,6 +215,8 @@ async def create_provider_config(
                 status_code=400,
             )
         trimmed_value[field_key] = trimmed
+    if kind == AGENT_API_KEY_KIND_OPENAI_COMPATIBLE:
+        _validate_custom_provider(trimmed_value)
     record = await agent_gateway_store.create_agent_provider_config(
         db,
         user_id=user_id,
@@ -220,6 +231,47 @@ async def create_provider_config(
         kind=kind,
     )
     return record
+
+
+def _validate_custom_provider(value: dict[str, str]) -> None:
+    """Validate literals before OpenCode applies its config interpolation."""
+    error = None
+    try:
+        endpoint = urlsplit(value["endpoint"])
+        port = endpoint.port
+        if (
+            endpoint.scheme not in ("http", "https")
+            or not endpoint.hostname
+            or endpoint.username is not None
+            or endpoint.password is not None
+            or endpoint.query
+            or endpoint.fragment
+            or port == 0
+            or re.search(r"[\s{}\\]", value["endpoint"])
+        ):
+            error = (
+                "Use an HTTP or HTTPS API base URL without credentials, a query, or a fragment."
+            )
+    except ValueError:
+        error = "Enter a valid HTTP or HTTPS API base URL."
+    if any("{env:" in item or "{file:" in item for item in value.values()):
+        error = (
+            "Enter literal provider values; environment and file substitutions are not supported."
+        )
+    models = list(
+        dict.fromkeys(line.strip() for line in value["models"].splitlines() if line.strip())
+    )
+    if not models or len(models) > 100 or any(re.search(r"[\s{}]", model) for model in models):
+        error = "Enter 1-100 model IDs, one per line, without spaces or braces."
+    if value.get("apiFormat", "chat") not in ("chat", "responses"):
+        error = "Choose Chat Completions or Responses as the API format."
+    if any(char in value.get("apiKey", "") for char in "\r\n"):
+        error = "Enter an API key without line breaks."
+    if len(value["name"]) > _MAX_TITLE_LENGTH:
+        error = f"Provider name must be 1-{_MAX_TITLE_LENGTH} characters."
+    if error:
+        raise CloudApiError("invalid_agent_provider_config_value", error, status_code=400)
+    value["models"] = "\n".join(models)
 
 
 async def revoke_api_key(

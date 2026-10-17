@@ -75,7 +75,7 @@ pub fn resolve_agent_unrouted_by_kind(
     kind: &AgentKind,
     runtime_home: &Path,
 ) -> Result<ResolvedAgent, AgentKindNotRegisteredError> {
-    let registry = crate::domains::agents::registry::built_in_registry();
+    let registry = crate::domains::agents::registry::runtime_registry(runtime_home);
     let descriptor = find_descriptor_by_kind(&registry, kind)?;
     Ok(resolve_agent_unrouted(descriptor, runtime_home))
 }
@@ -118,6 +118,31 @@ fn resolve_agent_in_scope(
     runtime_home: &Path,
     scope: CredentialEnvScope<'_>,
 ) -> ResolvedAgent {
+    if matches!(descriptor.kind, AgentKind::Custom { .. }) {
+        if let Ok(Some(config)) =
+            crate::domains::agents::custom::load(runtime_home, descriptor.kind.as_str())
+        {
+            return config.resolve();
+        }
+        return ResolvedAgent {
+            descriptor: descriptor.clone(),
+            status: ResolvedAgentStatus::Error,
+            credential_state: CredentialState::Ready,
+            auth_slots: Vec::new(),
+            cli_auth_state: Some(CliAuthState::Unsupported),
+            native: None,
+            agent_process: ResolvedArtifact {
+                role: ArtifactRole::AgentProcess,
+                installed: false,
+                source: Some("custom".into()),
+                version: None,
+                path: None,
+                message: Some("Custom ACP registration is unavailable.".into()),
+            },
+            spawn: None,
+            credentials_from_route: false,
+        };
+    }
     let home_dir = dirs::home_dir().unwrap_or_else(|| PathBuf::from("/"));
 
     let native = descriptor

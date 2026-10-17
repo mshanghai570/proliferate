@@ -2,6 +2,7 @@ import type { Schema } from "./schema.js";
 
 export type AgentApiKey = Schema<"AgentApiKeyResponse">;
 export type CreateAgentApiKeyRequest = Schema<"AgentApiKeyCreateRequest">;
+export type CreateAgentProviderConfigRequest = Schema<"AgentProviderConfigCreateRequest">;
 
 export type AgentAuthSelection = Schema<"AgentAuthSelectionResponse">;
 export type AgentAuthSource = Schema<"AgentAuthSourceInput">;

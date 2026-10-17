@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ComponentType } from "react";
+import { lazy, Suspense, useEffect, useRef, type ComponentType } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { APP_ROUTES } from "#product/config/app-routes";
 import { setAppNavigate } from "#product/lib/workflows/app/app-navigate-handoff";
@@ -9,6 +9,8 @@ import { WorkflowsPage } from "#product/pages/WorkflowsPage";
 import { WorkspacesPage } from "#product/pages/WorkspacesPage";
 import { useOrganizationSelectionLifecycle } from "#product/hooks/organizations/lifecycle/use-organization-selection-lifecycle";
 import { focusChatInputOnActivation } from "#product/lib/domain/focus-zone";
+
+const ExtensionsPage = lazy(() => import("#product/pages/ExtensionsPage").then((module) => ({ default: module.ExtensionsPage })));
 
 type MainRouteComponent = ComponentType<{ workspaceVisible?: boolean }>;
 type SettingsRouteComponent = ComponentType<{ returnTo?: string }>;
@@ -81,6 +83,7 @@ export function AuthenticatedAppHost({
           <Route path="workflows/:workflowId/runs/:runId" element={<WorkflowsPage />} />
           <Route path="automations" element={<LegacyRouteRedirect to={APP_ROUTES.workflows} />} />
           <Route path="automations/:workflowId" element={<LegacyRouteRedirect to={APP_ROUTES.workflows} />} />
+          <Route path="extensions" element={<Suspense fallback={null}><ExtensionsPage /></Suspense>} />
           <Route path="workspaces" element={<WorkspacesPage />} />
           <Route path="workspaces/:workspaceId" element={<DesktopWorkspaceDeepLinkPage />} />
           <Route path="*" element={<Navigate to={APP_ROUTES.home} replace />} />

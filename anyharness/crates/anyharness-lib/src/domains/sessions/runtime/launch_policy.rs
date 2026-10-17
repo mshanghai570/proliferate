@@ -177,6 +177,7 @@ pub(super) struct SessionLaunchContext {
     pub startup: SessionStartupStrategy,
     pub every_prompt_append: Option<String>,
     pub first_prompt_append: Option<String>,
+    pub launch_prompt_append: Option<String>,
 }
 
 /// Pure assembly of the launch bundle from already-resolved facts.
@@ -200,6 +201,7 @@ pub(super) fn assemble_session_launch(ctx: SessionLaunchContext) -> SessionLaunc
         prompts: SystemPromptAppends {
             every_prompt: ctx.every_prompt_append,
             first_prompt: ctx.first_prompt_append,
+            launch_prompt: ctx.launch_prompt_append,
         },
         // Overwritten by the manager under the start/inject critical section.
         last_seq: 0,

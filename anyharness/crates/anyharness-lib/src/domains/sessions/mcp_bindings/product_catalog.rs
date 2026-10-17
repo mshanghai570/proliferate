@@ -68,6 +68,9 @@ fn merge_launch_extras(target: &mut SessionLaunchExtras, source: &SessionLaunchE
         .first_prompt_system_prompt_append
         .extend(source.first_prompt_system_prompt_append.clone());
     target
+        .launch_prompt_append
+        .extend(source.launch_prompt_append.clone());
+    target
         .mcp_binding_summaries
         .extend(source.mcp_binding_summaries.clone());
 }
@@ -405,6 +408,7 @@ mod tests {
                 SessionLaunchExtras {
                     system_prompt_append: vec!["system-a".to_string()],
                     first_prompt_system_prompt_append: Vec::new(),
+                    launch_prompt_append: Vec::new(),
                     mcp_servers: Vec::new(),
                     mcp_binding_summaries: Vec::new(),
                 },
@@ -414,6 +418,7 @@ mod tests {
                 SessionLaunchExtras {
                     system_prompt_append: vec!["system-b".to_string()],
                     first_prompt_system_prompt_append: vec!["first-b".to_string()],
+                    launch_prompt_append: Vec::new(),
                     mcp_servers: Vec::new(),
                     mcp_binding_summaries: Vec::new(),
                 },

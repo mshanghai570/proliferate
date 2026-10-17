@@ -13,6 +13,7 @@ AGENT_API_KEY_STATUS_REVOKED = "revoked"
 AGENT_API_KEY_KIND_API_KEY = "api_key"
 AGENT_API_KEY_KIND_AWS_BEDROCK = "aws_bedrock"
 AGENT_API_KEY_KIND_AZURE_OPENAI = "azure_openai"
+AGENT_API_KEY_KIND_OPENAI_COMPATIBLE = "openai_compatible"
 # A seat: a portable Claude Max subscription credential (agent_auth spec §2,
 # "The vault"). Decrypts to one opaque secret string — a long-lived
 # `claude setup-token` OAuth token captured by the runtime's mint flow and
@@ -23,6 +24,7 @@ AGENT_API_KEY_KINDS = (
     AGENT_API_KEY_KIND_API_KEY,
     AGENT_API_KEY_KIND_AWS_BEDROCK,
     AGENT_API_KEY_KIND_AZURE_OPENAI,
+    AGENT_API_KEY_KIND_OPENAI_COMPATIBLE,
     AGENT_API_KEY_KIND_ANTHROPIC_SUBSCRIPTION,
 )
 # Typed kinds only — excludes the bare-secret default, which a selection wires
@@ -32,6 +34,7 @@ AGENT_API_KEY_KINDS = (
 AGENT_API_KEY_TYPED_KINDS = (
     AGENT_API_KEY_KIND_AWS_BEDROCK,
     AGENT_API_KEY_KIND_AZURE_OPENAI,
+    AGENT_API_KEY_KIND_OPENAI_COMPATIBLE,
 )
 
 AGENT_AUTH_SURFACE_LOCAL = "local"

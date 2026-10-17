@@ -170,6 +170,9 @@ pub fn resolve_profile(
     state: Option<&AgentAuthState>,
     harness_kind: &str,
 ) -> Result<AgentRuntimeAuthProfile, RouteAuthError> {
+    if crate::domains::agents::custom::is_custom_id(harness_kind) {
+        return Ok(AgentRuntimeAuthProfile::Native);
+    }
     let Some(state) = state else {
         return Ok(AgentRuntimeAuthProfile::Native);
     };

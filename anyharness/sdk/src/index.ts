@@ -20,6 +20,12 @@ export type {
 export { supportWindowResponseBytes } from "./client/support-window-response-bytes.js";
 
 export type {
+  ExtensionPackageIdentity,
+  InstalledExtensionSummary,
+  ListInstalledExtensionsResponse,
+} from "./types/extensions.js";
+
+export type {
   HealthResponse,
   RuntimeCapabilities,
   RuntimePressureLevel,
@@ -70,6 +76,8 @@ export type {
   HarnessLaunchOptionsResponse,
   ArtifactStatus,
   AgentSummary,
+  CustomAcpAgent,
+  RegisterCustomAcpAgentRequest,
   InstallAgentRequest,
   InstallAgentResponse,
   LoginCommand,
@@ -597,3 +605,5 @@ export type {
   FeedTextFrame,
   FeedWebSocketAuthTransport,
 } from "./streams/feeds.js";
+
+export type { SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse } from "./types/skills.js";

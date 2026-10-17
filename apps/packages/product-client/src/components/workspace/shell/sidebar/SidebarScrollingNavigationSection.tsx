@@ -4,6 +4,7 @@ import { SidebarScrollingNavigation } from "#product/components/workspace/shell/
 import { APP_ROUTES } from "#product/config/app-routes";
 import { SHORTCUTS } from "#product/config/shortcuts/registry";
 import { useOpenSupportReportWindow } from "#product/hooks/support/workflows/use-open-support-report-window";
+import { isExtensionMarketplaceEnabled } from "#product/lib/domain/capabilities/extension-marketplace";
 import { isWorkflowsV2Enabled } from "#product/lib/domain/capabilities/workflows-v2";
 import { getShortcutDisplayLabel } from "#product/lib/domain/shortcuts/matching";
 import { useShortcutRevealVisible } from "#product/providers/ShortcutRevealProvider";
@@ -15,6 +16,7 @@ const SUPPORT_SHORTCUT_LABEL = getShortcutDisplayLabel(SHORTCUTS.openSupport);
 interface SidebarScrollingNavigationSectionProps {
   onGoWorkspaces: () => void;
   onGoWorkflows: () => void;
+  onGoExtensions: () => void;
 }
 
 /**
@@ -29,6 +31,7 @@ interface SidebarScrollingNavigationSectionProps {
 export function SidebarScrollingNavigationSection({
   onGoWorkspaces,
   onGoWorkflows,
+  onGoExtensions,
 }: SidebarScrollingNavigationSectionProps) {
   const location = useLocation();
   const shortcutRevealVisible = useShortcutRevealVisible();
@@ -46,9 +49,12 @@ export function SidebarScrollingNavigationSection({
         // deliberately unavailable page.
         showWorkflows={isWorkflowsV2Enabled()}
         workflowsActive={location.pathname.startsWith(APP_ROUTES.workflows)}
+        showExtensions={isExtensionMarketplaceEnabled()}
+        extensionsActive={location.pathname === APP_ROUTES.extensions}
         supportActive={false}
         onGoWorkspaces={onGoWorkspaces}
         onGoWorkflows={onGoWorkflows}
+        onGoExtensions={onGoExtensions}
         onOpenSupport={handleOpenSupport}
         shortcutRevealVisible={shortcutRevealVisible}
         supportShortcutLabel={SUPPORT_SHORTCUT_LABEL}

@@ -166,8 +166,32 @@ impl AgentRuntime {
         self
     }
 
+    pub fn supports_custom_agents(&self) -> bool {
+        self.surface == RuntimeSurface::Local
+    }
+
+    pub fn list_custom_agents(&self) -> anyhow::Result<Vec<super::custom::CustomAgent>> {
+        super::custom::list(&self.runtime_home)
+    }
+
+    pub fn register_custom_agent(&self, config: &super::custom::CustomAgent) -> anyhow::Result<()> {
+        anyhow::ensure!(
+            self.supports_custom_agents(),
+            "custom agents require a local runtime"
+        );
+        super::custom::register(&self.runtime_home, config)
+    }
+
+    pub fn remove_custom_agent(&self, id: &str) -> anyhow::Result<bool> {
+        anyhow::ensure!(
+            self.supports_custom_agents(),
+            "custom agents require a local runtime"
+        );
+        super::custom::remove(&self.runtime_home, id)
+    }
+
     pub async fn list_agents(&self) -> AgentListSnapshot {
-        let registry = built_in_registry();
+        let registry = super::registry::runtime_registry(&self.runtime_home);
         let reconcile_snapshot = self.reconcile_service.snapshot().await;
         let agents = registry
             .iter()
@@ -180,7 +204,8 @@ impl AgentRuntime {
     }
 
     pub async fn get_agent(&self, kind: &str) -> Result<AgentReadinessSnapshot, AgentRuntimeError> {
-        let descriptor = descriptor_for_kind(kind)?;
+        let descriptor = super::registry::descriptor_at(&self.runtime_home, kind)
+            .ok_or_else(|| AgentRuntimeError::NotFound(kind.to_string()))?;
         let reconcile_snapshot = self.reconcile_service.snapshot().await;
         Ok(AgentReadinessSnapshot {
             agent: resolve_agent(&descriptor, &self.runtime_home),
@@ -374,6 +399,9 @@ impl AgentRuntime {
         for kind in &agent_kinds {
             let parsed = AgentKind::parse(kind)
                 .ok_or_else(|| AgentRuntimeError::InvalidReconcileAgentKind(kind.clone()))?;
+            if matches!(parsed, AgentKind::Custom { .. }) {
+                return Err(AgentRuntimeError::InvalidReconcileAgentKind(kind.clone()));
+            }
             if !requested_agent_kinds.contains(&parsed) {
                 requested_agent_kinds.push(parsed);
             }

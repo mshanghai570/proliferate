@@ -132,7 +132,7 @@ CREATE TABLE agent_api_key (
     user_id           uuid NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
     title             text NOT NULL,          -- "Max seat · ops@acme.com"
     kind              text NOT NULL CHECK (kind IN
-                        ('api_key','aws_bedrock','azure_openai','anthropic_subscription')),
+                        ('api_key','aws_bedrock','azure_openai','openai_compatible','anthropic_subscription')),
     value_ciphertext  text NOT NULL,          -- Fernet, cloud-secret-v1
     encryption_key_id text NOT NULL,
     redacted_hint     text NOT NULL,          -- "sk-…abc4"
@@ -461,6 +461,7 @@ GET  /keys
 POST /keys                       { title, value }                          → the created key row
 POST /keys/provider-config       { title, kind, value: {…} }               → the created key row
      (aws_bedrock: {region, bearerToken} · azure_openai: {endpoint, apiKey} — no deployment field)
+     (openai_compatible: {name, endpoint, models, apiKey?, apiFormat?}; models are newline-separated IDs)
 DELETE /keys/{key_id}
   → the revoked key row · 409 agent_api_key_referenced { harnesses: [kind] }   # in-use keys disable, never dangle
 
@@ -601,6 +602,7 @@ The per-harness recipe table — the one place "every harness has its own way of
 - **codex · provider_config** — a typed config renders an `[model_providers.azure]` block into `config.toml` (`wire_api = "responses"`, `env_key` naming the vault-delivered var); the codex × azure cell stays registry-`pending` until live-verified.
 - **opencode · gateway** — one file + three vars: write `opencode.json` (adds only the `proliferate` provider: `apiKey: "{env:PROLIFERATE_GATEWAY_KEY}"` + the exact live gateway model list from the plan seam); set `XDG_CONFIG_HOME` → the isolated dir, `OPENCODE_CONFIG` → the file path, `PROLIFERATE_GATEWAY_KEY` = the scoped key. **`XDG_DATA_HOME` stays ambient on purpose** — coexistence with native provider logins is opencode's model.
 - **opencode · api_key** — the named env var, additive beside gateway and native.
+- **opencode · openai_compatible provider_config** — an encrypted custom connection, exposed in local OpenCode Settings. Required fields are `name`, an HTTP(S) `endpoint`, and 1–100 newline-separated `models`; optional fields are `apiKey` and `apiFormat` (`chat`, the default, or `responses`). Endpoint paths are preserved exactly. Credentials, queries, fragments, whitespace, and interpolation directives are rejected in endpoints. File/environment interpolation is rejected in user-authored fields. The provider ID is `custom-<vault UUID>`, so connections cannot collide with built-in provider IDs. The server emits `OPENCODE_CONFIG_CONTENT` with an explicit model map and an environment reference for the optional key. Runtime rendering combines sibling provider maps and refuses duplicate IDs. Native provider logins coexist; removing or disabling a selection removes it from the next rendered state. Configured model IDs become executable only after the target harness reports them through the normal probe. No inference request is sent by the form.
 - **grok · gateway** — env only: `HOME` → sequence-keyed `grok-home-<seq>/`, `GROK_MODELS_BASE_URL` (proxy), `XAI_API_KEY` (the scoped key).
 - **cursor** — gateway is a typed refusal (no route exists); api_key sets `CURSOR_API_KEY`.
 

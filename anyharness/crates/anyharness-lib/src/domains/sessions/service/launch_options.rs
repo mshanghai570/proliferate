@@ -2,7 +2,7 @@
 
 use super::SessionService;
 use crate::domains::agents::launch_options::HarnessLaunchOptionsResponse;
-use crate::domains::agents::model::AgentKind;
+use crate::domains::agents::registry::runtime_registry;
 
 impl SessionService {
     pub fn active_agent_catalog(&self) -> crate::domains::agents::catalog::service::ActiveCatalog {
@@ -29,8 +29,8 @@ impl SessionService {
     pub fn harness_launch_options(&self) -> anyhow::Result<Vec<HarnessLaunchOptionsResponse>> {
         let mut responses = Vec::new();
 
-        for kind in AgentKind::all() {
-            let kind_id = kind.as_str();
+        for descriptor in runtime_registry(&self.runtime_home) {
+            let kind_id = descriptor.kind.as_str();
             let Some(observed) = self.launch_options_service.read(kind_id)? else {
                 continue;
             };

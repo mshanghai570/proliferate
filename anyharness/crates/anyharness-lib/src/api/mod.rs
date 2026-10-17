@@ -8,6 +8,8 @@ mod workflow_runs_openapi;
 pub mod ws;
 
 #[cfg(test)]
+mod extensions_tests;
+#[cfg(test)]
 mod openapi_tests;
 #[cfg(test)]
 mod review_admission_tests;

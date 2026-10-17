@@ -11,7 +11,7 @@ const VALID_CREDENTIAL_PROVIDER_IDS: &[&str] = &["anthropic", "openai", "gemini"
 // vault" table); mirrors constants/agent_gateway.py's AGENT_API_KEY_TYPED_KINDS
 // on the Python side. Which harness may declare which kind is registry data,
 // not a Rust constant — this list only bounds what a `kind` string may be.
-const VALID_PROVIDER_CONFIG_KINDS: &[&str] = &["aws_bedrock", "azure_openai"];
+const VALID_PROVIDER_CONFIG_KINDS: &[&str] = &["aws_bedrock", "azure_openai", "openai_compatible"];
 
 pub fn validate_agent_registry_document(registry: &AgentRegistryDocument) -> anyhow::Result<()> {
     if registry.schema_version != 1 {

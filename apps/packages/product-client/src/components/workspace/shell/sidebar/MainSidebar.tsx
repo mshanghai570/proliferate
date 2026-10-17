@@ -406,6 +406,7 @@ export const MainSidebar = memo(function MainSidebar({
           <SidebarScrollingNavigationSection
             onGoWorkspaces={actions.handleGoWorkspaces}
             onGoWorkflows={actions.handleGoWorkflows}
+            onGoExtensions={actions.handleGoExtensions}
           />
 
           <SidebarPinnedSection

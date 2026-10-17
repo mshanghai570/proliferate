@@ -10,7 +10,7 @@
 
 use crate::domains::agents::model::AgentKind;
 use crate::domains::agents::readiness::service::resolve_agent_unrouted;
-use crate::domains::agents::registry::{built_in_registry, descriptor};
+use crate::domains::agents::registry::{descriptor_at, runtime_registry};
 use std::path::PathBuf;
 
 /// Harnesses excluded from every UNATTENDED probe.
@@ -55,7 +55,7 @@ impl RuntimeProbeTargets {
 
 impl ProbeTargets for RuntimeProbeTargets {
     fn auto_harnesses(&self) -> Vec<String> {
-        built_in_registry()
+        runtime_registry(&self.runtime_home)
             .iter()
             .map(|descriptor| descriptor.kind.as_str().to_string())
             .filter(|kind| self.allows_automatic_probe(kind))
@@ -70,7 +70,7 @@ impl ProbeTargets for RuntimeProbeTargets {
     }
 
     fn is_installed(&self, harness_kind: &str) -> bool {
-        descriptor(harness_kind)
+        descriptor_at(&self.runtime_home, harness_kind)
             .map(|descriptor| {
                 resolve_agent_unrouted(&descriptor, &self.runtime_home)
                     .agent_process

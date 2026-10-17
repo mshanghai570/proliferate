@@ -13,6 +13,8 @@ Make "is Claude ready on this machine, and with which exact model and controls m
 | State | Where | Written by |
 | --- | --- | --- |
 | Supported kinds (`claude`, `codex`, `cursor`, `opencode`, `grok`) and their static install/auth/launch metadata | [model.rs](../../../anyharness/crates/anyharness-lib/src/domains/agents/model.rs), [registry/](../../../anyharness/crates/anyharness-lib/src/domains/agents/registry/schema.rs) | compiled in (bundled registry) |
+| Local custom ACP registrations (`custom-<uuid>`), command, literal arguments and environment | `<runtime-home>/custom-agents/<id>.json`, mode `0600` on Unix | local runtime registration API |
+| Imported skill packages, user defaults and repository overrides | `<runtime-home>/skills/packages.json`; [skills.md](skills.md) | skills API |
 | Distribution catalog — pins, artifact specs, model catalog | [catalog/](../../../anyharness/crates/anyharness-lib/src/domains/agents/catalog/schema.rs), [model_catalog.rs](../../../anyharness/crates/anyharness-lib/src/domains/agents/model_catalog.rs) | compiled in from `catalogs/agents/**` |
 | `agent_model_registry_snapshots` | **vestigial**: table exists ([0044](../../../anyharness/crates/anyharness-lib/src/persistence/sql/0044_agent_model_registry_snapshots.sql)) but no domain code reads or writes it on `main`; drop with the next migration | nobody |
 | Install manifests, downloads, seed archives, quarantine | [installer/](../../../anyharness/crates/anyharness-lib/src/domains/agents/installer/mod.rs) under `<runtime-home>` | this system, under [installer/lock.rs](../../../anyharness/crates/anyharness-lib/src/domains/agents/installer/lock.rs) |
@@ -28,11 +30,13 @@ HTTP ([agents.rs](../../../anyharness/crates/anyharness-lib/src/api/http/agents.
 | Route | Meaning |
 | --- | --- |
 | `GET /v1/agents`, `GET /v1/agents/{kind}` | resolved readiness per kind (`resolve_agent`, side-effect free) |
+| `GET|POST /v1/agents/custom`, `DELETE /v1/agents/custom/{id}` | list/register/remove local user-owned ACP commands; responses expose environment names only |
 | `POST /v1/agents/{kind}/install` | fenced managed install of the catalog pin |
 | `POST /v1/agents/{kind}/login/start`, `/login/terminal`, `GET|DELETE /v1/agents/login-terminals/{id}` | provider login flows (terminal-backed) |
 | `POST /v1/agents/reconcile`, `GET /v1/agents/reconcile` | start/inspect the catalog-pin reconcile job |
 | `GET /v1/agents/{kind}/launch-options`, `POST …/launch-options/refresh` | target-observed launch options; refresh pokes the probe |
 | `GET /v1/catalogs/agents/version` | the compiled catalog version — binary convergence *is* catalog convergence |
+| `GET|POST /v1/skills`, `PUT /v1/skills/{id}/enabled`, `DELETE /v1/skills/{id}` | runtime-local skill import, scope enablement and removal |
 
 Wire shapes: [agents.rs](../../../anyharness/crates/anyharness-contract/src/v1/agents.rs), [launch_options.rs](../../../anyharness/crates/anyharness-contract/src/v1/launch_options.rs), [catalogs.rs](../../../anyharness/crates/anyharness-contract/src/v1/catalogs.rs).
 
@@ -50,12 +54,15 @@ In-process: `AgentRuntime` ([runtime.rs](../../../anyharness/crates/anyharness-l
   [live/terminals/agent_login/](../../../anyharness/crates/anyharness-lib/src/live/terminals/agent_login/mod.rs).
 - `catalogs/agents/**` at build time (the registry + catalog data) and the
   desktop seed archive delivered through [desktop_host.md](../desktop-host/README.md).
+- User-configured OpenAI-compatible endpoints are agent_auth typed provider configs, declared for OpenCode in the registry. They supply provider configuration to the existing target probe; the configuration does not directly authorize executable model selections. The current form is exposed for local OpenCode sessions.
 - agent_auth — the resolved credential ladder and gateway plan the launch
   needs; this system *applies* what agent_auth *decides*.
 
 ## 5. Laws
 
 **The bundled registry is the source of truth for supported kinds.** Catalog modules are distribution, presentation and compatibility only and cannot authorize executable values ([README.md](../../areas/anyharness.md), launch-option authority).
+
+**Custom ACP commands are local and user-owned.** Explicit registrations supplement the bundled launch universe with a separate `custom-<uuid>` identity. They never enter managed install, reconcile, seeding or catalog pinning, and cannot alias bundled kinds. Readiness, probes and session startup resolve the same runtime-home registration and executable; its literal args and environment are included in the observation basis. Registered environment keys cannot be overridden by workspace/session environment. Models and controls still require target observation. Custom commands own their native authentication and receive no gateway route. Removing a registration prevents future launches; already running sessions continue.
 
 **Resolution never mutates.** `resolve_agent(...)` reports installed, compatible, credentialed state and nothing else; installation is a separate, fenced operation ([readiness/service.rs](../../../anyharness/crates/anyharness-lib/src/domains/agents/readiness/service.rs)).
 
@@ -118,6 +125,7 @@ Declared edge: `agents → sessions` (baseline; the reverse `sessions → agents
 ```text
 anyharness/crates/anyharness-lib/src/domains/agents/    → target: systems/harnesses/
 ├── model.rs · model_catalog.rs             AgentKind, artifact specs, readiness models
+├── custom.rs                               local user-owned ACP registrations
 ├── registry/                               bundled kind registry, schema, validation, projection
 ├── catalog/                                distribution catalog: schema, artifact, sync, validation
 ├── installer/                              downloads, pinned, npm/managed_npm, seed/, reconcile/,
@@ -131,7 +139,11 @@ anyharness/crates/anyharness-lib/src/domains/agents/    → target: systems/harn
 └── (auth/, auth_state.rs, route_auth/)     → agent_auth runtime section (fenced, see §7)
 anyharness/crates/anyharness-lib/src/integrations/agent_cli/   provider CLI mechanics (consumed)
 anyharness/crates/anyharness-lib/src/integrations/acp/         shared ACP helpers (consumed)
-anyharness/crates/anyharness-lib/src/api/http/{agents,agents_contract,agents_errors,
+anyharness/crates/anyharness-lib/src/domains/skills/           skill packages, enablement and launch extension
+anyharness/crates/anyharness-lib/src/adapters/skills/          file admission and workspace resource staging
+anyharness/crates/anyharness-lib/src/api/http/skills.rs        skills transport
+anyharness/crates/anyharness-contract/src/v1/skills.rs         skills wire shapes
+anyharness/crates/anyharness-lib/src/api/http/{agents,custom_agents,agents_contract,agents_errors,
     agent_launch_options,catalogs}.rs                           transport
 anyharness/crates/anyharness-contract/src/v1/{agents,launch_options,catalogs}.rs
 specs/areas/harnesses/{claude,codex,grok}.md               per-provider adapter docs

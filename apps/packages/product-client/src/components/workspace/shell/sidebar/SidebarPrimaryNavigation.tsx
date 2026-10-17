@@ -1,6 +1,6 @@
 import { AppShellNewChatIcon } from "#product/primitives/icons/app-shell";
 import { Fork, LifeBuoy } from "#product/primitives/icons/core";
-import { Grid } from "#product/primitives/icons/platform";
+import { Blocks, Grid } from "#product/primitives/icons/platform";
 import type { SidebarNavItemView } from "#product/components/workspace/shell/sidebar/ProductSidebarNavigation";
 import { ProductSidebarPrimaryNavigation } from "#product/components/workspace/shell/sidebar/ProductSidebarNavigation";
 
@@ -8,7 +8,7 @@ import { ProductSidebarPrimaryNavigation } from "#product/components/workspace/s
  * The sidebar's primary navigation, split across the scroll boundary.
  *
  * New chat is the one row that must always be reachable, so it stays pinned
- * with the brand row above the scroll region. Workspaces, Workflows and
+ * with the brand row above the scroll region. Workspaces, Workflows, Extensions and
  * Support are destinations rather than the primary action; they scroll away
  * with the repository list, which is what buys that list its vertical room
  * back on short windows.
@@ -56,11 +56,14 @@ interface SidebarScrollingNavigationProps {
    * not rendered disabled. */
   showWorkflows: boolean;
   workflowsActive: boolean;
+  showExtensions: boolean;
+  extensionsActive: boolean;
   supportActive: boolean;
   shortcutRevealVisible: boolean;
   supportShortcutLabel: string;
   onGoWorkspaces: () => void;
   onGoWorkflows: () => void;
+  onGoExtensions: () => void;
   onOpenSupport: () => void;
 }
 
@@ -68,11 +71,14 @@ export function SidebarScrollingNavigation({
   workspacesActive,
   showWorkflows,
   workflowsActive,
+  showExtensions,
+  extensionsActive,
   supportActive,
   shortcutRevealVisible,
   supportShortcutLabel,
   onGoWorkspaces,
   onGoWorkflows,
+  onGoExtensions,
   onOpenSupport,
 }: SidebarScrollingNavigationProps) {
   const navItems: SidebarNavItemView[] = [
@@ -90,6 +96,9 @@ export function SidebarScrollingNavigation({
         label: "Workflows",
       }]
       : []),
+    ...(showExtensions
+      ? [{ id: "extensions", active: extensionsActive, icon: <Blocks />, label: "Extensions" }]
+      : []),
     {
       id: "support",
       active: supportActive,
@@ -106,6 +115,9 @@ export function SidebarScrollingNavigation({
         break;
       case "workflows":
         onGoWorkflows();
+        break;
+      case "extensions":
+        onGoExtensions();
         break;
       case "support":
         onOpenSupport();

@@ -118,6 +118,21 @@ the app's `Contents/MacOS` inventory contains executable, signed AnyHarness,
 Worker, `proliferate-debug`, and `proliferate-diagnostics-collector` binaries;
 the collector must not contain the debug placeholder marker.
 
+### Fork Intel Preview
+
+The `mshanghai570/proliferate` fork has a separate `build-intel-dmg.yml`
+workflow for personal testing. It runs on pushes to `build/intel-dmg` or a
+manual dispatch, uses `macos-15-intel`, and builds the existing Rust helpers,
+runtime SDK, bundled agent seed, and Tauri app. It uploads an Intel DMG,
+SHA-256 checksum, and source metadata as a 14-day Actions artifact.
+
+The preview uses `com.mshanghai570.proliferate.preview`, requires macOS 15+,
+is ad-hoc signed without notarization, disables updater artifacts and automatic
+updates, and defaults to the local API on port 8000. Its token has only
+`contents: read`; it has no release, tag, updater, or deployment step. The
+production release matrix and signing requirements remain the authority for
+published releases.
+
 ### Windows Beta
 
 Windows (`x86_64-pc-windows-msvc`) returned to the matrix on 2026-08-20, having been removed on 2026-04-13 while the SDK generation step was POSIX-shell only. It is a beta leg, it is deliberately not release-blocking, and it is opt-in only:

@@ -14,7 +14,9 @@ pub mod auth;
 pub mod blocking;
 pub mod catalogs;
 pub mod cowork;
+pub mod custom_agents;
 pub mod error;
+pub mod extensions;
 pub mod files;
 pub mod git;
 mod git_contract;
@@ -64,3 +66,5 @@ mod workspaces_restore_errors;
 pub mod workspaces_setup;
 pub mod workspaces_worktrees;
 pub mod worktrees;
+
+pub mod skills;

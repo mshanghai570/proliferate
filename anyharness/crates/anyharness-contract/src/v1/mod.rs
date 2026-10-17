@@ -6,6 +6,7 @@ pub mod catalogs;
 pub mod cowork;
 pub mod errors;
 pub mod events;
+pub mod extensions;
 pub mod files;
 pub mod git;
 pub mod goals;
@@ -63,3 +64,5 @@ pub use terminals::*;
 pub use workspaces::*;
 pub use workspaces_lifecycle::*;
 pub use worktrees::*;
+
+pub mod skills;

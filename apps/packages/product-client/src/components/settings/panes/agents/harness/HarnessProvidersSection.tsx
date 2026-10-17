@@ -19,6 +19,7 @@ import {
   HarnessAuthEvidenceSummary,
 } from "#product/components/settings/panes/agents/harness/HarnessAuthEvidenceBadge";
 import { isFeatureEnabled } from "#product/config/feature-flags";
+import { CustomProvidersSection } from "#product/components/settings/panes/agents/harness/CustomProvidersSection";
 
 // Lazy: the modal pulls in the vendored provider-logo asset map (170+ marks),
 // which must never reach the login-path chunk (login JS budget gate,
@@ -67,7 +68,9 @@ export function HarnessProvidersSection({
   const createKey = useCreateAgentApiKey();
   const revokeKey = useRevokeAgentApiKey();
 
-  const rows = editor.editorState.rows.filter((row) => row.apiKeyId !== null);
+  const rows = editor.editorState.rows.filter(
+    (row): row is typeof row & { envVarName: string } => row.apiKeyId !== null && row.envVarName !== null,
+  );
   // Resolve each bound row back to its registry provider (by hint, else by the
   // env var) so the summary tiles can show the provider's mark.
   const configured = rows
@@ -270,6 +273,8 @@ export function HarnessProvidersSection({
           </p>
         )}
       </div>
+
+      {editor.surface === "local" ? <CustomProvidersSection editor={editor} /> : null}
 
       {modalOpen ? (
         <Suspense fallback={null}>

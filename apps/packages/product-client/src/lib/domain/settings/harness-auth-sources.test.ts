@@ -64,6 +64,18 @@ describe("isMultiSourceHarness", () => {
 });
 
 describe("isRowComplete", () => {
+  it("preserves persisted typed provider rows when another source changes", () => {
+    const state = deriveEditorState([
+      selection({ harnessKind: "opencode", envVarName: null, providerHint: "openai_compatible" }),
+      selection({ id: "sel-2", harnessKind: "opencode", apiKeyId: "key-2" }),
+    ], "opencode", "local");
+    const sources = buildDesiredSources("opencode", { ...state, gatewayEnabled: false });
+    expect(sources.filter((source) => source.sourceKind === "api_key")).toEqual([
+      { sourceKind: "api_key", apiKeyId: "key-1", envVarName: null, providerHint: "openai_compatible", enabled: true },
+      { sourceKind: "api_key", apiKeyId: "key-2", envVarName: "ANTHROPIC_API_KEY", providerHint: "anthropic", enabled: true },
+    ]);
+  });
+
   it("requires both a key and a valid env var name", () => {
     expect(isRowComplete(row())).toBe(true);
     expect(isRowComplete(row({ apiKeyId: null }))).toBe(false);

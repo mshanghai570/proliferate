@@ -2306,7 +2306,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "api_key" | "aws_bedrock" | "azure_openai" | "anthropic_subscription";
+            kind: "api_key" | "aws_bedrock" | "azure_openai" | "openai_compatible" | "anthropic_subscription";
             /** Redactedhint */
             redactedHint: string;
             /** Status */
@@ -2475,7 +2475,7 @@ export interface components {
             /** Value */
             value?: string | null;
             /** Config Kind */
-            config_kind?: ("aws_bedrock" | "azure_openai") | null;
+            config_kind?: ("aws_bedrock" | "azure_openai" | "openai_compatible") | null;
             /** Env */
             env?: {
                 [key: string]: string;
@@ -2690,7 +2690,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "aws_bedrock" | "azure_openai";
+            kind: "aws_bedrock" | "azure_openai" | "openai_compatible";
             /** Value */
             value: {
                 [key: string]: string;

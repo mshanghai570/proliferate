@@ -15,7 +15,7 @@ use crate::app::AppState;
 use crate::domains::agents::launch_options as domain;
 use crate::domains::agents::launch_probe::{LivePhaseReading, ProbeEngineMode};
 use crate::domains::agents::model::ResolvedAgentStatus;
-use crate::domains::agents::registry::descriptor;
+use crate::domains::agents::registry::descriptor_at;
 
 #[utoipa::path(
     get,
@@ -31,7 +31,7 @@ pub async fn get_launch_options(
     State(state): State<AppState>,
     Path(kind): Path<String>,
 ) -> Result<Json<HarnessLaunchOptionsResponse>, ApiError> {
-    validate_kind(&kind)?;
+    validate_kind(&state, &kind)?;
     let response = response_for(&state, &kind).await?;
     tracing::info!(
         harness = %kind,
@@ -62,7 +62,7 @@ pub async fn refresh_launch_options(
     State(state): State<AppState>,
     Path(kind): Path<String>,
 ) -> Result<(StatusCode, Json<HarnessLaunchOptionsResponse>), ApiError> {
-    validate_kind(&kind)?;
+    validate_kind(&state, &kind)?;
     state
         .launch_probe_service
         .refresh_now(&kind)
@@ -144,14 +144,16 @@ fn can_manually_refresh(state: &AppState) -> bool {
     state.launch_probe_service.mode() == ProbeEngineMode::Owner
 }
 
-fn validate_kind(kind: &str) -> Result<(), ApiError> {
+fn validate_kind(state: &AppState, kind: &str) -> Result<(), ApiError> {
     ensure_path_safe_identifier(kind, "kind")?;
-    descriptor(kind).map(|_| ()).ok_or_else(|| {
-        ApiError::not_found(
-            format!("unknown agent kind '{kind}'"),
-            "HARNESS_LAUNCH_OPTIONS_UNKNOWN_AGENT",
-        )
-    })
+    descriptor_at(&state.runtime_home, kind)
+        .map(|_| ())
+        .ok_or_else(|| {
+            ApiError::not_found(
+                format!("unknown agent kind '{kind}'"),
+                "HARNESS_LAUNCH_OPTIONS_UNKNOWN_AGENT",
+            )
+        })
 }
 
 fn ensure_path_safe_identifier(value: &str, field: &str) -> Result<(), ApiError> {

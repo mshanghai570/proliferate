@@ -87,7 +87,8 @@ export function useHomeNextModelSelection({
         ...otherLaunchOptions.map((entry) => entry.data),
       ]
         .flatMap((response) => {
-          const agent = response ? projectHarnessLaunchOptions(response) : null;
+          const agent = response ? projectHarnessLaunchOptions(response,
+            launchTarget?.kind === "cloud" ? undefined : agents.find((agent) => agent.kind === response.harnessKind)?.displayName) : null;
           return agent ? [{
             kind: agent.kind,
             displayName: agent.displayName,
@@ -97,7 +98,7 @@ export function useHomeNextModelSelection({
         });
       return registries.length > 0 ? registries : EMPTY_MODEL_REGISTRIES;
     },
-    [otherLaunchOptions, targetLaunchOptions.data],
+    [agents, launchTarget?.kind, otherLaunchOptions, targetLaunchOptions.data],
   );
   const readyAgentsForLaunch = useMemo(() => modelRegistries.map((registry) => ({
     kind: registry.kind,

@@ -26,6 +26,7 @@ pub struct SessionMcpLaunchAssembly {
     pub mcp_servers: Vec<SessionMcpServer>,
     pub system_prompt_append: Option<String>,
     pub first_prompt_system_prompt_append: Option<String>,
+    pub launch_prompt_append: Option<String>,
     pub mcp_binding_summaries_json: Option<String>,
 }
 
@@ -68,6 +69,9 @@ pub fn assemble_session_mcp_launch(
         .first_prompt_system_prompt_append
         .append(&mut product_extras.first_prompt_system_prompt_append);
     launch_extras
+        .launch_prompt_append
+        .append(&mut product_extras.launch_prompt_append);
+    launch_extras
         .mcp_servers
         .append(&mut product_extras.mcp_servers);
     launch_extras
@@ -85,6 +89,7 @@ pub fn assemble_session_mcp_launch(
         .append(&mut response_formatting::system_prompt_append());
     let first_prompt_system_prompt_append =
         join_system_prompt_append(Some(launch_extras.first_prompt_system_prompt_append));
+    let launch_prompt_append = join_system_prompt_append(Some(launch_extras.launch_prompt_append));
     let system_prompt_append = merge_system_prompt_append(
         persisted_system_prompt_append,
         launch_extras.system_prompt_append,
@@ -131,6 +136,7 @@ pub fn assemble_session_mcp_launch(
         mcp_servers,
         system_prompt_append,
         first_prompt_system_prompt_append,
+        launch_prompt_append,
         mcp_binding_summaries_json,
     })
 }
@@ -194,6 +200,9 @@ fn resolve_extension_launch_extras(
         combined
             .first_prompt_system_prompt_append
             .append(&mut extras.first_prompt_system_prompt_append);
+        combined
+            .launch_prompt_append
+            .append(&mut extras.launch_prompt_append);
         combined.mcp_servers.append(&mut extras.mcp_servers);
         combined
             .mcp_binding_summaries
@@ -384,6 +393,7 @@ mod tests {
             extras: SessionLaunchExtras {
                 system_prompt_append: vec!["product prompt".to_string()],
                 first_prompt_system_prompt_append: vec!["first prompt".to_string()],
+                launch_prompt_append: vec!["launch skill instructions".to_string()],
                 mcp_servers: vec![product_server],
                 mcp_binding_summaries: vec![summary("product-1", "product")],
             },
@@ -419,6 +429,10 @@ mod tests {
         assert_eq!(
             assembled.first_prompt_system_prompt_append.as_deref(),
             Some(expected_first_prompt.as_str())
+        );
+        assert_eq!(
+            assembled.launch_prompt_append.as_deref(),
+            Some("launch skill instructions")
         );
         assert!(assembled.mcp_binding_summaries_json.is_some());
     }

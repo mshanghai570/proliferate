@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "registryVersion": "2026-08-20.1",
+  "registryVersion": "2026-10-16.1",
   "generatedAt": "2026-07-17T03:08:00Z",
   "agents": [
     {
@@ -505,6 +505,11 @@
       },
       "docsUrl": "https://opencode.ai/docs/",
       "providerConfig": [
+        {
+          "kind": "openai_compatible",
+          "label": "OpenAI-compatible provider",
+          "envVars": ["OPENCODE_CONFIG_CONTENT"]
+        },
         {
           "kind": "aws_bedrock",
           "label": "AWS Bedrock",

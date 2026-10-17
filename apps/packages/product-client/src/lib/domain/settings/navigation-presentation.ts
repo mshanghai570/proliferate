@@ -3,6 +3,8 @@ import type { SettingsSection } from "#product/config/settings";
 export type SettingsNavIconId =
   | "account"
   | "agent-api-keys"
+  | "agent-custom"
+  | "agent-skills"
   | "agent-claude"
   | "agent-codex"
   | "agent-cursor"
@@ -133,6 +135,8 @@ export const SETTINGS_SCOPES: SettingsScopeNav[] = [
           { kind: "section", id: "agent-grok", label: "Grok", iconId: "agent-grok" },
           { kind: "section", id: "agent-cursor", label: "Cursor", iconId: "agent-cursor" },
           { kind: "section", id: "agent-api-keys", label: "API keys", iconId: "agent-api-keys" },
+          { kind: "section", id: "agent-custom", label: "Custom agents", iconId: "agent-custom" },
+          { kind: "section", id: "agent-skills", label: "Skills", iconId: "agent-skills" },
         ],
       },
     ],

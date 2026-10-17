@@ -187,6 +187,9 @@ impl GatewayModelPlanner {
     /// answer: nothing to plan a fetch against. Fail-closed refusal is the launch
     /// path's job, not the planner's.
     fn gateway_credentials(&self, harness_kind: &str) -> Option<(String, String)> {
+        if crate::domains::agents::custom::is_custom_id(harness_kind) {
+            return None;
+        }
         let state = load_state_file(&self.runtime_home).ok().flatten()?;
         let source = state
             .sources_for(harness_kind)

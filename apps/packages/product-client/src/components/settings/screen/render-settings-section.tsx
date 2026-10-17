@@ -4,6 +4,9 @@ import { AccountPane } from "#product/components/settings/panes/AccountPane";
 import { ArchivedWorkspacesPane } from "#product/components/settings/panes/archived/ArchivedWorkspacesPane";
 import { ApiKeysPane } from "#product/components/settings/panes/agents/api-keys/ApiKeysPane";
 import { HarnessPane } from "#product/components/settings/panes/agents/harness/HarnessPane";
+import { CustomAgentsPane } from "#product/components/settings/panes/agents/custom/CustomAgentsPane";
+import { SkillsSection } from "#product/components/settings/panes/agents/skills/SkillsSection";
+import { SettingsPageBody } from "#product/primitives/patterns/settings/SettingsPageBody";
 import { AppearancePane } from "#product/components/settings/panes/AppearancePane";
 import { CloudGuard, type CloudGateFlags } from "#product/components/cloud/CloudGuard";
 import { GeneralPane } from "#product/components/settings/panes/GeneralPane";
@@ -67,6 +70,12 @@ export function renderSettingsSection(
   }
   if (activeSection === "agent-api-keys") {
     return renderCloudGatedPane(authGate, () => <ApiKeysPane />);
+  }
+  if (activeSection === "agent-custom") {
+    return <CustomAgentsPane />;
+  }
+  if (activeSection === "agent-skills") {
+    return <SettingsPageBody><SkillsSection /></SettingsPageBody>;
   }
   if (activeSection === "general") {
     return <GeneralPane />;

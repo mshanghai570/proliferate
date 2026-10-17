@@ -1,3 +1,10 @@
+use anyharness_contract::v1::extensions::{
+    ExtensionInstallationState, ExtensionPackageErrorCode, InstallRegistryExtensionRequest,
+    InstalledExtensionSummary, ListInstalledExtensionsResponse,
+};
+use anyharness_contract::v1::skills::{
+    ImportSkillRequest, ListSkillsResponse, SetSkillEnabledRequest, SkillFile, SkillSummary,
+};
 use anyharness_contract::v1::{
     AdvanceReplaySessionResponse, AgentAuthCredentialEvidence, AgentAuthCredentialSource,
     AgentAuthDisplay, AgentAuthEvidenceRef, AgentAuthEvidenceStrength, AgentAuthFactsSummary,
@@ -129,8 +136,18 @@ mod support_windows;
         description = "Local sidecar runtime for managing coding agent installations, credentials, and ACP sessions."
     ),
     paths(
+        super::http::skills::list_skills,
+        super::http::skills::import_skill,
+        super::http::skills::set_skill_enabled,
+        super::http::skills::remove_skill,
+        super::http::extensions::list_extensions,
+        super::http::extensions::install_registry_extension,
+        super::http::extensions::uninstall_extension,
         super::http::health::get_health,
         super::http::agents::list_agents,
+        super::http::custom_agents::list_custom_agents,
+        super::http::custom_agents::register_custom_agent,
+        super::http::custom_agents::remove_custom_agent,
         super::http::agent_launch_options::get_launch_options,
         super::http::agent_launch_options::refresh_launch_options,
         super::http::agents::get_agent,
@@ -266,6 +283,16 @@ mod support_windows;
         super::http::reviews::mark_review_revision_ready,
     ),
     components(schemas(
+        SkillFile,
+        SkillSummary,
+        ImportSkillRequest,
+        SetSkillEnabledRequest,
+        ListSkillsResponse,
+        ExtensionInstallationState,
+        ExtensionPackageErrorCode,
+        InstallRegistryExtensionRequest,
+        InstalledExtensionSummary,
+        ListInstalledExtensionsResponse,
         HealthResponse,
         RuntimeCapabilities,
         RuntimePressureLevel,
@@ -593,6 +620,8 @@ mod support_windows;
         AgentInstallProgressPhase,
         AgentInstallProgressComponent,
         AgentInstallProgress,
+        anyharness_contract::v1::CustomAcpAgent,
+        anyharness_contract::v1::RegisterCustomAcpAgentRequest,
         ReconcileAgentsRequest,
         ReconcileAgentResult,
         ReconcileAgentsResponse,

@@ -153,9 +153,10 @@ impl SessionService {
         }
 
         let registry_lookup_started = Instant::now();
-        let descriptor = registry::descriptor(agent_kind).ok_or_else(|| {
-            CreateSessionError::Invalid(format!("unknown agent kind: {agent_kind}"))
-        })?;
+        let descriptor =
+            registry::descriptor_at(&self.runtime_home, agent_kind).ok_or_else(|| {
+                CreateSessionError::Invalid(format!("unknown agent kind: {agent_kind}"))
+            })?;
         tracing::info!(
             workspace_id = %workspace_id,
             agent_kind = %agent_kind,
@@ -167,7 +168,7 @@ impl SessionService {
         let readiness_env = read_materialized_launch_env(&self.runtime_home, workspace_path)
             .map_err(CreateSessionError::Internal)?;
         if let Some(env_var_name) =
-            find_capability_affecting_env_override(&descriptor, &readiness_env)
+            find_capability_affecting_env_override(&self.runtime_home, &descriptor, &readiness_env)
         {
             return Err(CreateSessionError::AgentEnvOverrideUnsupported {
                 agent_kind: agent_kind.to_string(),

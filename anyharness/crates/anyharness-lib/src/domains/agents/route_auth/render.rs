@@ -97,6 +97,22 @@ fn render_sources(
     runtime_home: &Path,
 ) -> Result<RenderedRouteAuth, RouteAuthError> {
     let mut rendered = RenderedRouteAuth::default();
+    if sources.harness_kind == "opencode"
+        && sources.sources.iter().any(|source| {
+            matches!(source,
+            ResolvedSource::ProviderConfig(profile) if profile.config_kind == "openai_compatible")
+        })
+        && sources.sources.iter().any(|source| {
+            matches!(source,
+            ResolvedSource::ApiKey(profile) if profile.env_var_name == "OPENCODE_CONFIG_CONTENT"
+                || profile.env_var_name.starts_with("PROLIFERATE_CUSTOM_"))
+        })
+    {
+        return Err(RouteAuthError::SelectionIncomplete {
+            harness_kind: "opencode".into(),
+            detail: "custom provider inputs conflict with an API key environment binding".into(),
+        });
+    }
     // The env var names the `provider_config` arm composed. Kept separate from
     // `rendered.set` because only THIS arm's names may exempt a claude rerouting
     // flag from sanitization — see `sanitize_claude_ambient`.
@@ -187,7 +203,7 @@ fn render_gateway(
             rendered,
         ),
         AgentKind::Grok => render_grok_gateway(profile, revision, runtime_home, rendered),
-        AgentKind::Cursor => Err(RouteAuthError::UnsupportedRoute {
+        AgentKind::Cursor | AgentKind::Custom { .. } => Err(RouteAuthError::UnsupportedRoute {
             harness_kind: harness_kind.to_string(),
             detail: "cursor has no gateway route".to_string(),
         }),
@@ -532,6 +548,13 @@ fn render_provider_config(
     provider_config_keys: &mut BTreeSet<String>,
 ) -> Result<(), RouteAuthError> {
     match (parse_harness(harness_kind)?, profile.config_kind.as_str()) {
+        (AgentKind::OpenCode, "openai_compatible") => {
+            super::custom_providers::compose(&profile.env, rendered)
+        }
+        (_, "openai_compatible") => Err(RouteAuthError::UnsupportedRoute {
+            harness_kind: harness_kind.to_string(),
+            detail: "custom OpenAI-compatible providers require OpenCode".into(),
+        }),
         (AgentKind::Claude, _) | (AgentKind::OpenCode, _) => {
             // Fully generic: the map's keys are already the harness's real
             // env var names for EVERY config_kind claude/opencode support
@@ -627,10 +650,12 @@ fn render_provider_config(
             });
             Ok(())
         }
-        (AgentKind::Cursor, _) | (AgentKind::Grok, _) => Err(RouteAuthError::UnsupportedRoute {
-            harness_kind: harness_kind.to_string(),
-            detail: format!("{harness_kind} has no provider-config recipe"),
-        }),
+        (AgentKind::Cursor, _) | (AgentKind::Grok, _) | (AgentKind::Custom { .. }, _) => {
+            Err(RouteAuthError::UnsupportedRoute {
+                harness_kind: harness_kind.to_string(),
+                detail: format!("{harness_kind} has no provider-config recipe"),
+            })
+        }
         (_, other) => Err(RouteAuthError::UnsupportedRoute {
             harness_kind: harness_kind.to_string(),
             detail: format!("unknown provider-config kind '{other}'"),
@@ -645,3 +670,7 @@ fn path_string(path: &Path) -> String {
 fn trim_trailing_slash(url: &str) -> &str {
     url.trim_end_matches('/')
 }
+
+#[cfg(test)]
+#[path = "custom_provider_tests.rs"]
+mod custom_provider_tests;

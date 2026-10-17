@@ -27,6 +27,17 @@ function state(overrides: Partial<AgentAuthState> = {}): AgentAuthState {
 }
 
 describe("planLocalAuthStatePush", () => {
+  it("delivers custom provider configuration unchanged to the local runtime", () => {
+    const custom = state({ harnesses: [{ harness_kind: "opencode", sources: [{
+      kind: "provider_config", config_kind: "openai_compatible", env: {
+        OPENCODE_CONFIG_CONTENT: '{"provider":{"custom-test":{"models":{"model-a":{}}}}}',
+      },
+    }] }] });
+    const stamped = stampIssuingServerOrigin(custom, "https://server.example");
+    expect(stamped.harnesses).toEqual(custom.harnesses);
+    expect(planLocalAuthStatePush({ state: custom, lastPushedFingerprint: null }).action).toBe("apply");
+  });
+
   it("pushes a scoped document that was never pushed", () => {
     const plan = planLocalAuthStatePush({
       state: state(),

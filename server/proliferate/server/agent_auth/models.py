@@ -35,8 +35,10 @@ AgentAuthSourceKind = Literal["gateway", "api_key", "seat"]
 AgentAuthStateSourceKind = Literal["gateway", "api_key", "provider_config", "seat"]
 # The vault's closed kind vocabulary (agent_auth spec §2 "The vault");
 # mirrors constants.agent_gateway.AGENT_API_KEY_KINDS.
-AgentApiKeyKind = Literal["api_key", "aws_bedrock", "azure_openai", "anthropic_subscription"]
-AgentProviderConfigKind = Literal["aws_bedrock", "azure_openai"]
+AgentApiKeyKind = Literal[
+    "api_key", "aws_bedrock", "azure_openai", "openai_compatible", "anthropic_subscription"
+]
+AgentProviderConfigKind = Literal["aws_bedrock", "azure_openai", "openai_compatible"]
 # The kinds POST /keys accepts: the bare-secret default, or a seat — the mint
 # flow's courier upload (agent_auth spec §3 flow 2). Typed provider configs
 # keep their own route (POST /keys/provider-config).
