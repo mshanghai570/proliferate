@@ -30,6 +30,13 @@ function readPortEnv(name: string, fallback: number): number {
 }
 
 export default defineConfig({
+  // Desktop exposes extension discovery by default. The Web host retains its
+  // separate opt-in preview gate until it can use a connected local runtime.
+  define: {
+    "import.meta.env.VITE_EXTENSION_MARKETPLACE": JSON.stringify(
+      process.env.VITE_EXTENSION_MARKETPLACE?.trim() ?? "1",
+    ),
+  },
   plugins: [
     react(),
     tailwindcss(),

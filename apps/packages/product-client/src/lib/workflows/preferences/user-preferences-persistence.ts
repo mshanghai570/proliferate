@@ -94,6 +94,8 @@ async function readLegacyUserPreferences(
     colorMode: legacyTheme.colorMode ?? defaults.colorMode,
     uiFontSizeId: defaults.uiFontSizeId,
     readableCodeFontSizeId: defaults.readableCodeFontSizeId,
+    uiFontFamily: defaults.uiFontFamily,
+    codeFontFamily: defaults.codeFontFamily,
     windowZoomId: defaults.windowZoomId,
     defaultChatAgentKind: legacyDefaultChatAgentKind ?? defaults.defaultChatAgentKind,
     ...(legacyDefaultChatModelId !== undefined

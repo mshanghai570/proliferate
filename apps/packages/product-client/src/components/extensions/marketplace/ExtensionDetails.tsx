@@ -20,14 +20,14 @@ export function ExtensionDetails({ extensionRef, onBack }: { extensionRef: Exten
   return (
     <section aria-label="Extension details" className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
       <div className="px-5 pt-4">
-        <Button variant="ghost" onClick={onBack}><ArrowLeft className="size-4" aria-hidden />Back to extensions</Button>
+        <Button variant="ghost" onClick={onBack}><ArrowLeft className="icon-paired" aria-hidden />Back to extensions</Button>
       </div>
       {metadata.isError ? <ExtensionRegistryFailure error={metadata.error} onRetry={() => { void metadata.refetch(); }} />
         : !extension ? <p role="status" className="p-5 text-ui text-muted-foreground">Loading extension…</p>
         : <>
           <header className="space-y-3 p-5">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 ref={headingRef} tabIndex={-1} className="text-xl font-semibold text-foreground">{extension.displayName}</h1>
+              <h1 ref={headingRef} tabIndex={-1} className="text-heading font-semibold text-foreground">{extension.displayName}</h1>
               {extension.verified && <Badge>Verified namespace</Badge>}
               {extension.deprecated && <Badge tone="warning">Deprecated</Badge>}
             </div>

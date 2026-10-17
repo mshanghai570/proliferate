@@ -1,4 +1,4 @@
-/** Discovery stays opt-in until installation and contribution loading are ready. */
+/** Desktop sets this at build time; Web retains an opt-in preview. */
 export function isExtensionMarketplaceEnabled(): boolean {
   return import.meta.env.VITE_EXTENSION_MARKETPLACE === "1";
 }

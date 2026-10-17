@@ -41,15 +41,58 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 
 ## Features
 
-- 🤖 **[Native harnesses](https://proliferate.com/docs/product/agents)** - Claude Code, Codex, OpenCode, Cursor, Grok, and more
-- 🔌 **Custom AI providers** - connect OpenAI-compatible endpoints to local OpenCode sessions, including providers that run on your machine
-- 🛠️ **Custom ACP agents** - connect installed agents with their own command, arguments, and environment
-- 📚 **Agent skills** - import `SKILL.md` packages and resources, then enable them for all repositories or individual repositories
-- 🌳 **[Worktree workspaces](https://proliferate.com/docs/product/workspaces)** - an isolated branch and working directory for every task
-- 🔀 **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
-- 🪆 **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
-- 🧩 **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
-- ⏰ **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
+- **[Native harnesses](https://proliferate.com/docs/product/agents)** - Claude Code, Codex, OpenCode, Cursor, Grok, and more
+- **Custom AI providers** - connect OpenAI-compatible endpoints to local OpenCode sessions, including providers that run on your machine
+- **Custom ACP agents** - connect installed agents with their own command, arguments, and environment
+- **Agent skills** - import `SKILL.md` packages and resources, then enable them for all repositories or individual repositories
+- **[Worktree workspaces](https://proliferate.com/docs/product/workspaces)** - an isolated branch and working directory for every task
+- **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
+- **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
+- **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
+- **Extensions marketplace (preview)** - browse Open VSX extensions and register supported declarative packages in the macOS app; installed packages remain inactive
+- **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
+
+### Current macOS customization scope
+
+The Extensions destination is visible by default in the macOS app. It provides
+Open VSX discovery, package installation, inventory, and removal. Packages do
+not yet activate in the editor, and executable extensions are refused. Set
+`VITE_EXTENSION_MARKETPLACE=0` when building Desktop to hide the preview.
+
+Custom OpenAI-compatible providers currently add models to local OpenCode
+sessions; they do not create standalone agents or configure every harness.
+Custom ACP agents are a separate option and must implement Agent Client
+Protocol. MCP tools are available through supported integrations. Appearance
+settings cover built-in color modes and text sizing. In the macOS app, enter
+installed font family names for interface and code text under **Settings →
+Appearance**; an unavailable family falls back to the built-in font. Importable
+themes and project RAG are not yet available.
+
+### macOS product direction
+
+The following goals describe work to make the macOS app a complete coding
+workspace. They are not claims about current availability.
+
+- **Extension marketplace:** discover, install, update, enable, disable, and
+  remove editor extensions. Activate supported themes, language features,
+  snippets, and other contributions in the running editor, with visible
+  compatibility and permissions.
+- **Built-in multi-agent orchestration:** run dual-agent setups and larger
+  agent swarms on one project. Choose the harness, provider, model, and
+  instructions for each agent, then coordinate and review their work in the
+  app. One setup should be able to pair an OpenCode model with Codex without
+  requiring an agent skill to orchestrate them.
+- **Provider choice per agent:** configure compatible model providers as a
+  first-class capability alongside native harnesses and ACP agents.
+- **Project RAG:** index project content, retrieve relevant context for agent
+  tasks, and show what information is indexed and sent to a model.
+- **MCP management:** add and manage MCP servers, inspect their tools, and
+  control access by agent or project.
+- **Editor personalization:** import compatible theme files, including JSON
+  where practical, and offer a font picker for installed macOS families.
+
+These goals can ship in stages. The feature list above should grow only when
+the corresponding capability works in the macOS app.
 
 ## Supported agents
 

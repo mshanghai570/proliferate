@@ -10,7 +10,8 @@ installation. IDE extensions and agent skills are separate systems.
 ## Purpose
 
 Let users inspect public registry extensions without implying that they can run
-in Proliferate. The client surface is an opt-in discovery preview. The runtime
+in Proliferate. Desktop includes the discovery preview by default; Web keeps
+it opt-in. The runtime
 library can materialize and register verified local declarative packages, list
 their state, and uninstall selected versions. Typed runtime list/uninstall
 endpoints connect the Installed surface. No contribution loader is connected,
@@ -34,9 +35,11 @@ Workspace enablement and extension-host processes remain absent.
 
 ## Public surface
 
-Setting `VITE_EXTENSION_MARKETPLACE=1` enables the sidebar Extensions destination
-and the [Extensions page](../../../apps/packages/product-client/src/pages/ExtensionsPage.tsx)
-at `/extensions`; other values leave discovery disabled. The authenticated
+Desktop enables the sidebar Extensions destination and the
+[Extensions page](../../../apps/packages/product-client/src/pages/ExtensionsPage.tsx)
+at `/extensions` by default. Set `VITE_EXTENSION_MARKETPLACE=0` in a Desktop
+build to hide it. Web continues to require `VITE_EXTENSION_MARKETPLACE=1`.
+The authenticated
 [route host](../../../apps/packages/product-client/src/pages/AuthenticatedAppHost.tsx)
 lazy-loads the page and keeps the workspace mounted while browsing.
 

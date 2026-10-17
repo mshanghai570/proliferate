@@ -17,7 +17,7 @@ export function ExtensionMarketplaceScreen() {
   return (
     <main className="flex min-h-0 min-w-0 flex-1 flex-col pt-[46px] text-foreground" data-telemetry-block>
       <header className="shrink-0 space-y-3 border-b border-border px-5 py-4">
-        <div className="flex flex-wrap items-center gap-3"><h1 className="text-lg font-semibold">{copy.title}</h1><Badge>{copy.preview}</Badge></div>
+        <div className="flex flex-wrap items-center gap-3"><h1 className="text-heading font-semibold">{copy.title}</h1><Badge>{copy.preview}</Badge></div>
         <p className="text-ui text-muted-foreground">{copy.subtitle}</p>
       </header>
       {state.selected ? <ExtensionDetails key={`${state.selected.namespace}.${state.selected.name}`} extensionRef={state.selected} onBack={() => state.setSelected(null)} />

@@ -109,4 +109,15 @@ describe("user preference migration", () => {
 
     expect(result.preferences.defaultNewWorkspaceMode).toBe("local");
   });
+
+  it("normalizes persisted font families and removes invalid values", () => {
+    const result = migrateUserPreferences({
+      uiFontFamily: "  Avenir  Next ",
+      codeFontFamily: 'Bad"; color: red',
+    });
+
+    expect(result.changed).toBe(true);
+    expect(result.preferences.uiFontFamily).toBe("Avenir Next");
+    expect(result.preferences.codeFontFamily).toBeNull();
+  });
 });

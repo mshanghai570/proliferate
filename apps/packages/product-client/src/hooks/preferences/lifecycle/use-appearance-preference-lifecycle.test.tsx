@@ -109,6 +109,34 @@ describe("useAppearancePreferenceLifecycle", () => {
     });
   });
 
+  it("applies installed font family names and restores defaults on reset", async () => {
+    installMatchMediaStub(true);
+    renderHook(() => useAppearancePreferenceLifecycle());
+
+    act(() => {
+      useUserPreferencesStore.getState().setMultiple({
+        uiFontFamily: "Avenir Next",
+        codeFontFamily: "JetBrains Mono",
+      });
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement.style.getPropertyValue("--font-sans"))
+        .toContain('"Avenir Next"');
+      expect(document.documentElement.style.getPropertyValue("--font-mono"))
+        .toContain('"JetBrains Mono"');
+    });
+
+    act(() => {
+      useUserPreferencesStore.getState().setMultiple({ uiFontFamily: null, codeFontFamily: null });
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement.style.getPropertyValue("--font-sans")).toBe("");
+      expect(document.documentElement.style.getPropertyValue("--font-mono")).toBe("");
+    });
+  });
+
   it("reapplies system color mode when the system preference changes", async () => {
     const matchMedia = installMatchMediaStub(false);
 

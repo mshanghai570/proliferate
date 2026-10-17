@@ -10,12 +10,16 @@ function applyStoredAppearancePreference(): void {
     colorMode,
     uiFontSizeId,
     readableCodeFontSizeId,
+    uiFontFamily,
+    codeFontFamily,
     windowZoomId,
   } = useUserPreferencesStore.getState();
   applyAppearancePreference({
     colorMode,
     uiFontSizeId,
     readableCodeFontSizeId,
+    uiFontFamily,
+    codeFontFamily,
     windowZoomId,
   });
 }
@@ -31,6 +35,8 @@ export function useAppearancePreferenceLifecycle(): void {
         state.colorMode !== prev.colorMode
         || state.uiFontSizeId !== prev.uiFontSizeId
         || state.readableCodeFontSizeId !== prev.readableCodeFontSizeId
+        || state.uiFontFamily !== prev.uiFontFamily
+        || state.codeFontFamily !== prev.codeFontFamily
         || state.windowZoomId !== prev.windowZoomId
       ) {
         applyStoredAppearancePreference();

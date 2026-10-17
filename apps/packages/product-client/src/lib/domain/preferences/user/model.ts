@@ -31,6 +31,8 @@ export interface UserPreferences {
   colorMode: ColorMode;
   uiFontSizeId: UiFontSizeId;
   readableCodeFontSizeId: ReadableCodeFontSizeId;
+  uiFontFamily: string | null;
+  codeFontFamily: string | null;
   windowZoomId: WindowZoomId;
   defaultChatAgentKind: string;
   defaultChatModelIdByAgentKind: Record<string, string>;
@@ -68,6 +70,8 @@ export const NEW_USER_DEFAULTS: UserPreferences = {
   colorMode: "dark",
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
+  uiFontFamily: null,
+  codeFontFamily: null,
   windowZoomId: "default",
   defaultChatAgentKind: "claude",
   defaultChatModelIdByAgentKind: {},
@@ -95,6 +99,8 @@ export const PERSISTED_RECORD_BACKFILL: UserPreferences = {
   colorMode: "dark",
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
+  uiFontFamily: null,
+  codeFontFamily: null,
   windowZoomId: "default",
   defaultChatAgentKind: "",
   defaultChatModelIdByAgentKind: {},

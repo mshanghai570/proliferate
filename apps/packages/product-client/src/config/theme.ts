@@ -11,6 +11,7 @@ import {
   type UiFontSizeId,
   type WindowZoomId,
 } from "#product/lib/domain/preferences/appearance";
+import { localFontStack, normalizeLocalFontFamily } from "#product/lib/domain/preferences/local-font-family";
 
 // ---------------------------------------------------------------------------
 // Color mode (the app ships a single Mono theme; mode is the only switch)
@@ -42,6 +43,8 @@ export interface AppearancePreference {
   colorMode: ColorMode;
   uiFontSizeId: UiFontSizeId;
   readableCodeFontSizeId: ReadableCodeFontSizeId;
+  uiFontFamily: string | null;
+  codeFontFamily: string | null;
   windowZoomId: WindowZoomId;
 }
 
@@ -49,6 +52,8 @@ export function applyAppearancePreference({
   colorMode,
   uiFontSizeId,
   readableCodeFontSizeId,
+  uiFontFamily,
+  codeFontFamily,
   windowZoomId,
 }: AppearancePreference) {
   const root = document.documentElement;
@@ -75,6 +80,16 @@ export function applyAppearancePreference({
   root.style.setProperty("--readable-code-font-size", readableCodeScale.codeFontSize);
   root.style.setProperty("--readable-code-line-height", readableCodeScale.codeLineHeight);
   root.style.setProperty("--proliferate-window-zoom", windowZoomScale.cssValue);
+  if (normalizeLocalFontFamily(uiFontFamily)) {
+    root.style.setProperty("--font-sans", localFontStack(uiFontFamily, "system-ui, sans-serif"));
+  } else {
+    root.style.removeProperty("--font-sans");
+  }
+  if (normalizeLocalFontFamily(codeFontFamily)) {
+    root.style.setProperty("--font-mono", localFontStack(codeFontFamily, "ui-monospace, monospace"));
+  } else {
+    root.style.removeProperty("--font-mono");
+  }
 
   notify();
 }

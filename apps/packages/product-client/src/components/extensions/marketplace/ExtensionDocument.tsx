@@ -11,7 +11,7 @@ export function ExtensionDocument({ url }: { url: string | null }) {
   if (document.isError) return <ExtensionRegistryFailure error={document.error} onRetry={() => { void document.refetch(); }} />;
   if (document.isPending) return <p role="status" className="p-5 text-ui text-muted-foreground">Loading document…</p>;
   return (
-    <div className="min-w-0 break-words p-5 text-ui leading-relaxed text-foreground [&_h1]:mb-4 [&_h1]:text-xl [&_h1]:font-semibold [&_h2]:my-4 [&_h2]:text-lg [&_h2]:font-semibold [&_p]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_pre]:overflow-auto [&_pre]:rounded-md [&_pre]:bg-surface-control [&_pre]:p-3 [&_code]:font-mono [&_table]:block [&_table]:overflow-auto [&_td]:border [&_td]:border-border [&_td]:p-2 [&_th]:p-2">
+    <div className="min-w-0 break-words p-5 text-ui leading-relaxed text-foreground [&_h1]:mb-4 [&_h1]:text-title [&_h1]:font-semibold [&_h2]:my-4 [&_h2]:text-heading [&_h2]:font-semibold [&_p]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_pre]:overflow-auto [&_pre]:rounded-md [&_pre]:bg-surface-control [&_pre]:p-3 [&_code]:font-mono [&_table]:block [&_table]:overflow-auto [&_td]:border [&_td]:border-border [&_td]:p-2 [&_th]:p-2">
       <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml
         urlTransform={(value) => resolveExtensionContentUrl(value, url) ?? ""}
         components={{

@@ -11,6 +11,8 @@ import { UserMessage } from "#product/components/workspace/chat/transcript/UserM
 import { AssistantMessage } from "#product/components/workspace/chat/transcript/AssistantMessage";
 import { Minus, Plus } from "#product/primitives/icons/core";
 import { Switch } from "#product/primitives/Switch";
+import { useProductHost } from "@proliferate/product-client/host/ProductHostProvider";
+import { LocalFontPreference } from "#product/components/settings/panes/LocalFontPreference";
 import {
   READABLE_CODE_FONT_SIZE_LABELS,
   READABLE_CODE_FONT_SIZE_OPTIONS,
@@ -60,6 +62,7 @@ const CHAT_PREVIEW_RESPONSE =
   "Moving the workspace to a cloud sandbox now — your branch `pablo/ui` comes along with changes and history intact.";
 
 export function AppearancePane() {
+  const isDesktop = useProductHost().desktop != null;
   const [mode, setMode] = useColorMode();
   const transparentChromeEnabled = useUserPreferencesStore((state) => state.transparentChromeEnabled);
   const uiFontSizeId = useUserPreferencesStore((state) => state.uiFontSizeId);
@@ -164,6 +167,10 @@ export function AppearancePane() {
             }]}
           />
         </SettingsRow>
+        {isDesktop && <>
+          <LocalFontPreference preferenceKey="uiFontFamily" label="Interface font" />
+          <LocalFontPreference preferenceKey="codeFontFamily" label="Code font" />
+        </>}
       </SettingsSection>
 
       <SettingsSection title="Advanced">

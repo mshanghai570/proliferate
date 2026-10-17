@@ -9,8 +9,8 @@ import "@xterm/xterm/css/xterm.css";
 import { getTerminalTheme, onThemeChange } from "#product/config/theme";
 import { resolveReadableCodeFontScale } from "#product/lib/domain/preferences/appearance";
 import {
-  TERMINAL_FONT_FAMILY,
   TERMINAL_LINE_HEIGHT,
+  resolveTerminalFontFamily,
 } from "#product/lib/domain/terminals/terminal-grid";
 import { useUserPreferencesStore } from "#product/stores/preferences/user-preferences-store";
 import {
@@ -120,6 +120,8 @@ export function useXtermSurface({
   const [hasBeenVisible, setHasBeenVisible] = useState(visible);
   const readableCodeFontSizeId = useUserPreferencesStore((state) => state.readableCodeFontSizeId);
   const uiFontSizeId = useUserPreferencesStore((state) => state.uiFontSizeId);
+  const codeFontFamily = useUserPreferencesStore((state) => state.codeFontFamily);
+  const terminalFontFamily = resolveTerminalFontFamily(codeFontFamily);
   const terminalTypography = resolveXtermSurfaceTypography(readableCodeFontSizeId, {
     fontSize,
     lineHeight,
@@ -128,6 +130,7 @@ export function useXtermSurface({
   const terminalLineHeight = terminalTypography.lineHeight;
   const terminalFontSizeRef = useRef(terminalFontSize);
   const terminalLineHeightRef = useRef(terminalLineHeight);
+  const terminalFontFamilyRef = useRef(terminalFontFamily);
 
   useEffect(() => {
     onDataRef.current = onData;
@@ -146,16 +149,18 @@ export function useXtermSurface({
   useEffect(() => {
     terminalFontSizeRef.current = terminalFontSize;
     terminalLineHeightRef.current = terminalLineHeight;
+    terminalFontFamilyRef.current = terminalFontFamily;
     const term = terminalRef.current;
     if (!term) {
       return;
     }
     term.options.fontSize = terminalFontSize;
     term.options.lineHeight = terminalLineHeight;
+    term.options.fontFamily = terminalFontFamily;
     requestAnimationFrame(() => {
       fitAddonRef.current?.fit();
     });
-  }, [terminalFontSize, terminalLineHeight]);
+  }, [terminalFontSize, terminalLineHeight, terminalFontFamily]);
 
   useEffect(() => {
     if (!hasBeenVisible) return;
@@ -185,7 +190,7 @@ export function useXtermSurface({
           ...XTERM_CURSOR_OPTIONS,
           fontSize: terminalFontSizeRef.current,
           lineHeight: terminalLineHeightRef.current,
-          fontFamily: TERMINAL_FONT_FAMILY,
+          fontFamily: terminalFontFamilyRef.current,
           theme: getTerminalTheme(),
           allowTransparency: true,
           scrollback,
