@@ -291,9 +291,7 @@ impl AppState {
             runtime_home.clone(),
         ));
         let plan_service = Arc::new(PlanService::new(PlanStore::new(db.clone())));
-        let skill_manager = Arc::new(crate::domains::skills::SkillManager::new(
-            runtime_home.clone(),
-        ));
+        let skill_manager = Arc::new(crate::domains::skills::SkillManager::new(runtime_home.clone()));
         let extension_manager = Arc::new(ExtensionManager::new(db.clone(), runtime_home.clone()));
         let goal_service = Arc::new(GoalService::new(GoalStore::new(db.clone())));
         let loop_service = Arc::new(LoopService::new(LoopStore::new(db.clone())));

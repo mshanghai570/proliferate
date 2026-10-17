@@ -650,12 +650,10 @@ fn render_provider_config(
             });
             Ok(())
         }
-        (AgentKind::Cursor, _) | (AgentKind::Grok, _) | (AgentKind::Custom { .. }, _) => {
-            Err(RouteAuthError::UnsupportedRoute {
-                harness_kind: harness_kind.to_string(),
-                detail: format!("{harness_kind} has no provider-config recipe"),
-            })
-        }
+        (AgentKind::Cursor, _) | (AgentKind::Grok, _) | (AgentKind::Custom { .. }, _) => Err(RouteAuthError::UnsupportedRoute {
+            harness_kind: harness_kind.to_string(),
+            detail: format!("{harness_kind} has no provider-config recipe"),
+        }),
         (_, other) => Err(RouteAuthError::UnsupportedRoute {
             harness_kind: harness_kind.to_string(),
             detail: format!("unknown provider-config kind '{other}'"),

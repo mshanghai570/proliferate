@@ -119,28 +119,14 @@ fn resolve_agent_in_scope(
     scope: CredentialEnvScope<'_>,
 ) -> ResolvedAgent {
     if matches!(descriptor.kind, AgentKind::Custom { .. }) {
-        if let Ok(Some(config)) =
-            crate::domains::agents::custom::load(runtime_home, descriptor.kind.as_str())
-        {
+        if let Ok(Some(config)) = crate::domains::agents::custom::load(runtime_home, descriptor.kind.as_str()) {
             return config.resolve();
         }
         return ResolvedAgent {
-            descriptor: descriptor.clone(),
-            status: ResolvedAgentStatus::Error,
-            credential_state: CredentialState::Ready,
-            auth_slots: Vec::new(),
-            cli_auth_state: Some(CliAuthState::Unsupported),
-            native: None,
-            agent_process: ResolvedArtifact {
-                role: ArtifactRole::AgentProcess,
-                installed: false,
-                source: Some("custom".into()),
-                version: None,
-                path: None,
-                message: Some("Custom ACP registration is unavailable.".into()),
-            },
-            spawn: None,
-            credentials_from_route: false,
+            descriptor: descriptor.clone(), status: ResolvedAgentStatus::Error,
+            credential_state: CredentialState::Ready, auth_slots: Vec::new(), cli_auth_state: Some(CliAuthState::Unsupported), native: None,
+            agent_process: ResolvedArtifact { role: ArtifactRole::AgentProcess, installed: false, source: Some("custom".into()), version: None, path: None, message: Some("Custom ACP registration is unavailable.".into()) },
+            spawn: None, credentials_from_route: false,
         };
     }
     let home_dir = dirs::home_dir().unwrap_or_else(|| PathBuf::from("/"));

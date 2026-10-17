@@ -166,27 +166,19 @@ impl AgentRuntime {
         self
     }
 
-    pub fn supports_custom_agents(&self) -> bool {
-        self.surface == RuntimeSurface::Local
-    }
+    pub fn supports_custom_agents(&self) -> bool { self.surface == RuntimeSurface::Local }
 
     pub fn list_custom_agents(&self) -> anyhow::Result<Vec<super::custom::CustomAgent>> {
         super::custom::list(&self.runtime_home)
     }
 
     pub fn register_custom_agent(&self, config: &super::custom::CustomAgent) -> anyhow::Result<()> {
-        anyhow::ensure!(
-            self.supports_custom_agents(),
-            "custom agents require a local runtime"
-        );
+        anyhow::ensure!(self.supports_custom_agents(), "custom agents require a local runtime");
         super::custom::register(&self.runtime_home, config)
     }
 
     pub fn remove_custom_agent(&self, id: &str) -> anyhow::Result<bool> {
-        anyhow::ensure!(
-            self.supports_custom_agents(),
-            "custom agents require a local runtime"
-        );
+        anyhow::ensure!(self.supports_custom_agents(), "custom agents require a local runtime");
         super::custom::remove(&self.runtime_home, id)
     }
 

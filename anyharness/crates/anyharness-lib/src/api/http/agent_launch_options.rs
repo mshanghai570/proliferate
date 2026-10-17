@@ -146,14 +146,12 @@ fn can_manually_refresh(state: &AppState) -> bool {
 
 fn validate_kind(state: &AppState, kind: &str) -> Result<(), ApiError> {
     ensure_path_safe_identifier(kind, "kind")?;
-    descriptor_at(&state.runtime_home, kind)
-        .map(|_| ())
-        .ok_or_else(|| {
-            ApiError::not_found(
-                format!("unknown agent kind '{kind}'"),
-                "HARNESS_LAUNCH_OPTIONS_UNKNOWN_AGENT",
-            )
-        })
+    descriptor_at(&state.runtime_home, kind).map(|_| ()).ok_or_else(|| {
+        ApiError::not_found(
+            format!("unknown agent kind '{kind}'"),
+            "HARNESS_LAUNCH_OPTIONS_UNKNOWN_AGENT",
+        )
+    })
 }
 
 fn ensure_path_safe_identifier(value: &str, field: &str) -> Result<(), ApiError> {

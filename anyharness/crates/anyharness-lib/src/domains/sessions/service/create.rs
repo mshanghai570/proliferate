@@ -153,10 +153,9 @@ impl SessionService {
         }
 
         let registry_lookup_started = Instant::now();
-        let descriptor =
-            registry::descriptor_at(&self.runtime_home, agent_kind).ok_or_else(|| {
-                CreateSessionError::Invalid(format!("unknown agent kind: {agent_kind}"))
-            })?;
+        let descriptor = registry::descriptor_at(&self.runtime_home, agent_kind).ok_or_else(|| {
+            CreateSessionError::Invalid(format!("unknown agent kind: {agent_kind}"))
+        })?;
         tracing::info!(
             workspace_id = %workspace_id,
             agent_kind = %agent_kind,

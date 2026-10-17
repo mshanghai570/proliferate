@@ -1,9 +1,7 @@
+use anyharness_contract::v1::skills::{SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse};
 use anyharness_contract::v1::extensions::{
     ExtensionInstallationState, ExtensionPackageErrorCode, InstallRegistryExtensionRequest,
     InstalledExtensionSummary, ListInstalledExtensionsResponse,
-};
-use anyharness_contract::v1::skills::{
-    ImportSkillRequest, ListSkillsResponse, SetSkillEnabledRequest, SkillFile, SkillSummary,
 };
 use anyharness_contract::v1::{
     AdvanceReplaySessionResponse, AgentAuthCredentialEvidence, AgentAuthCredentialSource,
@@ -283,11 +281,7 @@ mod support_windows;
         super::http::reviews::mark_review_revision_ready,
     ),
     components(schemas(
-        SkillFile,
-        SkillSummary,
-        ImportSkillRequest,
-        SetSkillEnabledRequest,
-        ListSkillsResponse,
+        SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse,
         ExtensionInstallationState,
         ExtensionPackageErrorCode,
         InstallRegistryExtensionRequest,

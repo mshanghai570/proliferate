@@ -38,8 +38,8 @@ export function ExtensionDetails({ extensionRef, onBack }: { extensionRef: Exten
               {extension.averageRating !== null && <span>{extension.averageRating.toFixed(1)} / 5 rating</span>}
               {!runtimeAvailable && <Badge tone="warning">Unsupported in this build</Badge>}
             </div>
-            <Button
-              disabled={!runtimeAvailable || install.isPending}
+            <Button 
+              disabled={!runtimeAvailable || install.isPending} 
               onClick={() => { install.mutate({ ...extension.ref, version: extension.version }); }}
             >
               {install.isPending ? "Installing..." : copy.install}

@@ -10,7 +10,7 @@
 
 use crate::domains::agents::model::AgentKind;
 use crate::domains::agents::readiness::service::resolve_agent_unrouted;
-use crate::domains::agents::registry::{descriptor_at, runtime_registry};
+use crate::domains::agents::registry::{runtime_registry, descriptor_at};
 use std::path::PathBuf;
 
 /// Harnesses excluded from every UNATTENDED probe.

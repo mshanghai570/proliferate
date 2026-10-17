@@ -14,12 +14,12 @@ use super::http::{
     agent_auth::{
         delete_agent_auth_state, dismiss_native_bridge, get_native_bridge, put_agent_auth_state,
     },
-    agent_launch_options, agents, auth as http_auth, catalogs, cowork, extensions, files, git,
+    agent_launch_options, agents, auth as http_auth, catalogs, cowork, extensions, files, git, skills,
     goals, health, hosting, loops, mobility, plans, processes, product_mcp, replay, repo_roots,
     reviews, sessions, sessions_config, sessions_events, sessions_fork, sessions_interactions,
-    sessions_lifecycle, sessions_prompt, sessions_resume, skills, subagents, terminals,
-    workflow_runs, workspaces, workspaces_lifecycle, workspaces_purge, workspaces_restore,
-    workspaces_setup, workspaces_worktrees, worktrees,
+    sessions_lifecycle, sessions_prompt, sessions_resume, subagents, terminals, workflow_runs,
+    workspaces, workspaces_lifecycle, workspaces_purge, workspaces_restore, workspaces_setup,
+    workspaces_worktrees, worktrees,
 };
 use super::sse::sessions as sse_sessions;
 use super::ws::activity as ws_activity;
@@ -33,15 +33,9 @@ mod pending_prompt_routes;
 mod support_window_routes;
 pub fn build_router(state: AppState) -> Router {
     let v1 = Router::new()
-        .route(
-            "/skills",
-            get(skills::list_skills).post(skills::import_skill),
-        )
+        .route("/skills", get(skills::list_skills).post(skills::import_skill))
         .route("/skills/{id}", delete(skills::remove_skill))
-        .route(
-            "/skills/{id}/enabled",
-            axum::routing::put(skills::set_skill_enabled),
-        )
+        .route("/skills/{id}/enabled", axum::routing::put(skills::set_skill_enabled))
         .route("/extensions", get(extensions::list_extensions))
         .route(
             "/extensions/install",
@@ -52,15 +46,8 @@ pub fn build_router(state: AppState) -> Router {
             delete(extensions::uninstall_extension),
         )
         // Agents
-        .route(
-            "/agents/custom",
-            get(super::http::custom_agents::list_custom_agents)
-                .post(super::http::custom_agents::register_custom_agent),
-        )
-        .route(
-            "/agents/custom/{id}",
-            delete(super::http::custom_agents::remove_custom_agent),
-        )
+        .route("/agents/custom", get(super::http::custom_agents::list_custom_agents).post(super::http::custom_agents::register_custom_agent))
+        .route("/agents/custom/{id}", delete(super::http::custom_agents::remove_custom_agent))
         .route("/agents", get(agents::list_agents))
         .route(
             "/agents/reconcile",
