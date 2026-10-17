@@ -1,0 +1,1838 @@
+{
+  "schemaVersion": 2,
+  "catalogVersion": "2026-08-20.1",
+  "probedAgainst": {
+    "registryVersion": "2026-08-20.1"
+  },
+  "generatedAt": "2026-08-17T20:49:16.584Z",
+  "agents": [
+    {
+      "kind": "claude",
+      "displayName": "Claude",
+      "harness": {
+        "agentProcess": {
+          "version": "0.66.0-proliferate.2",
+          "source": {
+            "kind": "git",
+            "repo": "https://github.com/proliferate-ai/claude-agent-acp.git",
+            "gitRef": "65f6205329daea4a521ee0f0c042722b0feb306a",
+            "executableRelpath": "node_modules/.bin/claude-agent-acp"
+          }
+        },
+        "native": {
+          "version": "2.1.234",
+          "source": {
+            "kind": "binary",
+            "targets": {
+              "macos_arm64": {
+                "url": "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.234/darwin-arm64/claude",
+                "sha256": "08d8700313697cbe730a25420c908a299ce52d56f0eb2cf4fac94cab5109bc57",
+                "downloadSizeBytes": 310740672
+              },
+              "macos_x64": {
+                "url": "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.234/darwin-x64/claude",
+                "sha256": "1a7b2e8948609f1f732a6498cd17b805b5c5187d74a99adc61ebaa5a29efc34c",
+                "downloadSizeBytes": 319452208
+              },
+              "linux_x64": {
+                "url": "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.234/linux-x64/claude",
+                "sha256": "3473601ea695d5bf769c5b202844d4cb4fbf723ae995450fcb6973204775c84a",
+                "downloadSizeBytes": 328358192
+              },
+              "linux_arm64": {
+                "url": "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.234/linux-arm64/claude",
+                "sha256": "24adda673591cd8345b03ec8245915bb151a259a1ebc3ef23649b57ba944aaa2",
+                "downloadSizeBytes": 325507304
+              },
+              "windows_x64": {
+                "url": "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.234/win32-x64/claude.exe",
+                "sha256": "3f877e78543e2cb4daad61d18f06cc11028f9dffc1afd41ccf1f8f84cf02eb1b",
+                "downloadSizeBytes": 324028576
+              },
+              "windows_arm64": {
+                "url": "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/2.1.234/win32-arm64/claude.exe",
+                "sha256": "ed6cc3d0218e4b27f3691e3832837d814a5274b02755c34aedeb74e3db65e8d4",
+                "downloadSizeBytes": 311927456
+              }
+            }
+          }
+        }
+      },
+      "authContexts": [
+        {
+          "id": "bedrock",
+          "authSlotId": "anthropic",
+          "signals": {
+            "envFlag": "CLAUDE_CODE_USE_BEDROCK=1"
+          }
+        },
+        {
+          "id": "anthropic-api",
+          "authSlotId": "anthropic",
+          "signals": {
+            "anyOf": [
+              {
+                "env": "ANTHROPIC_API_KEY"
+              },
+              {
+                "env": "ANTHROPIC_AUTH_TOKEN"
+              }
+            ]
+          }
+        },
+        {
+          "id": "anthropic-oauth",
+          "authSlotId": "anthropic",
+          "signals": {
+            "anyOf": [
+              {
+                "discovery": "claude-oauth-creds"
+              },
+              {
+                "discovery": "claude-keychain"
+              }
+            ]
+          }
+        },
+        {
+          "id": "gateway",
+          "authSlotId": "gateway",
+          "description": "Proliferate LiteLLM gateway (route-engaged; not credential-detected).",
+          "signals": {
+            "route": "gateway"
+          }
+        }
+      ],
+      "session": {
+        "supportsGoals": true,
+        "presentationModels": [
+          {
+            "id": "default",
+            "displayName": "Default",
+            "description": "Use the default model (currently Opus 5)"
+          },
+          {
+            "id": "opus[1m]",
+            "displayName": "Opus (1M context)",
+            "description": "Opus 5 with 1M context · Best for everyday, complex tasks · $5/$25 per Mtok"
+          },
+          {
+            "id": "sonnet",
+            "displayName": "Sonnet",
+            "description": "Sonnet 5 · Efficient for routine tasks"
+          },
+          {
+            "id": "haiku",
+            "displayName": "Haiku 4.5",
+            "description": "Haiku 4.5 · Fastest for quick answers"
+          },
+          {
+            "id": "claude-fable-5",
+            "displayName": "Fable 5",
+            "description": null
+          },
+          {
+            "id": "claude-opus-4-8",
+            "displayName": "Opus 4.8",
+            "description": null
+          },
+          {
+            "id": "opus",
+            "displayName": "Opus",
+            "description": "Opus 5 · Best for everyday, complex tasks"
+          },
+          {
+            "id": "us.anthropic.claude-fable-5",
+            "displayName": "Fable 5",
+            "description": "Fable 5 · Most capable for your hardest and longest-running tasks"
+          },
+          {
+            "id": "us.anthropic.claude-sonnet-5",
+            "displayName": "Sonnet 5",
+            "description": "Sonnet 5 · Efficient for routine tasks"
+          },
+          {
+            "id": "us.anthropic.claude-sonnet-4-6",
+            "displayName": "Sonnet 4.6",
+            "description": "Sonnet 4.6 · Previous Sonnet version"
+          },
+          {
+            "id": "us.anthropic.claude-sonnet-4-6[1m]",
+            "displayName": "Sonnet 4.6 (1M context)",
+            "description": "Sonnet 4.6 for long sessions"
+          },
+          {
+            "id": "us.anthropic.claude-opus-4-1-20250805-v1:0",
+            "displayName": "Opus 4.1",
+            "description": "Opus 4.1 · Legacy"
+          },
+          {
+            "id": "us.anthropic.claude-opus-5",
+            "displayName": "Opus 5",
+            "description": "Opus 5 · Best for everyday, complex tasks"
+          },
+          {
+            "id": "us.anthropic.claude-opus-5[1m]",
+            "displayName": "Opus 5 (1M context)",
+            "description": "Opus 5 for long sessions"
+          },
+          {
+            "id": "us.anthropic.claude-opus-4-8",
+            "displayName": "Opus 4.8",
+            "description": "Opus 4.8 · Previous Opus version"
+          },
+          {
+            "id": "us.anthropic.claude-opus-4-8[1m]",
+            "displayName": "Opus 4.8 (1M context)",
+            "description": "Opus 4.8 for long sessions"
+          },
+          {
+            "id": "us.anthropic.claude-opus-4-7",
+            "displayName": "Opus 4.7",
+            "description": "Opus 4.7 · Legacy"
+          },
+          {
+            "id": "us.anthropic.claude-opus-4-7[1m]",
+            "displayName": "Opus 4.7 (1M context)",
+            "description": "Opus 4.7 for long sessions"
+          },
+          {
+            "id": "us.anthropic.claude-opus-4-6-v1",
+            "displayName": "Opus 4.6",
+            "description": "Opus 4.6 · Legacy"
+          },
+          {
+            "id": "us.anthropic.claude-opus-4-6-v1[1m]",
+            "displayName": "Opus 4.6 (1M context)",
+            "description": "Opus 4.6 for long sessions"
+          },
+          {
+            "id": "global.anthropic.claude-fable-5",
+            "displayName": "Fable 5",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-4-5",
+            "displayName": "Sonnet 4.5",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-4-5-20250929",
+            "displayName": "Sonnet 4.5 (2025-09-29)",
+            "description": null
+          },
+          {
+            "id": "claude-haiku-4-5",
+            "displayName": "Haiku 4.5",
+            "description": null
+          },
+          {
+            "id": "claude-haiku-4-5-20251001",
+            "displayName": "Haiku 4.5 (2025-10-01)",
+            "description": null
+          },
+          {
+            "id": "claude-opus-4-6",
+            "displayName": "Opus 4.6",
+            "description": null
+          },
+          {
+            "id": "claude-opus-4-6-20260205",
+            "displayName": "Opus 4.6 (2026-02-05)",
+            "description": null
+          }
+        ]
+      },
+      "provenance": {
+        "probedAt": "2026-08-17T20:42:09.068225+00:00",
+        "attestation": {
+          "name": "@proliferate/claude-agent-acp",
+          "version": "0.66.0-proliferate.2",
+          "title": "Claude Agent"
+        },
+        "runs": [
+          {
+            "id": "claude.anthropic-api",
+            "snapshotPath": "generated/claude.anthropic-api.probe.json"
+          },
+          {
+            "id": "claude.anthropic-oauth",
+            "snapshotPath": "generated/claude.anthropic-oauth.probe.json"
+          },
+          {
+            "id": "claude.bedrock",
+            "snapshotPath": "generated/claude.bedrock.probe.json"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "codex",
+      "displayName": "Codex",
+      "harness": {
+        "agentProcess": {
+          "version": "1.1.14-proliferate.1",
+          "source": {
+            "kind": "git",
+            "repo": "https://github.com/proliferate-ai/codex-acp.git",
+            "gitRef": "219738c9dd4205d3c70ab950f5f22cc3b28103c4",
+            "executableRelpath": "node_modules/.bin/codex-acp"
+          }
+        },
+        "native": {
+          "version": "rust-v0.147.0",
+          "source": {
+            "kind": "archive",
+            "targets": {
+              "macos_arm64": {
+                "url": "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-aarch64-apple-darwin.tar.gz",
+                "sha256": "75984b81f92a71b0c0f4b3b5cad80e5c57177e4d8c8b4b1e13db703b20dc4358",
+                "expectedBinary": "codex-aarch64-apple-darwin",
+                "downloadSizeBytes": 87984231
+              },
+              "macos_x64": {
+                "url": "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-x86_64-apple-darwin.tar.gz",
+                "sha256": "36e782f71d8164cc37c2b89c64948f2180e9a2f8456b27e660da75bc6b5574e2",
+                "expectedBinary": "codex-x86_64-apple-darwin",
+                "downloadSizeBytes": 95851149
+              },
+              "linux_x64": {
+                "url": "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-x86_64-unknown-linux-musl.tar.gz",
+                "sha256": "0246e2e773834e07f0fb5249ed6ebad12e4591e608f8c7bb97dd6a9690544c36",
+                "expectedBinary": "codex-x86_64-unknown-linux-musl",
+                "downloadSizeBytes": 98970270
+              },
+              "linux_arm64": {
+                "url": "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-aarch64-unknown-linux-musl.tar.gz",
+                "sha256": "eb677c80f666b1ab8b4b1d083b66e8d614b1281d960bb6f9fd8ca98f58b38b90",
+                "expectedBinary": "codex-aarch64-unknown-linux-musl",
+                "downloadSizeBytes": 91607658
+              },
+              "windows_x64": {
+                "url": "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-x86_64-pc-windows-msvc.exe.tar.gz",
+                "sha256": "7c47d4dc9202569d85ef2cbe9203dd2e75c326f5085e3854487a740339a8bdcd",
+                "expectedBinary": "codex-x86_64-pc-windows-msvc.exe",
+                "downloadSizeBytes": 99655443
+              },
+              "windows_arm64": {
+                "url": "https://github.com/openai/codex/releases/download/rust-v0.147.0/codex-aarch64-pc-windows-msvc.exe.tar.gz",
+                "sha256": "c3a7da6cd2ed2a4e3c85a0b4f0b254cde81b51a9e3600530978fce689807ed07",
+                "expectedBinary": "codex-aarch64-pc-windows-msvc.exe",
+                "downloadSizeBytes": 91259737
+              }
+            },
+            "args": []
+          }
+        }
+      },
+      "authContexts": [
+        {
+          "id": "bedrock",
+          "authSlotId": "openai"
+        },
+        {
+          "id": "openai-oauth",
+          "authSlotId": "openai",
+          "signals": {
+            "anyOf": [
+              {
+                "discovery": "codex-auth-json-oauth"
+              },
+              {
+                "discovery": "codex-keychain"
+              }
+            ]
+          }
+        },
+        {
+          "id": "openai-api",
+          "authSlotId": "openai",
+          "signals": {
+            "anyOf": [
+              {
+                "env": "OPENAI_API_KEY"
+              },
+              {
+                "env": "CODEX_API_KEY"
+              },
+              {
+                "discovery": "codex-auth-json-api-key"
+              }
+            ]
+          }
+        },
+        {
+          "id": "gateway",
+          "authSlotId": "gateway",
+          "description": "Proliferate LiteLLM gateway (route-engaged; not credential-detected).",
+          "signals": {
+            "route": "gateway"
+          }
+        }
+      ],
+      "session": {
+        "supportsGoals": true,
+        "presentationModels": [
+          {
+            "id": "openai.gpt-oss-120b",
+            "displayName": "GPT-OSS 120B",
+            "description": null
+          },
+          {
+            "id": "openai.gpt-5.6-sol",
+            "displayName": "GPT-5.6 Sol",
+            "description": "Latest frontier agentic coding model."
+          },
+          {
+            "id": "openai.gpt-5.6-terra",
+            "displayName": "GPT-5.6 Terra",
+            "description": "Balanced agentic coding model for everyday work."
+          },
+          {
+            "id": "openai.gpt-5.6-luna",
+            "displayName": "GPT-5.6 Luna",
+            "description": "Fast and affordable agentic coding model."
+          },
+          {
+            "id": "openai.gpt-5.5",
+            "displayName": "GPT-5.5",
+            "description": "Frontier model for complex coding, research, and real-world work."
+          },
+          {
+            "id": "openai.gpt-5.4",
+            "displayName": "GPT-5.4",
+            "description": "Strong model for everyday coding."
+          },
+          {
+            "id": "gpt-5.6-sol",
+            "displayName": "GPT-5.6 Sol",
+            "description": "Latest frontier agentic coding model."
+          },
+          {
+            "id": "gpt-5.6-terra",
+            "displayName": "GPT-5.6 Terra",
+            "description": "Balanced agentic coding model for everyday work."
+          },
+          {
+            "id": "gpt-5.6-luna",
+            "displayName": "GPT-5.6 Luna",
+            "description": "Fast and affordable agentic coding model."
+          },
+          {
+            "id": "gpt-5.5",
+            "displayName": "GPT-5.5",
+            "description": "Frontier model for complex coding, research, and real-world work."
+          },
+          {
+            "id": "gpt-5.2",
+            "displayName": "GPT-5.2",
+            "description": "Optimized for professional work and long-running agents."
+          },
+          {
+            "id": "gpt-5.4",
+            "displayName": "GPT-5.4",
+            "description": "Strong model for everyday coding."
+          },
+          {
+            "id": "gpt-5.4-mini",
+            "displayName": "GPT-5.4 Mini",
+            "description": "Small, fast, and cost-efficient model for simpler coding tasks."
+          },
+          {
+            "id": "gpt-5.2-2025-12-11",
+            "displayName": "GPT-5.2 (2025-12-11)",
+            "description": null
+          },
+          {
+            "id": "gpt-5-mini",
+            "displayName": "GPT-5 Mini",
+            "description": null
+          },
+          {
+            "id": "gpt-5-mini-2025-08-07",
+            "displayName": "GPT-5 Mini (2025-08-07)",
+            "description": null
+          }
+        ]
+      },
+      "provenance": {
+        "probedAt": "2026-08-16T11:54:52.840296+00:00",
+        "attestation": {
+          "name": "@proliferate/codex-acp",
+          "version": "1.1.14-proliferate.1",
+          "title": "Codex"
+        },
+        "runs": [
+          {
+            "id": "codex.bedrock",
+            "snapshotPath": "generated/codex.bedrock.probe.json"
+          },
+          {
+            "id": "codex.openai-api",
+            "snapshotPath": "generated/codex.openai-api.probe.json"
+          },
+          {
+            "id": "codex.openai-oauth",
+            "snapshotPath": "generated/codex.openai-oauth.probe.json"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "cursor",
+      "displayName": "Cursor",
+      "harness": {
+        "agentProcess": {
+          "version": "2026.07.09",
+          "source": {
+            "kind": "archive",
+            "targets": {
+              "macos_arm64": {
+                "url": "https://downloads.cursor.com/lab/2026.07.09-a3815c0/darwin/arm64/agent-cli-package.tar.gz",
+                "sha256": "009ee857d49f17c10e5035e33884eb258d1f3839c1d52bdb35f35a117369dfde",
+                "expectedBinary": "./dist-package/cursor-agent"
+              },
+              "macos_x64": {
+                "url": "https://downloads.cursor.com/lab/2026.07.09-a3815c0/darwin/x64/agent-cli-package.tar.gz",
+                "sha256": "066c499f6ec43734254337c493aeec5aabb4a6ae6d6df7da214fa86ceda9e45d",
+                "expectedBinary": "./dist-package/cursor-agent"
+              },
+              "linux_x64": {
+                "url": "https://downloads.cursor.com/lab/2026.07.09-a3815c0/linux/x64/agent-cli-package.tar.gz",
+                "sha256": "c7c1f32249cedb99cc20cd4eed1f9308dc2299a78c283bbc6efd6d658cd4977e",
+                "expectedBinary": "./dist-package/cursor-agent"
+              }
+            },
+            "args": [
+              "acp"
+            ]
+          }
+        }
+      },
+      "authContexts": [
+        {
+          "id": "cursor-login",
+          "authSlotId": "cursor",
+          "signals": {
+            "anyOf": [
+              {
+                "env": "CURSOR_API_KEY"
+              },
+              {
+                "discovery": "cursor-keychain"
+              }
+            ]
+          }
+        }
+      ],
+      "session": {
+        "supportsGoals": false,
+        "presentationModels": [
+          {
+            "id": "default",
+            "displayName": "Auto",
+            "description": null
+          },
+          {
+            "id": "grok-4.5",
+            "displayName": "Grok-4.5",
+            "description": null
+          },
+          {
+            "id": "composer-2.5",
+            "displayName": "Composer 2.5",
+            "description": null
+          },
+          {
+            "id": "claude-opus-4-8",
+            "displayName": "Claude Opus 4.8",
+            "description": null
+          },
+          {
+            "id": "gpt-5.6-sol",
+            "displayName": "GPT-5.6-Sol",
+            "description": null
+          },
+          {
+            "id": "gpt-5.5",
+            "displayName": "GPT-5.5",
+            "description": null
+          },
+          {
+            "id": "claude-fable-5",
+            "displayName": "Claude Fable 5",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-5",
+            "displayName": "Claude-Sonnet-5",
+            "description": null
+          },
+          {
+            "id": "gpt-5.6-terra",
+            "displayName": "GPT-5.6-Terra",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-4-6",
+            "displayName": "Claude Sonnet 4.6",
+            "description": null
+          },
+          {
+            "id": "gpt-5.3-codex",
+            "displayName": "GPT-5.3 Codex",
+            "description": null
+          },
+          {
+            "id": "claude-opus-4-7",
+            "displayName": "Claude Opus 4.7",
+            "description": null
+          },
+          {
+            "id": "gpt-5.4",
+            "displayName": "GPT-5.4",
+            "description": null
+          },
+          {
+            "id": "claude-opus-4-6",
+            "displayName": "Claude Opus 4.6",
+            "description": null
+          },
+          {
+            "id": "claude-opus-4-5",
+            "displayName": "Claude Opus 4.5",
+            "description": null
+          },
+          {
+            "id": "gpt-5.2",
+            "displayName": "GPT-5.2",
+            "description": null
+          },
+          {
+            "id": "gpt-5.6-luna",
+            "displayName": "GPT-5.6-Luna",
+            "description": null
+          },
+          {
+            "id": "gemini-3.1-pro",
+            "displayName": "Gemini 3.1 Pro",
+            "description": null
+          },
+          {
+            "id": "gpt-5.4-mini",
+            "displayName": "GPT-5.4 Mini",
+            "description": null
+          },
+          {
+            "id": "gpt-5.4-nano",
+            "displayName": "GPT-5.4 Nano",
+            "description": null
+          },
+          {
+            "id": "claude-haiku-4-5",
+            "displayName": "Claude Haiku 4.5",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-4-5",
+            "displayName": "Claude Sonnet 4.5",
+            "description": null
+          },
+          {
+            "id": "gpt-5.2-codex",
+            "displayName": "GPT-5.2 Codex",
+            "description": null
+          },
+          {
+            "id": "gpt-5.1-codex-max",
+            "displayName": "GPT-5.1 Codex Max",
+            "description": null
+          },
+          {
+            "id": "gpt-5.1",
+            "displayName": "GPT-5.1",
+            "description": null
+          },
+          {
+            "id": "gemini-3-flash",
+            "displayName": "Gemini 3 Flash",
+            "description": null
+          },
+          {
+            "id": "gemini-3.5-flash",
+            "displayName": "Gemini 3.5 Flash",
+            "description": null
+          },
+          {
+            "id": "gpt-5.1-codex-mini",
+            "displayName": "GPT-5.1 Codex Mini",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-4",
+            "displayName": "Claude Sonnet 4",
+            "description": null
+          },
+          {
+            "id": "gpt-5-mini",
+            "displayName": "GPT-5 Mini",
+            "description": null
+          },
+          {
+            "id": "gemini-2.5-flash",
+            "displayName": "Gemini 2.5 Flash",
+            "description": null
+          },
+          {
+            "id": "kimi-k2.7-code",
+            "displayName": "Kimi-K2.7-Code",
+            "description": null
+          },
+          {
+            "id": "glm-5.2",
+            "displayName": "GLM-5.2",
+            "description": null
+          }
+        ]
+      },
+      "provenance": {
+        "probedAt": "2026-07-17T05:35:36.678732+00:00",
+        "attestation": null,
+        "runs": [
+          {
+            "id": "cursor.cursor-login",
+            "snapshotPath": "generated/cursor.cursor-login.probe.json"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "grok",
+      "displayName": "Grok",
+      "harness": {
+        "agentProcess": {
+          "version": "0.2.102",
+          "source": {
+            "kind": "npm",
+            "package": "@xai-official/grok@0.2.102",
+            "sha256": "sha512-Q8BdegoBOCvLq5cDDYiomZd3Dnxwwv72TbQ60B5HNpOJP4AoJpTarNuB+BGNUZ1/6U7rw14xZrRtxLrkkv3nHA==",
+            "args": [
+              "agent",
+              "stdio"
+            ]
+          }
+        }
+      },
+      "authContexts": [
+        {
+          "id": "xai-api",
+          "authSlotId": "xai",
+          "signals": {
+            "anyOf": [
+              {
+                "env": "XAI_API_KEY"
+              },
+              {
+                "env": "GROK_API_KEY"
+              },
+              {
+                "discovery": "grok-auth-json-oauth"
+              }
+            ]
+          }
+        },
+        {
+          "id": "gateway",
+          "authSlotId": "gateway",
+          "description": "Proliferate LiteLLM gateway (route-engaged; not credential-detected).",
+          "signals": {
+            "route": "gateway"
+          }
+        }
+      ],
+      "session": {
+        "supportsGoals": false,
+        "presentationModels": [
+          {
+            "id": "grok-4.20-0309-non-reasoning",
+            "displayName": "Grok 4.20 Non-Reasoning",
+            "description": null
+          },
+          {
+            "id": "grok-4.20-0309-reasoning",
+            "displayName": "Grok 4.20 Reasoning",
+            "description": null
+          },
+          {
+            "id": "grok-4.20-multi-agent-0309",
+            "displayName": "Grok 4.20 Multi-Agent",
+            "description": null
+          },
+          {
+            "id": "grok-4.3",
+            "displayName": "Grok 4.3",
+            "description": null
+          },
+          {
+            "id": "grok-4.5",
+            "displayName": "Grok-4.5",
+            "description": null
+          },
+          {
+            "id": "grok-build-0.1",
+            "displayName": "Grok Build 0.1",
+            "description": null
+          },
+          {
+            "id": "grok-imagine-image",
+            "displayName": "Grok Imagine Image",
+            "description": null
+          },
+          {
+            "id": "grok-imagine-image-quality",
+            "displayName": "Grok Imagine Image Quality",
+            "description": null
+          },
+          {
+            "id": "grok-imagine-video",
+            "displayName": "Grok Imagine Video",
+            "description": null
+          },
+          {
+            "id": "grok-imagine-video-1.5",
+            "displayName": "Grok-Imagine-Video-1.5",
+            "description": null
+          },
+          {
+            "id": "grok-4",
+            "displayName": "Grok 4",
+            "description": null
+          },
+          {
+            "id": "grok-4-fast",
+            "displayName": "Grok 4 Fast",
+            "description": null
+          },
+          {
+            "id": "grok-code-fast-1",
+            "displayName": "Grok Code Fast 1",
+            "description": null
+          },
+          {
+            "id": "grok-build",
+            "displayName": "Grok Build",
+            "description": null
+          }
+        ]
+      },
+      "provenance": {
+        "probedAt": "2026-07-17T05:35:08.879897+00:00",
+        "attestation": null,
+        "runs": [
+          {
+            "id": "grok.xai-api",
+            "snapshotPath": "generated/grok.xai-api.probe.json"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "opencode",
+      "displayName": "OpenCode",
+      "harness": {
+        "agentProcess": {
+          "version": "1.18.3",
+          "source": {
+            "kind": "archive",
+            "targets": {
+              "macos_arm64": {
+                "url": "https://github.com/anomalyco/opencode/releases/download/v1.18.3/opencode-darwin-arm64.zip",
+                "sha256": "946f62b155638b911144b7bef520ee4a6442f696297907873463bca3524e40ef",
+                "expectedBinary": "./opencode"
+              },
+              "macos_x64": {
+                "url": "https://github.com/anomalyco/opencode/releases/download/v1.18.3/opencode-darwin-x64.zip",
+                "sha256": "4ea147867ba19e4ec03559df557811f1674f40788aea4d10326dc563b7667c6d",
+                "expectedBinary": "./opencode"
+              },
+              "linux_x64": {
+                "url": "https://github.com/anomalyco/opencode/releases/download/v1.18.3/opencode-linux-x64.tar.gz",
+                "sha256": "60f27b2679f00a511b6539f97e02448afaf58d9c66e2448285ea0c517ca84583",
+                "expectedBinary": "./opencode"
+              }
+            },
+            "args": [
+              "acp"
+            ]
+          }
+        }
+      },
+      "authContexts": [
+        {
+          "id": "anthropic-api",
+          "authSlotId": "anthropic",
+          "signals": {
+            "anyOf": [
+              {
+                "env": "ANTHROPIC_API_KEY"
+              },
+              {
+                "env": "ANTHROPIC_AUTH_TOKEN"
+              },
+              {
+                "discovery": "opencode-auth-json/anthropic"
+              }
+            ]
+          }
+        },
+        {
+          "id": "openai-api",
+          "authSlotId": "openai",
+          "signals": {
+            "anyOf": [
+              {
+                "env": "OPENAI_API_KEY"
+              },
+              {
+                "discovery": "opencode-auth-json/openai"
+              }
+            ]
+          }
+        },
+        {
+          "id": "gemini-api",
+          "authSlotId": "gemini",
+          "signals": {
+            "anyOf": [
+              {
+                "env": "GEMINI_API_KEY"
+              },
+              {
+                "env": "GOOGLE_API_KEY"
+              },
+              {
+                "discovery": "opencode-auth-json/google"
+              },
+              {
+                "discovery": "opencode-auth-json/gemini"
+              }
+            ]
+          }
+        },
+        {
+          "id": "opencode-zen",
+          "authSlotId": "opencode-zen",
+          "signals": {
+            "discovery": "opencode-auth-json/opencode"
+          }
+        },
+        {
+          "id": "baseline"
+        },
+        {
+          "id": "gateway",
+          "authSlotId": "gateway",
+          "description": "Proliferate LiteLLM gateway (route-engaged; not credential-detected).",
+          "signals": {
+            "route": "gateway"
+          }
+        }
+      ],
+      "session": {
+        "supportsGoals": false,
+        "presentationModels": [
+          {
+            "id": "anthropic/claude-fable-5",
+            "displayName": "Anthropic/Claude Fable 5",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-haiku-4-5-20251001",
+            "displayName": "Anthropic/Claude Haiku 4.5",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-haiku-4-5",
+            "displayName": "Anthropic/Claude Haiku 4.5 (latest)",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-5-20251101",
+            "displayName": "Anthropic/Claude Opus 4.5",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-5",
+            "displayName": "Anthropic/Claude Opus 4.5 (latest)",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-6",
+            "displayName": "Anthropic/Claude Opus 4.6",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-6-fast",
+            "displayName": "Anthropic/Claude Opus 4.6 Fast",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-7",
+            "displayName": "Anthropic/Claude Opus 4.7",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-7-fast",
+            "displayName": "Anthropic/Claude Opus 4.7 Fast",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-8",
+            "displayName": "Anthropic/Claude Opus 4.8",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-opus-4-8-fast",
+            "displayName": "Anthropic/Claude Opus 4.8 Fast",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-sonnet-4-5-20250929",
+            "displayName": "Anthropic/Claude Sonnet 4.5",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-sonnet-4-5",
+            "displayName": "Anthropic/Claude Sonnet 4.5 (latest)",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-sonnet-4-6",
+            "displayName": "Anthropic/Claude Sonnet 4.6",
+            "description": null
+          },
+          {
+            "id": "anthropic/claude-sonnet-5",
+            "displayName": "Anthropic/Claude Sonnet 5",
+            "description": null
+          },
+          {
+            "id": "opencode/big-pickle",
+            "displayName": "OpenCode Zen/Big Pickle",
+            "description": null
+          },
+          {
+            "id": "opencode/deepseek-v4-flash-free",
+            "displayName": "OpenCode Zen/DeepSeek V4 Flash Free",
+            "description": null
+          },
+          {
+            "id": "opencode/hy3-free",
+            "displayName": "OpenCode Zen/Hy3 Free",
+            "description": null
+          },
+          {
+            "id": "opencode/mimo-v2.5-free",
+            "displayName": "OpenCode Zen/MiMo V2.5 Free",
+            "description": null
+          },
+          {
+            "id": "opencode/nemotron-3-ultra-free",
+            "displayName": "OpenCode Zen/Nemotron 3 Ultra Free",
+            "description": null
+          },
+          {
+            "id": "opencode/north-mini-code-free",
+            "displayName": "OpenCode Zen/North Mini Code Free",
+            "description": null
+          },
+          {
+            "id": "google/gemini-2.5-flash",
+            "displayName": "Google/Gemini 2.5 Flash",
+            "description": null
+          },
+          {
+            "id": "google/gemini-2.5-flash-preview-tts",
+            "displayName": "Google/Gemini 2.5 Flash Preview TTS",
+            "description": null
+          },
+          {
+            "id": "google/gemini-2.5-flash-lite",
+            "displayName": "Google/Gemini 2.5 Flash-Lite",
+            "description": null
+          },
+          {
+            "id": "google/gemini-2.5-pro",
+            "displayName": "Google/Gemini 2.5 Pro",
+            "description": null
+          },
+          {
+            "id": "google/gemini-2.5-pro-preview-tts",
+            "displayName": "Google/Gemini 2.5 Pro Preview TTS",
+            "description": null
+          },
+          {
+            "id": "google/gemini-3-flash-preview",
+            "displayName": "Google/Gemini 3 Flash Preview",
+            "description": null
+          },
+          {
+            "id": "google/gemini-3.1-flash-lite",
+            "displayName": "Google/Gemini 3.1 Flash Lite",
+            "description": null
+          },
+          {
+            "id": "google/gemini-3.1-pro-preview",
+            "displayName": "Google/Gemini 3.1 Pro Preview",
+            "description": null
+          },
+          {
+            "id": "google/gemini-3.1-pro-preview-customtools",
+            "displayName": "Google/Gemini 3.1 Pro Preview Custom Tools",
+            "description": null
+          },
+          {
+            "id": "google/gemini-3.5-flash",
+            "displayName": "Google/Gemini 3.5 Flash",
+            "description": null
+          },
+          {
+            "id": "google/gemini-embedding-001",
+            "displayName": "Google/Gemini Embedding 001",
+            "description": null
+          },
+          {
+            "id": "google/gemini-flash-latest",
+            "displayName": "Google/Gemini Flash Latest",
+            "description": null
+          },
+          {
+            "id": "google/gemini-flash-lite-latest",
+            "displayName": "Google/Gemini Flash-Lite Latest",
+            "description": null
+          },
+          {
+            "id": "google/gemini-omni-flash-preview",
+            "displayName": "Google/Gemini Omni Flash Preview",
+            "description": null
+          },
+          {
+            "id": "google/gemma-4-26b-a4b-it",
+            "displayName": "Google/Gemma 4 26B A4B IT",
+            "description": null
+          },
+          {
+            "id": "google/gemma-4-31b-it",
+            "displayName": "Google/Gemma 4 31B IT",
+            "description": null
+          },
+          {
+            "id": "google/gemini-2.5-flash-image",
+            "displayName": "Google/Nano Banana",
+            "description": null
+          },
+          {
+            "id": "google/gemini-3.1-flash-image-preview",
+            "displayName": "Google/Nano Banana 2",
+            "description": null
+          },
+          {
+            "id": "google/gemini-3-pro-image-preview",
+            "displayName": "Google/Nano Banana Pro",
+            "description": null
+          },
+          {
+            "id": "openai/chatgpt-image-latest",
+            "displayName": "OpenAI/chatgpt-image-latest",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-3.5-turbo",
+            "displayName": "OpenAI/GPT-3.5-turbo",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4",
+            "displayName": "OpenAI/GPT-4",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4-turbo",
+            "displayName": "OpenAI/GPT-4 Turbo",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4.1",
+            "displayName": "OpenAI/GPT-4.1",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4.1-mini",
+            "displayName": "OpenAI/GPT-4.1 mini",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4.1-nano",
+            "displayName": "OpenAI/GPT-4.1 nano",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4o",
+            "displayName": "OpenAI/GPT-4o",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4o-2024-05-13",
+            "displayName": "OpenAI/GPT-4o (2024-05-13)",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4o-2024-08-06",
+            "displayName": "OpenAI/GPT-4o (2024-08-06)",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4o-2024-11-20",
+            "displayName": "OpenAI/GPT-4o (2024-11-20)",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-4o-mini",
+            "displayName": "OpenAI/GPT-4o mini",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5",
+            "displayName": "OpenAI/GPT-5",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5-mini",
+            "displayName": "OpenAI/GPT-5 Mini",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5-nano",
+            "displayName": "OpenAI/GPT-5 Nano",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5-pro",
+            "displayName": "OpenAI/GPT-5 Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5-codex",
+            "displayName": "OpenAI/GPT-5-Codex",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.1",
+            "displayName": "OpenAI/GPT-5.1",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.1-chat-latest",
+            "displayName": "OpenAI/GPT-5.1 Chat",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.1-codex",
+            "displayName": "OpenAI/GPT-5.1 Codex",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.1-codex-max",
+            "displayName": "OpenAI/GPT-5.1 Codex Max",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.1-codex-mini",
+            "displayName": "OpenAI/GPT-5.1 Codex mini",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.2",
+            "displayName": "OpenAI/GPT-5.2",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.2-chat-latest",
+            "displayName": "OpenAI/GPT-5.2 Chat",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.2-codex",
+            "displayName": "OpenAI/GPT-5.2 Codex",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.2-pro",
+            "displayName": "OpenAI/GPT-5.2 Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.3-chat-latest",
+            "displayName": "OpenAI/GPT-5.3 Chat (latest)",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.3-codex",
+            "displayName": "OpenAI/GPT-5.3 Codex",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.3-codex-spark",
+            "displayName": "OpenAI/GPT-5.3 Codex Spark",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.4",
+            "displayName": "OpenAI/GPT-5.4",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.4-fast",
+            "displayName": "OpenAI/GPT-5.4 Fast",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.4-mini",
+            "displayName": "OpenAI/GPT-5.4 mini",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.4-mini-fast",
+            "displayName": "OpenAI/GPT-5.4 mini Fast",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.4-nano",
+            "displayName": "OpenAI/GPT-5.4 nano",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.4-pro",
+            "displayName": "OpenAI/GPT-5.4 Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.5",
+            "displayName": "OpenAI/GPT-5.5",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.5-fast",
+            "displayName": "OpenAI/GPT-5.5 Fast",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.5-pro",
+            "displayName": "OpenAI/GPT-5.5 Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6",
+            "displayName": "OpenAI/GPT-5.6",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-fast",
+            "displayName": "OpenAI/GPT-5.6 Fast",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-luna",
+            "displayName": "OpenAI/GPT-5.6 Luna",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-luna-fast",
+            "displayName": "OpenAI/GPT-5.6 Luna Fast",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-luna-pro",
+            "displayName": "OpenAI/GPT-5.6 Luna Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-pro",
+            "displayName": "OpenAI/GPT-5.6 Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-sol",
+            "displayName": "OpenAI/GPT-5.6 Sol",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-sol-fast",
+            "displayName": "OpenAI/GPT-5.6 Sol Fast",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-sol-pro",
+            "displayName": "OpenAI/GPT-5.6 Sol Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-terra",
+            "displayName": "OpenAI/GPT-5.6 Terra",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-terra-fast",
+            "displayName": "OpenAI/GPT-5.6 Terra Fast",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-5.6-terra-pro",
+            "displayName": "OpenAI/GPT-5.6 Terra Pro",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-image-1",
+            "displayName": "OpenAI/gpt-image-1",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-image-1-mini",
+            "displayName": "OpenAI/gpt-image-1-mini",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-image-1.5",
+            "displayName": "OpenAI/gpt-image-1.5",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-image-2",
+            "displayName": "OpenAI/gpt-image-2",
+            "description": null
+          },
+          {
+            "id": "openai/gpt-realtime-2.1",
+            "displayName": "OpenAI/GPT-Realtime-2.1",
+            "description": null
+          },
+          {
+            "id": "openai/o1",
+            "displayName": "OpenAI/o1 1",
+            "description": null
+          },
+          {
+            "id": "openai/o1-pro",
+            "displayName": "OpenAI/o1-pro",
+            "description": null
+          },
+          {
+            "id": "openai/o3",
+            "displayName": "OpenAI/o3 3",
+            "description": null
+          },
+          {
+            "id": "openai/o3-deep-research",
+            "displayName": "OpenAI/o3-deep-research",
+            "description": null
+          },
+          {
+            "id": "openai/o3-mini",
+            "displayName": "OpenAI/o3-mini",
+            "description": null
+          },
+          {
+            "id": "openai/o3-pro",
+            "displayName": "OpenAI/o3-pro",
+            "description": null
+          },
+          {
+            "id": "openai/o4-mini",
+            "displayName": "OpenAI/o4-mini",
+            "description": null
+          },
+          {
+            "id": "openai/o4-mini-deep-research",
+            "displayName": "OpenAI/o4-mini-deep-research",
+            "description": null
+          },
+          {
+            "id": "openai/text-embedding-3-large",
+            "displayName": "OpenAI/text-embedding-3-large",
+            "description": null
+          },
+          {
+            "id": "openai/text-embedding-3-small",
+            "displayName": "OpenAI/text-embedding-3-small",
+            "description": null
+          },
+          {
+            "id": "openai/text-embedding-ada-002",
+            "displayName": "OpenAI/text-embedding-ada-002",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-fable-5",
+            "displayName": "OpenCode Zen/Claude Fable 5",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-haiku-4-5",
+            "displayName": "OpenCode Zen/Claude Haiku 4.5",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-opus-4-1",
+            "displayName": "OpenCode Zen/Claude Opus 4.1",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-opus-4-5",
+            "displayName": "OpenCode Zen/Claude Opus 4.5",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-opus-4-6",
+            "displayName": "OpenCode Zen/Claude Opus 4.6",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-opus-4-7",
+            "displayName": "OpenCode Zen/Claude Opus 4.7",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-opus-4-8",
+            "displayName": "OpenCode Zen/Claude Opus 4.8",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-sonnet-4",
+            "displayName": "OpenCode Zen/Claude Sonnet 4",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-sonnet-4-5",
+            "displayName": "OpenCode Zen/Claude Sonnet 4.5",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-sonnet-4-6",
+            "displayName": "OpenCode Zen/Claude Sonnet 4.6",
+            "description": null
+          },
+          {
+            "id": "opencode/claude-sonnet-5",
+            "displayName": "OpenCode Zen/Claude Sonnet 5",
+            "description": null
+          },
+          {
+            "id": "opencode/deepseek-v4-flash",
+            "displayName": "OpenCode Zen/DeepSeek V4 Flash",
+            "description": null
+          },
+          {
+            "id": "opencode/deepseek-v4-pro",
+            "displayName": "OpenCode Zen/DeepSeek V4 Pro",
+            "description": null
+          },
+          {
+            "id": "opencode/gemini-3-flash",
+            "displayName": "OpenCode Zen/Gemini 3 Flash",
+            "description": null
+          },
+          {
+            "id": "opencode/gemini-3.1-pro",
+            "displayName": "OpenCode Zen/Gemini 3.1 Pro Preview",
+            "description": null
+          },
+          {
+            "id": "opencode/gemini-3.5-flash",
+            "displayName": "OpenCode Zen/Gemini 3.5 Flash",
+            "description": null
+          },
+          {
+            "id": "opencode/glm-5",
+            "displayName": "OpenCode Zen/GLM-5",
+            "description": null
+          },
+          {
+            "id": "opencode/glm-5.1",
+            "displayName": "OpenCode Zen/GLM-5.1",
+            "description": null
+          },
+          {
+            "id": "opencode/glm-5.2",
+            "displayName": "OpenCode Zen/GLM-5.2",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5",
+            "displayName": "OpenCode Zen/GPT-5",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5-codex",
+            "displayName": "OpenCode Zen/GPT-5 Codex",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5-nano",
+            "displayName": "OpenCode Zen/GPT-5 Nano",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.1",
+            "displayName": "OpenCode Zen/GPT-5.1",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.1-codex",
+            "displayName": "OpenCode Zen/GPT-5.1 Codex",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.1-codex-max",
+            "displayName": "OpenCode Zen/GPT-5.1 Codex Max",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.1-codex-mini",
+            "displayName": "OpenCode Zen/GPT-5.1 Codex Mini",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.2",
+            "displayName": "OpenCode Zen/GPT-5.2",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.2-codex",
+            "displayName": "OpenCode Zen/GPT-5.2 Codex",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.3-codex",
+            "displayName": "OpenCode Zen/GPT-5.3 Codex",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.3-codex-spark",
+            "displayName": "OpenCode Zen/GPT-5.3 Codex Spark",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.4",
+            "displayName": "OpenCode Zen/GPT-5.4",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.4-mini",
+            "displayName": "OpenCode Zen/GPT-5.4 Mini",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.4-nano",
+            "displayName": "OpenCode Zen/GPT-5.4 Nano",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.4-pro",
+            "displayName": "OpenCode Zen/GPT-5.4 Pro",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.5",
+            "displayName": "OpenCode Zen/GPT-5.5",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.5-pro",
+            "displayName": "OpenCode Zen/GPT-5.5 Pro",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.6-luna",
+            "displayName": "OpenCode Zen/GPT-5.6 Luna",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.6-sol",
+            "displayName": "OpenCode Zen/GPT-5.6 Sol",
+            "description": null
+          },
+          {
+            "id": "opencode/gpt-5.6-terra",
+            "displayName": "OpenCode Zen/GPT-5.6 Terra",
+            "description": null
+          },
+          {
+            "id": "opencode/grok-4.5",
+            "displayName": "OpenCode Zen/Grok 4.5",
+            "description": null
+          },
+          {
+            "id": "opencode/grok-build-0.1",
+            "displayName": "OpenCode Zen/Grok Build 0.1",
+            "description": null
+          },
+          {
+            "id": "opencode/kimi-k2.5",
+            "displayName": "OpenCode Zen/Kimi K2.5",
+            "description": null
+          },
+          {
+            "id": "opencode/kimi-k2.6",
+            "displayName": "OpenCode Zen/Kimi K2.6",
+            "description": null
+          },
+          {
+            "id": "opencode/kimi-k2.7-code",
+            "displayName": "OpenCode Zen/Kimi K2.7 Code",
+            "description": null
+          },
+          {
+            "id": "opencode/minimax-m2.5",
+            "displayName": "OpenCode Zen/MiniMax-M2.5",
+            "description": null
+          },
+          {
+            "id": "opencode/minimax-m2.7",
+            "displayName": "OpenCode Zen/MiniMax-M2.7",
+            "description": null
+          },
+          {
+            "id": "opencode/minimax-m3",
+            "displayName": "OpenCode Zen/MiniMax-M3 3",
+            "description": null
+          },
+          {
+            "id": "opencode/qwen3.5-plus",
+            "displayName": "OpenCode Zen/Qwen3.5 Plus",
+            "description": null
+          },
+          {
+            "id": "opencode/qwen3.6-plus",
+            "displayName": "OpenCode Zen/Qwen3.6 Plus",
+            "description": null
+          },
+          {
+            "id": "opencode-go/deepseek-v4-flash",
+            "displayName": "OpenCode Go/DeepSeek V4 Flash",
+            "description": null
+          },
+          {
+            "id": "opencode-go/deepseek-v4-pro",
+            "displayName": "OpenCode Go/DeepSeek V4 Pro",
+            "description": null
+          },
+          {
+            "id": "opencode-go/glm-5.1",
+            "displayName": "OpenCode Go/GLM-5.1",
+            "description": null
+          },
+          {
+            "id": "opencode-go/glm-5.2",
+            "displayName": "OpenCode Go/GLM-5.2",
+            "description": null
+          },
+          {
+            "id": "opencode-go/kimi-k2.6",
+            "displayName": "OpenCode Go/Kimi K2.6",
+            "description": null
+          },
+          {
+            "id": "opencode-go/kimi-k2.7-code",
+            "displayName": "OpenCode Go/Kimi K2.7 Code",
+            "description": null
+          },
+          {
+            "id": "opencode-go/mimo-v2.5",
+            "displayName": "OpenCode Go/MiMo V2.5",
+            "description": null
+          },
+          {
+            "id": "opencode-go/mimo-v2.5-pro",
+            "displayName": "OpenCode Go/MiMo V2.5 Pro",
+            "description": null
+          },
+          {
+            "id": "opencode-go/minimax-m2.7",
+            "displayName": "OpenCode Go/MiniMax-M2.7",
+            "description": null
+          },
+          {
+            "id": "opencode-go/minimax-m3",
+            "displayName": "OpenCode Go/MiniMax-M3 3",
+            "description": null
+          },
+          {
+            "id": "opencode-go/qwen3.6-plus",
+            "displayName": "OpenCode Go/Qwen3.6 Plus",
+            "description": null
+          },
+          {
+            "id": "opencode-go/qwen3.7-max",
+            "displayName": "OpenCode Go/Qwen3.7 Max",
+            "description": null
+          },
+          {
+            "id": "opencode-go/qwen3.7-plus",
+            "displayName": "OpenCode Go/Qwen3.7 Plus",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-4-5",
+            "displayName": "Sonnet 4.5",
+            "description": null
+          },
+          {
+            "id": "claude-sonnet-4-5-20250929",
+            "displayName": "Sonnet 4.5 (2025-09-29)",
+            "description": null
+          },
+          {
+            "id": "claude-haiku-4-5",
+            "displayName": "Haiku 4.5",
+            "description": null
+          },
+          {
+            "id": "claude-haiku-4-5-20251001",
+            "displayName": "Haiku 4.5 (2025-10-01)",
+            "description": null
+          }
+        ]
+      },
+      "provenance": {
+        "probedAt": "2026-07-17T05:35:02.916500+00:00",
+        "attestation": {
+          "name": "OpenCode",
+          "version": "1.18.3",
+          "title": null
+        },
+        "runs": [
+          {
+            "id": "opencode.anthropic-api",
+            "snapshotPath": "generated/opencode.anthropic-api.probe.json"
+          },
+          {
+            "id": "opencode.baseline",
+            "snapshotPath": "generated/opencode.baseline.probe.json"
+          },
+          {
+            "id": "opencode.gemini-api",
+            "snapshotPath": "generated/opencode.gemini-api.probe.json"
+          },
+          {
+            "id": "opencode.openai-api",
+            "snapshotPath": "generated/opencode.openai-api.probe.json"
+          },
+          {
+            "id": "opencode.opencode-zen",
+            "snapshotPath": "generated/opencode.opencode-zen.probe.json"
+          }
+        ]
+      }
+    }
+  ]
+}

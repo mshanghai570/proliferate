@@ -1,0 +1,2095 @@
+@import "tailwindcss";
+/* Generated token authority (apps/packages/design/src/tokens.ts →
+   scripts/generate-theme.mjs). CSS requires every @import before any other
+   at-rule that produces output, so this sits directly under "tailwindcss" and
+   above the @source list. This file declares rules only; global token VALUES
+   are never hand-authored here. */
+@import "../theme.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/manrope";
+
+@source "../../../product-client/src";
+
+/* -- Geist font loading (kept for fallback / mono) --
+   Relative to the EMITTED stylesheet (dist/css/product.css); `copy-css.mjs`
+   places the woff2s in dist/fonts/. These were absolute `/node_modules/…`
+   URLs, which only resolve when a dev server serves node_modules — every
+   other bundler or deploy target got a dangling rule and fell back to a
+   system mono font. Keep these paths in step with copy-css.mjs. */
+@font-face {
+  font-family: "Geist";
+  src: url("../fonts/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("../fonts/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* The `--icon-*` optical tiers below need a hand-authored utility because
+   `--icon-*` is not one of Tailwind's own token namespaces. The sibling
+   control-height tier (`--height-control`, 28px — see tokens.ts) deliberately
+   is: Tailwind emits `h-control` / `min-h-control` / `max-h-control` from the
+   `--height-*` namespace on its own, so re-declaring it here would be a second
+   authority for the same utility. Any control-height rule belongs in the token
+   table, never in this file. */
+
+@utility icon-status {
+  width: var(--icon-status);
+  height: var(--icon-status);
+}
+
+@utility icon-tight {
+  width: var(--icon-tight);
+  height: var(--icon-tight);
+}
+
+@utility icon-compact {
+  width: var(--icon-compact);
+  height: var(--icon-compact);
+}
+
+@utility icon-indicator {
+  width: var(--icon-indicator);
+  height: var(--icon-indicator);
+}
+
+@utility icon-paired {
+  width: var(--icon-paired);
+  height: var(--icon-paired);
+}
+
+@utility icon-control {
+  width: var(--icon-control);
+  height: var(--icon-control);
+}
+
+@utility icon-large {
+  width: var(--icon-large);
+  height: var(--icon-large);
+}
+
+@utility icon-display {
+  width: var(--icon-display);
+  height: var(--icon-display);
+}
+
+:root {
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 320px;
+  overflow: hidden;
+  background: var(--color-background);
+  /* The primary UI role is the inherited fallback for otherwise-untyped text
+     and icon-only controls. Semantic role utilities still override it, while
+     rem-based layout geometry continues to resolve against the unchanged html
+     root and therefore stays independent from the UI font preference. */
+  font-size: var(--text-ui);
+  line-height: var(--text-ui--line-height);
+}
+
+/* Layered per the shared-reset rule in specs/areas/frontend.md: unlayered
+   CSS beats every layer, which would both strip caret utilities off matching
+   elements and defeat the empty-field caret suppression below — that rule must
+   win this one by specificity inside the same layer. */
+@layer base {
+  :is(input, textarea, [contenteditable]:not([contenteditable="false"]), [data-ui-thin-caret]) {
+    caret-color: var(--color-text-caret);
+  }
+}
+
+/* Current macOS WebKit paints native insertion carets at two CSS pixels, at the
+   same origin where a native placeholder's first glyph begins. Rather than
+   nudging the focused placeholder aside (which visibly bumped it on every
+   focus/blur while it stayed on screen), suppress the native caret only while
+   the placeholder is shown — an empty start-aligned field's caret sits at the
+   content-box origin — and paint the same one-pixel replacement caret the chat
+   composer uses, as a background bar at that origin. Typing any character
+   dismisses the placeholder, which atomically restores the native caret in the
+   same style rule (IME composition included). Entered text, its caret, and the
+   resting placeholder never move. The base layer lets a specialized control
+   override this contract, but an override must replace it whole: overriding
+   only the background leaves an invisible caret; overriding only caret-color
+   doubles it. A centered or right-to-left field must opt out the same way —
+   the bar is pinned to the left content edge. */
+@layer base {
+  /* activity-motion */
+  :is(input, textarea):focus:placeholder-shown {
+    animation: ui-empty-field-caret-blink 1s steps(1, end) infinite;
+    background-image: linear-gradient(var(--color-text-caret), var(--color-text-caret));
+    background-origin: content-box;
+    background-repeat: no-repeat;
+    background-size: 1px 1.25em;
+    caret-color: transparent;
+  }
+  /* Single-line inputs center their one line box in the content box; textareas
+     stack lines from the content-box top. Align the bar with where the first
+     glyph actually renders in each. */
+  input:focus:placeholder-shown {
+    background-position: 0 50%;
+  }
+  textarea:focus:placeholder-shown {
+    background-position: 0 0;
+  }
+  /* Refine with line-box units where the engine has them. This stays a
+     separate progressive layer because an engine that lacks `lh` drops the
+     declaration, and background-size would fall back to `auto` — a gradient
+     with no intrinsic size then floods the whole content box. The base
+     declarations above must therefore stand alone without `lh`. */
+  @supports (height: 1lh) {
+    :is(input, textarea):focus:placeholder-shown {
+      background-size: 1px min(1lh, 1.25em);
+    }
+    textarea:focus:placeholder-shown {
+      background-position: 0 calc((1lh - min(1lh, 1.25em)) / 2);
+    }
+  }
+}
+
+@keyframes ui-empty-field-caret-blink {
+  0%, 54% {
+    background-image: linear-gradient(var(--color-text-caret), var(--color-text-caret));
+  }
+  55%, 100% {
+    background-image: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(input, textarea):focus:placeholder-shown {
+    animation: none;
+  }
+}
+
+:is(input, textarea, [contenteditable]:not([contenteditable="false"]), [data-ui-thin-caret])::selection {
+  background-color: var(--color-text-selection);
+  color: inherit;
+}
+
+/* SelectedResponseAnnotationMarkers.tsx paints each annotated excerpt through
+   the custom-highlight registry for as long as its annotation stays attached
+   to the composer. One-off color-mix per the PRO-243 review: promote to a
+   token only if a second translucent --color-special use appears. Byte-lean
+   on purpose (short highlight name, `background`, `#0000` for transparent):
+   the login first-load CSS budget sits within ~20 B of its cap. */
+::highlight(annotation) {
+  background: color-mix(in oklab, var(--color-special) 30%, #0000);
+}
+
+/* Spinner.tsx keeps the wrapper box stationary while the shared theme rotates
+   only its centered SVG. Neutralize legacy wrapper animation classes so
+   transforms never compound. The square box is the second half of "rotates in
+   place": the glyph tiers are em-based, so a spinner stretched by a flex or
+   grid parent resolves a non-square box, and rotating a non-square box sweeps
+   an arc wider than its own footprint. */
+.proliferate-spinner {
+  animation: none !important;
+  aspect-ratio: 1 / 1;
+}
+
+@keyframes om-wave {
+  0% { transform: scale(0); opacity: 0; }
+  16% { transform: scale(1); opacity: 1; }
+  44% { transform: scale(1); opacity: 1; }
+  62%, 100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes om-dot {
+  0%, 55%, 100% { opacity: 0; }
+  12%, 32% { opacity: 1; }
+}
+
+@keyframes om-scan {
+  0%, 42%, 100% { opacity: 0; }
+  10%, 26% { opacity: 1; }
+}
+
+@keyframes om-helix {
+  0%, 45%, 100% { opacity: 0; }
+  15%, 28% { opacity: 1; }
+}
+
+@keyframes om-breathe {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.dot-cell-loader {
+  --dot-cell-size: 0.1875rem;
+  --dot-cell-gap: 0.125rem;
+  display: inline-grid;
+  grid-template-columns: repeat(3, var(--dot-cell-size));
+  gap: var(--dot-cell-gap);
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.dot-cell-loader[data-size="compact"] {
+  --dot-cell-size: 0.15625rem;
+  --dot-cell-gap: 0.09375rem;
+}
+
+.dot-cell-loader[data-size="hero"] {
+  --dot-cell-size: 0.375rem;
+  --dot-cell-gap: 0.25rem;
+}
+
+/* Each dot carries its grid coordinates (--om-r/--om-c) and its clockwise
+   ring position (--om-o); every variant derives its per-dot delay from those
+   in one calc() instead of a per-variant nth-child ladder. */
+.dot-cell-loader__dot {
+  --om-r: 0;
+  --om-c: 0;
+  --om-o: 0;
+  width: var(--dot-cell-size);
+  height: var(--dot-cell-size);
+  border-radius: var(--radius-full);
+  background: currentColor;
+  opacity: 0;
+}
+
+.dot-cell-loader__dot:nth-child(2) { --om-c: 1; --om-o: 1; }
+.dot-cell-loader__dot:nth-child(3) { --om-c: 2; --om-o: 2; }
+.dot-cell-loader__dot:nth-child(4) { --om-r: 1; --om-o: 7; }
+.dot-cell-loader__dot:nth-child(5) { --om-r: 1; --om-c: 1; }
+.dot-cell-loader__dot:nth-child(6) { --om-r: 1; --om-c: 2; --om-o: 3; }
+.dot-cell-loader__dot:nth-child(7) { --om-r: 2; --om-o: 6; }
+.dot-cell-loader__dot:nth-child(8) { --om-r: 2; --om-c: 1; --om-o: 5; }
+.dot-cell-loader__dot:nth-child(9) { --om-r: 2; --om-c: 2; --om-o: 4; }
+
+/* Wave sweeps column-major: delay order transposes the grid (col * 3 + row). */
+.dot-cell-loader[data-variant="wave"] .dot-cell-loader__dot {
+  transform: scale(0);
+  animation: om-wave var(--activity-dot-cell-wave-cycle) var(--ease-standard) infinite;
+  animation-delay: calc(var(--activity-dot-cell-wave-step) * (var(--om-c) * 3 + var(--om-r)));
+}
+
+.dot-cell-loader[data-variant="orbit"] .dot-cell-loader__dot {
+  animation: om-dot var(--activity-dot-cell-orbit-cycle) var(--ease-linear) infinite;
+  animation-delay: calc(var(--activity-dot-cell-orbit-step) * var(--om-o));
+}
+
+.dot-cell-loader[data-variant="orbit"] .dot-cell-loader__dot:nth-child(5) { visibility: hidden; animation: none; }
+
+.dot-cell-loader[data-variant="scan"] .dot-cell-loader__dot {
+  animation: om-scan var(--activity-dot-cell-scan-cycle) var(--ease-standard) infinite;
+  animation-delay: calc(var(--activity-dot-cell-scan-step) * var(--om-r));
+}
+
+.dot-cell-loader[data-variant="helix"] .dot-cell-loader__dot {
+  animation: om-helix var(--activity-dot-cell-helix-cycle) var(--ease-standard) infinite;
+  animation-delay: calc(var(--activity-dot-cell-helix-column-step) * var(--om-c) + var(--activity-dot-cell-helix-row-step) * var(--om-r));
+}
+
+.dot-cell-loader[data-variant="breathe"] .dot-cell-loader__dot {
+  animation: om-breathe var(--activity-dot-cell-breathe-cycle) var(--ease-standard) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot-cell-loader__dot {
+    animation: none !important;
+    transform: scale(1) !important;
+    opacity: 0.6;
+  }
+}
+
+/*
+ * Neutralize the browser's default anchor color/underline, but keep it in
+ * `@layer base` so intentional utility classes on a link (text-link-foreground,
+ * underline, the provider/file mention styles, …) still win. An UNLAYERED rule
+ * here would beat every `@layer utilities` class and silently strip all link
+ * styling — anchors would render as plain inherited text.
+ */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.web-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-heavy) transparent;
+}
+
+.web-scrollbar::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.web-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-border-heavy);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Static two-edge fallback for browsers without scroll-driven animations. */
+.vertical-scroll-fade-mask {
+  --edge-fade-distance: 1.5rem;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black var(--edge-fade-distance),
+    black calc(100% - var(--edge-fade-distance)),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black var(--edge-fade-distance),
+    black calc(100% - var(--edge-fade-distance)),
+    transparent 100%
+  );
+}
+
+/* The user-message bubble's edge, which one mode needs and the other does not.
+   --color-card is #212121 on the #181818 pane in dark, so the fill alone
+   separates the bubble; in light the card is #ffffff on a #ffffff pane, so the
+   fill separates nothing and the edge is the only thing carrying the shape.
+   The border and the elevation are one decision, so they are authored together
+   here rather than split across a border utility and a shadow utility. The
+   shadow token itself is now mode-responsive at runtime (see the shadow note in
+   `scripts/generate-theme.mjs`), so `var(--shadow-user-message)` and the
+   `shadow-user-message` utility resolve identically — this is co-location, not
+   a workaround. */
+.chat-user-message-bubble {
+  border-color: var(--color-user-message-border);
+  box-shadow: var(--shadow-user-message);
+}
+
+/* Composer chrome: one opaque surface with mode-responsive depth. Dark is
+   separated by its fill alone; light combines the border-role perimeter with
+   a shallow ink-tinted lift so the ordinary empty input reads as available
+   against the white transcript canvas. The token owns the complete recipe so
+   the cap seam and every Desktop/Web consumer share one production path. */
+.chat-composer-surface {
+  background-color: var(--color-composer-background);
+  -webkit-backdrop-filter: var(--color-composer-backdrop-filter);
+  backdrop-filter: var(--color-composer-backdrop-filter);
+  box-shadow: var(--shadow-composer);
+}
+
+/* The cap variant of that same surface: composer chrome attached
+   ABOVE the input box (the workspace-activity cap). It is the composer surface,
+   so it takes the identical opaque fill and backdrop treatment. It carries no
+   elevation shadow or stroke of its own; the 1px stroke that outlines the cap
+   is painted outside the border-box by the consumer (ring-*), and its bottom is
+   clipped here to keep that ring from double-painting the attached seam. The
+   underlying composer keeps its shared light depth recipe while dark remains
+   fill-only; the cap ring is activity-card chrome outside composer-input scope. */
+.chat-composer-surface--cap {
+  background-color: var(--color-composer-background);
+  -webkit-backdrop-filter: var(--color-composer-backdrop-filter);
+  backdrop-filter: var(--color-composer-backdrop-filter);
+  clip-path: inset(-2px -2px 0 -2px);
+}
+
+/* The composer uses a fail-safe one-pixel visual caret because current macOS
+   WebKit paints its redesigned native caret at two CSS pixels. Layout-critical
+   styles are inline on the editor-owned visual caret; this rule is the native
+   fallback whenever that caret cannot resolve a valid collapsed selection. */
+[data-chat-composer-editor] {
+  caret-color: var(--color-text-caret);
+}
+
+@keyframes chat-composer-caret-blink {
+  0%, 54% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+
+/* activity-motion */
+[data-chat-composer-caret] {
+  animation: chat-composer-caret-blink 1s steps(1, end) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-chat-composer-caret] {
+    animation: none;
+  }
+}
+
+/* ---- Composer file-mention chip ----
+   A file picked with "@" reads as a file reference, not as a bare name: the
+   file-type glyph leads, the basename carries the weight, and the elided
+   directory trails behind it in the muted role.
+
+   The chip is a Lexical TextNode, which is why the directory is a generated box
+   rather than a DOM element. Lexical owns the text element's children and
+   anchors carets inside it, so a real sibling there would be reconciled away or
+   become a caret trap. `content:` cannot be selected, cannot be reached by the
+   caret, and stays out of textContent, so the path is painted without joining
+   the draft's text — the reason this relationship lives here rather than as a
+   utility at the callsite. */
+.composer-file-mention {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+  max-width: 100%;
+  vertical-align: baseline;
+}
+
+/* The glyph is optically centered against the basename's x-height rather than
+   sitting on the shared baseline, which a square mark overshoots. */
+.composer-file-mention-glyph {
+  align-self: center;
+}
+
+.composer-file-mention [data-composer-file-mention-directory]::after {
+  content: " " attr(data-composer-file-mention-directory);
+  color: var(--color-muted-foreground);
+  font-size: var(--text-ui-sm);
+}
+
+/* ---- Skeleton shimmer ----
+   Loading blocks share one motion family with the thinking-text sweep in
+   product.css: a soft gradient band travelling left→right via transform
+   (compositor-only — never background-position). Stagger sibling rows by
+   setting the --shimmer-delay custom property per row. */
+@keyframes skeleton-shimmer-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+/* activity-motion */
+.skeleton-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--color-muted-foreground) 16%, transparent) 50%,
+    transparent 100%
+  );
+  will-change: transform;
+  transform: translateX(-100%);
+  animation: skeleton-shimmer-sweep 3s linear infinite;
+  animation-delay: var(--shimmer-delay, 0s);
+}
+
+/* Reduced motion: drop the travelling sweep and breathe the block's opacity
+   instead — a calm fade rather than a static grey slab or a moving band. */
+@keyframes skeleton-fade {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer::before {
+    animation: none;
+  }
+  /* activity-motion */
+  .skeleton-shimmer {
+    animation: skeleton-fade 2s ease-in-out infinite;
+    animation-delay: var(--shimmer-delay, 0s);
+  }
+}
+
+/* ---- Content fade-in ----
+   Shared one-shot entrance for content that replaces a loading state. Opacity
+   only (never transform/size) so it can never contribute to layout shift; the
+   element's resting opacity is 1, so with the animation disabled it stays
+   visible. */
+@keyframes content-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-content-fade-in {
+  animation: content-fade-in var(--duration-enter) var(--ease-out-quint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-content-fade-in {
+    animation: none;
+  }
+}
+
+/* ---- Streaming prose reveal ----
+   Each recent word owns an opacity-only animation. Existing word spans retain
+   their class and source-order key for the entire fade window, so a later word
+   can begin before earlier words reach full opacity. */
+@keyframes stream-word-in {
+  from { opacity: 0.08; }
+  to { opacity: 1; }
+}
+
+/* activity-motion */
+.stream-word {
+  animation: stream-word-in var(--activity-stream-reveal-fade) linear both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stream-word {
+    animation: none;
+  }
+}
+
+/* Thinking indicator — a light left→right gleam, compositor-only.
+   The "agent is working" label sits at a dim muted base; a brighter highlight
+   sweeps across it left→right with a comet-like trailing edge, momentarily
+   lifting the passing slice to full foreground — a light gleam, never a dark
+   band. A masked band window (.thinking-text-band) translates across while its
+   glyph copy inside counter-translates in lockstep, so the bright copy stays
+   glyph-aligned; both transforms run on the compositor and the soft-edge mask
+   is static, so there is no per-frame paint to jitter and no layout to bump.
+   The gleam color is --color-foreground, so it reads as "brighten to full" in
+   either theme (light on dark, dark on light). 1.8s duration + ease-in-out
+   keeps it alive without feeling frantic. Reduced motion renders a static
+   muted label. */
+@keyframes thinking-band-sweep {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(125%);
+  }
+}
+
+@keyframes thinking-band-glyphs-sweep {
+  from {
+    transform: translateX(50%);
+  }
+  to {
+    transform: translateX(-125%);
+  }
+}
+
+.thinking-text {
+  position: relative;
+  /* Dim base so the traveling gleam clearly stands out against it. */
+  color: color-mix(in srgb, var(--color-muted-foreground) 60%, transparent);
+}
+
+/* activity-motion */
+.thinking-text-band {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  /* A wider trailing-edge tail so the sweep reads as a comet, not a thin line.
+     The solid core is ~10% wide, but the long fade-out behind it lingers. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 2%,
+    black 14%,
+    black 24%,
+    transparent 42%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 2%,
+    black 14%,
+    black 24%,
+    transparent 42%
+  );
+  will-change: transform;
+  animation: thinking-band-sweep var(--thinking-text-duration, 1.8s)
+    var(--thinking-text-easing, cubic-bezier(0.45, 0.05, 0.55, 0.95)) infinite;
+  animation-delay: var(--thinking-text-delay, 0ms);
+}
+
+/* activity-motion */
+.thinking-text-band-glyphs {
+  display: block;
+  /* Same width as the label so the copy lays out (and truncates) identically
+     to the base text beneath it. */
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* The gleam: the passing slice reaches full foreground contrast. */
+  color: var(--color-foreground);
+  will-change: transform;
+  animation: thinking-band-glyphs-sweep var(--thinking-text-duration, 1.8s)
+    var(--thinking-text-easing, cubic-bezier(0.45, 0.05, 0.55, 0.95)) infinite;
+  animation-delay: var(--thinking-text-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinking-text {
+    color: var(--color-muted-foreground);
+  }
+
+  .thinking-text-band {
+    display: none;
+  }
+}
+/* ---- end thinking indicator ---- */
+
+/* ---- Brand mark breathe (auth / pre-app loading) ----
+   The living mark is the plain brand icon, quietly alive: a slow opacity
+   breathe while the app resolves, settling to full presence when done.
+   Opacity-only (compositor), no scale — the mark must feel patient, not
+   busy. Reduced motion renders the static icon (no classes applied). */
+@keyframes brand-mark-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* activity-motion */
+.animate-brand-mark-breathe {
+  animation: brand-mark-breathe 2.6s ease-in-out infinite;
+}
+
+/* One-shot settle: eases the mark from mid-breathe back to full opacity
+   when the session check resolves, so stopping the loop never snaps. */
+@keyframes brand-mark-settle {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-brand-mark-settle {
+  animation: brand-mark-settle var(--duration-emphasized) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-brand-mark-breathe,
+  .animate-brand-mark-settle {
+    animation: none;
+  }
+}
+
+@keyframes web-sidebar-panel-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+[data-proliferate-client="web"] .web-sidebar-panel-slide-in {
+  animation: web-sidebar-panel-slide-in var(--duration-panel) var(--ease-spring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-proliferate-client="web"] .web-sidebar-panel-slide-in {
+    animation: none;
+  }
+}
+
+[data-proliferate-client="web"] {
+  min-height: 100%;
+}
+
+[data-proliferate-client="desktop"] {
+  min-height: 100%;
+}
+
+/* ========================================================================
+ * Global token VALUES are owned by apps/packages/design/src/tokens.ts and
+ * projected into dist/theme.css by scripts/generate-theme.mjs, which this
+ * stylesheet imports above. This file declares product rules, component-scoped custom
+ * properties and utilities only — never a global token value.
+ * scripts/check-theme.mjs enforces that ownership.
+ * ======================================================================== */
+
+.file-reference-icon {
+  color: color-mix(in srgb, #339cff 64%, #003f7a 36%);
+}
+
+/* Integration brand marks. The tile takes its box from a semantic icon tier at
+   the callsite; the artwork inside is a SHARE OF THAT TILE, which is why the
+   relationship lives here instead of as a second icon tier at the callsite.
+   Two independent em sizes could not express it: the tile resolved its em
+   against the callsite font size and the artwork resolved its own against the
+   same one, so their ratio was pinned at whatever the two tiers happened to be
+   — above 1 for a tile a tier below the artwork, which made the mark larger
+   than the box clipping it. A share is inversion-proof at every tile size, so a
+   new callsite only chooses the tile's tier.
+   [RETUNE:integration-icons/glyph-optical-weight] — the inline glyph share is
+   the smaller of the two: those marks are flat and full-bleed, with none of the
+   internal whitespace most logo assets carry, so at the image share they read
+   heavier than their neighbours in an identical tile. The step between the two
+   shares is the same relative step the two icon tiers used to express. */
+.integration-icon-tile {
+  --integration-icon-image-share: 78%;
+  --integration-icon-glyph-share: 65%;
+}
+
+.integration-icon-tile > [data-integration-icon-artwork="image"] {
+  width: var(--integration-icon-image-share);
+  height: var(--integration-icon-image-share);
+  object-fit: contain;
+}
+
+.integration-icon-tile > [data-integration-icon-artwork="glyph"] {
+  width: var(--integration-icon-glyph-share);
+  height: var(--integration-icon-glyph-share);
+  flex-shrink: 0;
+}
+
+.file-source-view {
+  --diff-view-surface: var(--color-background);
+  --diffs-bg: var(--diff-view-surface);
+  /* Authored roles, not ink percentages: 4.5% foreground is a legible step on a
+     near-black plane and nothing at all on white, so a single mix cannot serve
+     both modes. The roles already carry a per-mode value. */
+  --file-source-row-hover: var(--color-hover);
+  --file-source-line-number: var(--color-faint);
+  --file-source-line-number-hover: var(--color-foreground-secondary);
+  --file-source-content-gap: 0.625rem;
+  --file-source-content-padding-inline: 0.125rem;
+  background: var(--diff-view-surface);
+}
+
+.file-source-scroll {
+  overscroll-behavior: none;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
+}
+
+.file-source-view:hover .file-source-scroll {
+  scrollbar-color: var(--color-scrollbar-thumb-active) transparent;
+}
+
+.file-tree-scroll {
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+}
+
+.file-tree-scroll:hover {
+  scrollbar-color: var(--color-scrollbar-thumb-active) transparent;
+}
+
+.file-source-view [data-file] {
+  background: var(--diff-view-surface);
+  color: var(--diffs-fg);
+}
+
+mark.content-find-match {
+  background-color: var(--color-terminal-yellow);
+  color: var(--color-background);
+  border-radius: calc(var(--radius) / 4);
+  padding: 0;
+  margin: 0;
+  border: 0;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  vertical-align: baseline;
+}
+
+mark.content-find-active {
+  background-color: hsl(30 95% 65%);
+}
+
+
+/* ========================================================================
+ * NON-THEME STYLES
+ * ======================================================================== */
+
+
+/* ---- Base styles ---- */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+  background: transparent;
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Shared menu-surface enter: applied at Radix positioned
+   wrappers (PopoverButton/DropdownMenu/ContextMenu content, Tooltip), never
+   inside POPOVER_SURFACE_CLASS, so hand-positioned surfaces don't
+   double-animate. No exit animation — Radix unmounts immediately. */
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---- Shared modal enter/exit (ModalShell / kit Dialog) ----
+   Simple clean fade: overlay and panel both fade, no motion.
+   Radix Presence holds the node mounted until the exit animation ends, so
+   the out keyframes drive the close. Compositor-only (opacity/transform). */
+@keyframes modal-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-overlay-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+/* Opacity ONLY — the panel is centered via Tailwind's standalone translate
+   property; putting translate() in these keyframes double-shifts the panel
+   during the animation and it snaps to center when the keyframe ends. */
+@keyframes modal-panel-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-panel-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.modal-overlay-animated[data-state="open"] {
+  animation: modal-overlay-in var(--duration-enter) var(--ease-out-quint);
+}
+.modal-overlay-animated[data-state="closed"] {
+  animation: modal-overlay-out var(--duration-exit) var(--ease-standard) forwards;
+}
+.modal-panel-animated[data-state="open"] {
+  animation: modal-panel-in var(--duration-enter) var(--ease-out-quint);
+}
+.modal-panel-animated[data-state="closed"] {
+  animation: modal-panel-out var(--duration-exit) var(--ease-standard) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-overlay-animated[data-state="open"],
+  .modal-overlay-animated[data-state="closed"],
+  .modal-panel-animated[data-state="open"],
+  .modal-panel-animated[data-state="closed"] {
+    animation: none;
+  }
+}
+
+/* ---- Composer dock card motion (interaction cards / todo tracker) ----
+   Owned by useComposerDockCardPresence (apps/desktop). Mount rides the
+   chip-enter recipe — 280ms cubic-bezier(.23,1,.32,1) with a soft overshoot
+   at 70% — adapted to a full-width bottom-docked card (rises out of the
+   composer, transform-origin bottom). Resolve fades the card out for 150ms
+   (CARD_EXIT_DURATION_MS must match) before the slot unmounts it.
+   Compositor-only by owner rule: transform/opacity ONLY (see the
+   thinking-text block above). */
+@keyframes composer-dock-card-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1.005);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes composer-dock-card-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.composer-dock-card-enter {
+  transform-origin: 50% 100%;
+  animation: composer-dock-card-enter var(--duration-emphasized) var(--ease-spring) both;
+}
+
+.composer-dock-card-exit {
+  animation: composer-dock-card-exit var(--duration-exit) var(--ease-out-quint) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-dock-card-enter,
+  .composer-dock-card-exit {
+    animation: none;
+  }
+}
+
+/* Composer control value swap: when a selection changes, the new value slides
+   in from above while the old value slides out below, clipped by the swap
+   container. Compositor rule: transform/opacity only. */
+/* display block, not inline-block: an inline-block with overflow hidden
+   baseline-aligns on its bottom edge, which would hoist the label a few px
+   the moment the swap wrapper first mounts. */
+.composer-value-swap {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.composer-value-enter {
+  display: inline-block;
+  animation: composer-value-enter var(--duration-panel) var(--ease-spring);
+}
+
+.composer-value-exit {
+  position: absolute;
+  inset: 0;
+  display: inline-block;
+  white-space: nowrap;
+  animation: composer-value-exit var(--duration-panel) var(--ease-spring) forwards;
+}
+
+@keyframes composer-value-enter {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes composer-value-exit {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Composer effort ladder: the six bars only ever change opacity between lit
+   (1) and unlit (0.3), and ComposerEffortStepper.tsx supplies the per-bar
+   transition-delay that makes the lit edge travel up the ladder rather than
+   the whole glyph flipping at once. The ruled 240ms is --duration-panel. */
+.composer-effort-ladder-bar {
+  transition: opacity var(--duration-panel) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-effort-ladder-bar {
+    transition: none;
+  }
+}
+
+/* Composer mode badge glyph swap: the badge is icon-only, so the mode change
+   has nothing but the glyph to carry it. The new mode drops in from above
+   instead of crossfading — a crossfade of two 18px glyphs reads as a redraw,
+   the drop reads as a different mode arriving. Compositor-only
+   (transform/opacity); the element is keyed on the mode value in
+   ComposerModeBadge.tsx so the animation replays per step.
+   The ruled 200ms lands exactly on --duration-disclosure, and the curve is
+   --ease-out-quint off the existing ease scale: a one-consumer curve is not
+   worth a token of its own, and the drop is short enough that quint's
+   front-loaded departure reads as the same arrival. */
+.composer-mode-badge-glyph {
+  animation: composer-mode-badge-glyph-in var(--duration-disclosure) var(--ease-out-quint) both;
+}
+
+@keyframes composer-mode-badge-glyph-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-mode-badge-glyph {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-value-enter,
+  .composer-value-exit {
+    animation: none;
+  }
+
+  .composer-value-exit {
+    display: none;
+  }
+}
+
+/* ---- Status-chip entrance ----
+   Used by the plan-decision status chip (ProposedPlanCard): when the
+   proposed_plan item arrives the chip springs in-place over the still-mounted
+   plan card. 280ms cubic-bezier(.23,1,.32,1) with a soft overshoot at 70%.
+   Compositor-only by owner rule: transform/opacity ONLY. */
+@keyframes chip-enter {
+  0% {
+    opacity: 0;
+    transform: translate(-8px, 4px) scale(0.92);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(1px, -1px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.chip-enter {
+  transform-origin: 0 50%;
+  animation: chip-enter var(--duration-emphasized) var(--ease-spring) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip-enter {
+    animation: none;
+  }
+}
+
+/* A newly settled subagent identity joins an already-mounted horizontal run.
+   Its receipt-specific registry key makes the pop one-shot; replay and
+   virtualization remounts stay static. Compositor-only: opacity/scale. */
+@keyframes subagent-spawn-chip-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.subagent-spawn-chip-enter {
+  transform-origin: 50% 50%;
+  animation: subagent-spawn-chip-enter var(--duration-pop) var(--ease-pop) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subagent-spawn-chip-enter {
+    animation: none;
+  }
+}
+
+/* ---- Satellite ripple for streaming logo ---- */
+@keyframes ripple-sat {
+  0%, 100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes ripple-center {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* activity-motion */
+.animate-ripple-center {
+  animation: ripple-center 1.2s ease-in-out infinite;
+}
+
+/* activity-motion */
+.animate-ripple-sat {
+  animation: ripple-sat 1.2s ease-in-out infinite;
+}
+
+/* Turn-tail status crossfade — the shimmer / transient-thought / needs-input
+   marker share one slot; a state change fades the incoming content in over
+   150ms instead of a hard swap. Compositor-only (opacity), and gated behind
+   motion-safe: at the call site so reduced-motion gets an instant swap. */
+@keyframes status-crossfade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-status-crossfade {
+  animation: status-crossfade var(--duration-enter) var(--ease-out-quint);
+}
+
+/* New live transcript activity settles into place with the same calm cadence
+   as streamed prose. The row commits at its final layout size immediately;
+   only compositor-friendly opacity/transform animate. Replay prevention is
+   owned by the session-scoped TranscriptEntryMotion registry. */
+@keyframes transcript-activity-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-transcript-activity-in {
+  animation: transcript-activity-in var(--duration-enter) var(--ease-out-quint) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-transcript-activity-in {
+    animation: none;
+  }
+}
+
+/*
+ * Proliferate loading mark — snake
+ *
+ * 8 orbit nodes, each staggered by 1/8 of the cycle.
+ * Each node: invisible → snap on → hold 3 steps → snap off.
+ * ~3 nodes visible at any moment, sliding around the orbit.
+ *
+ * Cycle: 2.4s, step = 0.3s. Node visible for 3 steps = 37.5% of cycle.
+ * step-end timing = no easing, instant transitions.
+ */
+/*
+ * 13 nodes, build-then-remove cycle. No pauses.
+ *
+ * 26 steps total (13 build + 13 remove), 0.08s per step = 2.08s cycle.
+ * Build: nodes snap on one by one (first on = step 0).
+ * Remove: immediately starts, opposite order (first on = last off).
+ *
+ * Node N (step index N): on at step N, off at step (26 - 1 - N) = step (25 - N).
+ * Visible for (25 - N - N + 1) = (26 - 2N) steps... that's uneven.
+ *
+ * Better: two separate animations. Build delay = N * 0.08s.
+ * Remove delay = (12 - N) * 0.08s + 1.04s (after build phase).
+ * Each node: on for (13 + (12 - 2N)) steps.
+ *
+ * Simplest: just use two rects per node — one for build, one for remove,
+ * but that's messy. Instead, compute per-node on/off percentages directly.
+ */
+
+/* Node 0: on at step 0, off at step 25 (last to go). On for 25/26 of cycle. */
+/* Node 12: on at step 12, off at step 13 (first to go). On for 1/26 of cycle. */
+/* Each node's keyframes differ, so we need per-node animations. */
+
+/* step = 3.846% of cycle */
+@keyframes snake-n0  { 0% { opacity:0 } 0.5% { opacity:1 } 96% { opacity:1 } 96.5% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n1  { 0% { opacity:0 } 3.85% { opacity:0 } 4.35% { opacity:1 } 92.3% { opacity:1 } 92.8% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n2  { 0% { opacity:0 } 7.7% { opacity:0 } 8.2% { opacity:1 } 88.5% { opacity:1 } 89% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n3  { 0% { opacity:0 } 11.54% { opacity:0 } 12.04% { opacity:1 } 84.6% { opacity:1 } 85.1% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n4  { 0% { opacity:0 } 15.38% { opacity:0 } 15.88% { opacity:1 } 80.8% { opacity:1 } 81.3% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n5  { 0% { opacity:0 } 19.23% { opacity:0 } 19.73% { opacity:1 } 76.9% { opacity:1 } 77.4% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n6  { 0% { opacity:0 } 23.08% { opacity:0 } 23.58% { opacity:1 } 73.1% { opacity:1 } 73.6% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n7  { 0% { opacity:0 } 26.92% { opacity:0 } 27.42% { opacity:1 } 69.2% { opacity:1 } 69.7% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n8  { 0% { opacity:0 } 30.77% { opacity:0 } 31.27% { opacity:1 } 65.4% { opacity:1 } 65.9% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n9  { 0% { opacity:0 } 34.62% { opacity:0 } 35.12% { opacity:1 } 61.5% { opacity:1 } 62% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n10 { 0% { opacity:0 } 38.46% { opacity:0 } 38.96% { opacity:1 } 57.7% { opacity:1 } 58.2% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n11 { 0% { opacity:0 } 42.31% { opacity:0 } 42.81% { opacity:1 } 53.8% { opacity:1 } 54.3% { opacity:0 } 100% { opacity:0 } }
+@keyframes snake-n12 { 0% { opacity:0 } 46.15% { opacity:0 } 46.65% { opacity:1 } 50% { opacity:1 } 50.5% { opacity:0 } 100% { opacity:0 } }
+
+/* activity-motion */
+.animate-snake-0  { opacity: 0; animation: snake-n0  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-1  { opacity: 0; animation: snake-n1  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-2  { opacity: 0; animation: snake-n2  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-3  { opacity: 0; animation: snake-n3  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-4  { opacity: 0; animation: snake-n4  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-5  { opacity: 0; animation: snake-n5  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-6  { opacity: 0; animation: snake-n6  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-7  { opacity: 0; animation: snake-n7  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-8  { opacity: 0; animation: snake-n8  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-9  { opacity: 0; animation: snake-n9  2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-10 { opacity: 0; animation: snake-n10 2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-11 { opacity: 0; animation: snake-n11 2.08s linear infinite; }
+/* activity-motion */
+.animate-snake-12 { opacity: 0; animation: snake-n12 2.08s linear infinite; }
+
+/* ---- Braille sweep loading text ----
+   Retained as a CSS-driven auth-only mark. */
+@keyframes braille-sweep-content {
+  0%,
+  6.249% { content: "⠁⠀"; }
+  6.25%,
+  12.499% { content: "⠋⠀"; }
+  12.5%,
+  18.749% { content: "⠟⠁"; }
+  18.75%,
+  24.999% { content: "⡿⠋"; }
+  25%,
+  31.249% { content: "⣿⠟"; }
+  31.25%,
+  37.499% { content: "⣿⡿"; }
+  37.5%,
+  49.999% { content: "⣿⣿"; }
+  50%,
+  56.249% { content: "⣾⣿"; }
+  56.25%,
+  62.499% { content: "⣴⣿"; }
+  62.5%,
+  68.749% { content: "⣠⣾"; }
+  68.75%,
+  74.999% { content: "⢀⣴"; }
+  75%,
+  81.249% { content: "⠀⣠"; }
+  81.25%,
+  87.499% { content: "⠀⢀"; }
+  87.5%,
+  100% { content: "⠀⠀"; }
+}
+
+/* activity-motion */
+.braille-sweep-frame::before {
+  content: "⠁⠀";
+  animation: braille-sweep-content 960ms step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .braille-sweep-frame::before {
+    animation: none;
+    content: "⣿⣿";
+  }
+}
+
+/* ---- Dialog pop-in (update restart confirm) ----
+   Compositor-only entrance for centered Radix dialog panels. The keyframes
+   restate the -translate-x/y-1/2 centering because `animation` overrides the
+   utility transform while it plays. */
+/* Owner rev 2026-07-02: plain fade — the centering transform stays constant. */
+@keyframes dialog-pop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-dialog-pop-in {
+  animation: dialog-pop-in var(--duration-enter) var(--ease-out-quint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-dialog-pop-in {
+    animation: none;
+  }
+}
+
+/* ---- Turn-end celebration ---- */
+/* 4.5s total: trot in (0-30%), pause & celebrate (30-70%), trot out (70-100%) */
+/* Arms down during trot, raise when paused in center, stay up for exit */
+/* Trophy pops in after arms are up, stays for the hold, exits with the trot */
+.workspace-shell-tab {
+  height: var(--workspace-shell-tab-height);
+}
+
+/* Header tabs fill the 46px bar so an active underline at bottom: 0 overlaps
+   the bar separator. The tab surface has no visual transition; only the label
+   color eases between inactive and hover states. */
+.workspace-shell-tab__surface {
+  background-color: var(--workspace-shell-tab-inactive-background);
+  border-color: var(--workspace-shell-tab-inactive-border);
+  border-radius: var(--workspace-shell-tab-radius);
+}
+
+.workspace-shell-tab__content {
+  border-radius: var(--workspace-shell-tab-radius);
+}
+
+.workspace-shell-tab__label {
+  font-size: var(--workspace-shell-tab-font-size);
+  transition: color var(--duration-hover) ease;
+}
+
+.workspace-shell-tab[data-has-status="true"] .workspace-shell-tab__label {
+  padding-right: calc(
+    var(--workspace-shell-tab-status-size) + var(--workspace-shell-tab-content-gap)
+  );
+}
+
+/* A revealed shortcut participates in the button's flex row, so its own
+   width replaces the status reservation and the title truncates before it. */
+.workspace-shell-tab[data-has-shortcut="true"] .workspace-shell-tab__label {
+  padding-right: 0;
+}
+
+.workspace-shell-tab__status {
+  position: absolute;
+  right: var(--workspace-shell-tab-inline-padding);
+  top: 50%;
+  width: var(--workspace-shell-tab-status-size);
+  transform: translateY(-50%);
+}
+
+.workspace-shell-tab .workspace-shell-tab__shortcut {
+  padding: var(--workspace-shell-tab-shortcut-block-padding)
+    var(--workspace-shell-tab-shortcut-inline-padding);
+  font-size: var(--workspace-shell-tab-shortcut-font-size);
+  line-height: var(--workspace-shell-tab-shortcut-line-height);
+  border-radius: var(--workspace-shell-tab-shortcut-radius);
+}
+
+.workspace-shell-tab__underline {
+  inset-inline: var(--workspace-shell-tab-active-underline-size);
+  bottom: 0;
+  height: var(--workspace-shell-tab-active-underline-size);
+  border-radius: calc(var(--workspace-shell-tab-active-underline-size) / 2);
+  background-color: var(--workspace-shell-tab-active-underline);
+}
+
+.workspace-shell-tab[data-multi-selected="true"] .workspace-shell-tab__surface {
+  background-color: var(--workspace-shell-tab-selected-background);
+  border-color: var(--workspace-shell-tab-selected-border);
+}
+
+.workspace-shell-tab[data-active="true"] .workspace-shell-tab__surface {
+  background-color: var(--workspace-shell-tab-active-background);
+  border-color: var(--workspace-shell-tab-active-border);
+}
+
+/* Tab close: the closing tab fades and collapses its own width while the
+   surviving tabs (and the trailing "+" button, which follows the strip's
+   measured content width) translate into the vacated space on the same
+   duration and curve, so the row reads as one slide rather than a snap. */
+@keyframes tab-close-collapse {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.workspace-shell-tab--closing {
+  pointer-events: none;
+  animation: var(--workspace-shell-tab-close-collapse);
+}
+
+/* The trailing "+" button is a flex sibling of the strip, so it does not move
+   by transform — it moves because the strip's measured content width shrinks.
+   Animating that width is therefore the only way to make the button travel with
+   the surviving tabs instead of snapping to the new edge. */
+.workspace-shell-tab-strip__viewport,
+.workspace-shell-tab-strip__viewport > .workspace-tab-strip__content {
+  transition:
+    max-width var(--duration-enter) var(--ease-out-quint),
+    width var(--duration-enter) var(--ease-out-quint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-shell-tab--closing {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+.workspace-shell-tab__icon {
+  font-size: var(--text-ui-sm);
+  width: var(--icon-paired);
+  height: var(--icon-paired);
+}
+
+.workspace-shell-action-button,
+.workspace-shell-icon-button {
+  box-sizing: border-box;
+  border: 1px solid var(--workspace-shell-action-border);
+  border-radius: var(--workspace-shell-action-radius);
+  background-color: var(--workspace-shell-action-background);
+  color: var(--workspace-shell-action-foreground);
+  font-size: var(--workspace-shell-action-font-size);
+  line-height: var(--workspace-shell-action-line-height);
+  font-weight: var(--workspace-shell-action-font-weight);
+  transition:
+    background-color var(--duration-hover) var(--ease-standard),
+    color var(--duration-hover) var(--ease-standard),
+    border-color var(--duration-hover) var(--ease-standard);
+}
+
+/* Right-panel trigger buttons stay flat (no chip rim/fill). */
+.glass-editor-panel-new-tab-menu-trigger {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.workspace-shell-action-button {
+  height: var(--workspace-shell-action-size);
+  min-height: var(--workspace-shell-action-size);
+  gap: 0.375rem;
+  padding-inline: 0.5rem;
+}
+
+.workspace-shell-icon-button {
+  width: var(--workspace-shell-action-size);
+  height: var(--workspace-shell-action-size);
+  min-width: var(--workspace-shell-action-size);
+  min-height: var(--workspace-shell-action-size);
+  justify-content: center;
+  padding: 0;
+}
+
+.workspace-shell-action-button > svg,
+.workspace-shell-icon-button > svg {
+  width: var(--icon-paired);
+  height: var(--icon-paired);
+}
+
+.workspace-shell-action-button:hover:not(:disabled),
+.workspace-shell-icon-button:hover:not(:disabled),
+.workspace-shell-action-button[data-state="open"],
+.workspace-shell-icon-button[data-state="open"] {
+  background-color: var(--color-hover);
+  color: var(--workspace-shell-action-hover-foreground);
+}
+
+/* Modifier: flat always (rest, hover, open) — only tint fill on hover. */
+.workspace-shell-icon-button--flat {
+  border-color: transparent;
+}
+
+/* Split control: primary action + chevron menu segment sharing one pill.
+   The left segment drops its inner edge so the right segment's border is the
+   single divider seam (no doubled line). */
+.workspace-shell-split-button-left {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right-width: 0;
+}
+
+.workspace-shell-split-button-right {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.workspace-shell-split-button-right.workspace-shell-icon-button {
+  width: calc(var(--workspace-shell-action-size) - 0.5rem);
+  min-width: calc(var(--workspace-shell-action-size) - 0.5rem);
+}
+
+/* ---- Right panel tabs ---- */
+/*
+ * --tab-system-height mirrors the left workspace header height so the two
+ * panes line up: 46px in both chrome modes, matching the h-[46px] header
+ * classes in apps/desktop/src/lib/domain/preferences/workspace-chrome.ts.
+ */
+.right-panel-tab-system {
+  --tab-system-height: 46px;
+  --tab-max-width: 156px;
+  --tab-shell-max-width: 160px;
+  --tab-height: 28px; /* tab chrome */
+  --tab-container-padding: calc((var(--tab-system-height) - var(--tab-height) - 2px) / 2);
+  --tab-stable-end-margin: 0px;
+  --tab-gap: 3px;
+  --tab-bar-mask-size: 28px;
+  --right-panel-tab-surface: transparent;
+  /* Matches the surface painted behind the header (workspace shell bg-sidebar)
+     so the sticky new-tab trigger masks tabs scrolling underneath it. */
+  --right-panel-tab-sticky-surface: color-mix(in srgb, var(--color-sidebar-background) 88%, transparent);
+  --right-panel-tab-active-bg: color-mix(
+    in srgb,
+    var(--color-sidebar-foreground) 5%,
+    transparent
+  );
+  --right-panel-tab-text-primary: var(--color-sidebar-foreground);
+  --right-panel-tab-text-secondary: color-mix(in srgb, var(--color-sidebar-foreground) 65%, transparent);
+  --right-panel-tab-text-tertiary: var(--color-sidebar-muted-foreground);
+  /* Structural pointer target; the nested .ui-icon remains text-relative. */
+  --right-panel-tab-close-target-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: var(--tab-system-height);
+  flex-shrink: 0;
+  min-width: 0;
+  background-color: var(--right-panel-tab-surface);
+  color: var(--right-panel-tab-text-secondary);
+  font-size: var(--text-ui-sm);
+  line-height: var(--text-ui-sm--line-height);
+  font-weight: var(--font-weight-control);
+}
+
+/* Light is not dark with the ink flipped: an ink-alpha percentage that reads as
+   a step on a near-black plane vanishes on white (5% ink on #ffffff is #f7f7f7,
+   which is no fill at all). So the light half of this component takes the
+   authored neutral roles directly instead of re-deriving them from foreground. */
+:root[data-mode="light"] .right-panel-tab-system {
+  --right-panel-tab-surface: var(--color-surface);
+  --right-panel-tab-sticky-surface: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  --right-panel-tab-active-bg: var(--color-selected);
+  --right-panel-tab-text-secondary: var(--color-foreground-secondary);
+}
+
+.right-panel-tab-system .ui-tab-system-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+  padding: 0 8px;
+  background-color: var(--right-panel-tab-surface);
+  flex-shrink: 0;
+  /* Tab drag-reorder is pointer-event driven; without this WebKit starts a
+     text selection mid-drag and paints the whole bar (and anything the sweep
+     crosses) blue. */
+  user-select: none;
+}
+
+.right-panel-tab-system .editor-panel-tab-bar-tab-cluster {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.right-panel-tab-system .ui-tab-system-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--tab-gap);
+  flex-shrink: 0;
+  height: 100%;
+  padding: var(--tab-container-padding) 0;
+  color: var(--right-panel-tab-text-tertiary);
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__scrollable {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-padding-inline: var(--tab-bar-mask-size);
+  scroll-padding-inline-start: 4px;
+  scroll-padding-inline-end: var(--tab-bar-mask-size);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__scrollable[data-has-stable] {
+  margin-left: var(--tab-stable-end-margin);
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__viewport {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--tab-gap);
+  flex-shrink: 0;
+  height: 100%;
+  overflow: visible;
+  position: relative;
+  z-index: 0;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__scrollable--sections .ui-tab-system-tabs__viewport {
+  min-width: 0;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--tab-gap);
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__spacer {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__edge {
+  position: sticky;
+  z-index: 10;
+  width: 0;
+  height: 100%;
+  flex-shrink: 0;
+  opacity: 1;
+  transition: opacity var(--duration-hover) var(--ease-standard);
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__edge::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  width: 0;
+  pointer-events: none;
+  background: transparent;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__edge--start {
+  left: 0;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__edge--start::after {
+  left: 0;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__edge--end {
+  right: 0;
+}
+
+.right-panel-tab-system .ui-tab-system-tabs__edge--end::after {
+  right: 0;
+  /* Right-edge overflow fade for the scrollable tab strip. */
+  width: 14px;
+  background: linear-gradient(to left, var(--right-panel-tab-sticky-surface), transparent);
+}
+
+.right-panel-tab-system .ui-tab-system-new-tab-sticky {
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex-shrink: 0;
+  padding-left: 4px;
+  background-color: var(--right-panel-tab-surface);
+}
+
+.right-panel-tab-system .right-panel-header-entry-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  height: var(--tab-height);
+  max-width: var(--tab-shell-max-width);
+  padding-right: 4px;
+  contain: content;
+  touch-action: none;
+}
+
+.right-panel-tab-system .right-panel-header-entry-shell[data-drop-before="true"]::before,
+.right-panel-tab-system .right-panel-tab-drop-target[data-drop-before="true"]::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: -1px;
+  z-index: 5;
+  width: 2px;
+  border-radius: 9999px;
+  background-color: var(--color-primary);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--right-panel-tab-surface) 84%, transparent);
+}
+
+.right-panel-tab-system .ui-tab-system-tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  margin: 0;
+  font: inherit;
+  letter-spacing: 0;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  outline: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--tab-height);
+  max-width: var(--tab-max-width);
+  padding: 4px 8px;
+  color: var(--right-panel-tab-text-secondary);
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition-property: color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+.right-panel-tab-system .ui-tab-system-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 8px;
+  background-color: transparent;
+  pointer-events: none;
+  transition: background-color var(--duration-hover) var(--ease-standard);
+}
+
+.right-panel-tab-system .ui-tab-system-tab[data-reorderable="true"] {
+  cursor: grab;
+}
+
+.right-panel-tab-system .right-panel-header-entry-shell[data-dragging="true"] {
+  z-index: 4;
+}
+
+.right-panel-tab-system .ui-tab-system-tab[aria-grabbed="true"],
+.right-panel-tab-system .ui-tab-system-tab[data-dragging],
+.right-panel-tab-system .right-panel-header-entry-shell[data-dragging="true"] .ui-tab-system-tab {
+  cursor: grabbing;
+  opacity: 0.96;
+  box-shadow: 0 4px 14px color-mix(in oklab, var(--color-overlay) 20%, transparent);
+}
+
+.right-panel-tab-system .ui-tab-system-tab[data-stable],
+.right-panel-tab-system .ui-tab-system-tab[data-launcher-tab] {
+  align-items: center;
+  aspect-ratio: 1;
+  justify-content: center;
+  min-width: var(--tab-height);
+  width: var(--tab-height);
+  padding: 0;
+}
+
+.right-panel-tab-system .ui-tab-system-tab:not([data-stable]):not([data-launcher-tab]),
+.right-panel-tab-system .right-panel-terminal-tab {
+  flex: 0 0 auto;
+  width: fit-content;
+  min-width: 0;
+  max-width: var(--tab-max-width);
+}
+
+.right-panel-tab-system .ui-tab-system-tab:hover:not([data-active])::before,
+.right-panel-tab-system .ui-tab-system-tab[data-active]::before,
+.right-panel-tab-system .ui-tab-system-tab[data-app-active]::before {
+  background-color: var(--right-panel-tab-active-bg);
+}
+
+.right-panel-tab-system .ui-tab-system-tab:hover:not([data-active]) {
+  color: var(--right-panel-tab-text-primary);
+}
+
+.right-panel-tab-system .ui-tab-system-tab[data-active],
+.right-panel-tab-system .ui-tab-system-tab[data-app-active] {
+  color: var(--right-panel-tab-text-primary);
+}
+
+.right-panel-tab-system .ui-tab-system-tab:focus-visible {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-sidebar-ring) 34%, transparent);
+}
+
+.right-panel-tab-system .ui-tab-system-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.right-panel-tab-system .ui-tab-system-tab__content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--workspace-shell-tab-content-gap);
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.right-panel-tab-system .ui-tab-system-tab__content[data-shortcut-reveal="true"] {
+  padding-right: 1.65rem;
+}
+
+.right-panel-tab-system .ui-tab-system-tab[data-stable] .ui-tab-system-tab__content,
+.right-panel-tab-system .ui-tab-system-tab[data-launcher-tab] .ui-tab-system-tab__content {
+  flex: 0 0 auto;
+  justify-content: center;
+}
+
+.right-panel-tab-system .ui-tab-system-tab__icon,
+.right-panel-tab-system .ui-icon {
+  display: block;
+  width: var(--icon-control);
+  height: var(--icon-control);
+  flex-shrink: 0;
+  color: var(--right-panel-tab-text-tertiary);
+  vertical-align: middle;
+}
+
+.right-panel-tab-system .ui-tab-system-tab:hover:not([data-active]) .ui-tab-system-tab__icon,
+.right-panel-tab-system .ui-tab-system-tab:hover:not([data-active]) .ui-icon {
+  color: var(--right-panel-tab-text-primary);
+}
+
+.right-panel-tab-system .ui-tab-system-tab[data-active] .ui-tab-system-tab__icon,
+.right-panel-tab-system .ui-tab-system-tab[data-app-active] .ui-tab-system-tab__icon,
+.right-panel-tab-system .ui-tab-system-tab[data-active] .ui-icon,
+.right-panel-tab-system .ui-tab-system-tab[data-app-active] .ui-icon {
+  color: var(--right-panel-tab-text-primary);
+}
+
+.right-panel-tab-system .ui-tab-system-tab__label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+.right-panel-tab-system .ui-tab-system-tab__label-primary {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.right-panel-tab-system .ui-tab-system-tab__dirty-indicator {
+  display: none;
+  flex-shrink: 0;
+  width: var(--icon-status);
+  height: var(--icon-status);
+  margin-left: 0.18em;
+  border-radius: 9999px;
+  background-color: var(--right-panel-tab-text-tertiary);
+}
+
+.right-panel-tab-system .ui-tab-system-tab__dirty-indicator[data-dirty] {
+  display: block;
+}
+
+.right-panel-tab-system .right-panel-shortcut-badge {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  z-index: 2;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--right-panel-tab-text-tertiary);
+}
+
+.right-panel-tab-system .right-panel-terminal-tab-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: var(--tab-height);
+  min-width: 0;
+  max-width: var(--tab-shell-max-width);
+}
+
+.right-panel-tab-system .right-panel-terminal-tab-shell .ui-tab-system-tab__close-container {
+  position: absolute;
+  left: 0.64em;
+  top: 0;
+  bottom: 0;
+  width: var(--right-panel-tab-close-target-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  border-radius: 9999px;
+  background-color: transparent;
+  color: var(--right-panel-tab-text-tertiary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-hover) var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .right-panel-tab-system .right-panel-terminal-tab-shell:hover .ui-tab-system-tab__close-container {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .right-panel-tab-system .right-panel-terminal-tab-shell:hover .ui-tab-system-tab__icon {
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+.right-panel-tab-system .ui-tab-system-tab__close,
+.right-panel-tab-system .right-panel-terminal-edit-action {
+  width: var(--right-panel-tab-close-target-size);
+  height: var(--right-panel-tab-close-target-size);
+  min-width: var(--right-panel-tab-close-target-size);
+  min-height: var(--right-panel-tab-close-target-size);
+  padding: 0;
+  border-radius: 9999px;
+  background-color: transparent;
+  color: var(--right-panel-tab-text-tertiary);
+}
+
+.right-panel-tab-system .ui-tab-system-tab__close:hover:not(:disabled),
+.right-panel-tab-system .right-panel-terminal-edit-action:hover:not(:disabled) {
+  background-color: var(--color-hover);
+  color: var(--right-panel-tab-text-primary);
+}
+
+.right-panel-tab-system .right-panel-terminal-tab--editing {
+  color: var(--right-panel-tab-text-primary);
+}
+
+.right-panel-tab-system .ui-tab-system-tab__label-edit-slot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  flex: 0 1 auto;
+  min-width: 28px;
+  max-width: calc(var(--tab-max-width) - 2.75rem);
+}
+
+.right-panel-tab-system .ui-tab-system-tab__label-input {
+  flex: 0 1 auto;
+  min-width: 28px;
+  max-width: 100%;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  outline: none;
+  box-shadow: none;
+}
+
+.right-panel-tab-system .ui-tab-system-tab__label-input:focus,
+.right-panel-tab-system .ui-tab-system-tab__label-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.right-panel-tab-system .ui-tab-system-section__trailing {
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  padding: var(--tab-container-padding) 0 var(--tab-container-padding) 6px;
+  background-color: transparent;
+}
+
+.right-panel-tab-system .editor-panel-overflow-action {
+  display: contents;
+}
+
+.right-panel-tab-system .glass-editor-panel-new-tab-menu-trigger {
+  flex-shrink: 0;
+}
+
+.right-panel-tab-system .workspace-shell-icon-button .ui-icon {
+  width: var(--icon-control);
+  height: var(--icon-control);
+}
+
+.right-panel-tab-system .right-panel-tab-drop-target {
+  position: relative;
+  width: var(--tab-gap);
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.right-panel-tab-system .right-panel-tab-drop-target[data-drop-before="true"]::before {
+  left: 2px;
+}
+
+.right-panel-tab-system .ui-tab-system-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -53,7 +53,7 @@ jobs:
             -p proliferate-diagnostics-collector
           for binary in anyharness proliferate-worker proliferate-debug proliferate-diagnostics-collector; do
             test -x "target/$TARGET/release/$binary"
-            lipo -verify_arch x86_64 "target/$TARGET/release/$binary"
+            lipo "target/$TARGET/release/$binary" -verify_arch x86_64
           done
           {
             echo "ANYHARNESS_BIN=$PWD/target/$TARGET/release/anyharness"
@@ -103,7 +103,7 @@ jobs:
           test "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$app/Contents/Info.plist")" = 15.0
           for binary in proliferate anyharness proliferate-worker proliferate-debug proliferate-diagnostics-collector; do
             test -x "$app/Contents/MacOS/$binary"
-            lipo -verify_arch x86_64 "$app/Contents/MacOS/$binary"
+            lipo "$app/Contents/MacOS/$binary" -verify_arch x86_64
             codesign --verify --strict "$app/Contents/MacOS/$binary"
           done
           test "$("$app/Contents/MacOS/proliferate-diagnostics-collector" --print-export-policy)" = lifecycle_only
