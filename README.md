@@ -65,7 +65,8 @@ Custom ACP agents are a separate option and must implement Agent Client
 Protocol. MCP tools are available through supported integrations. Appearance
 settings cover built-in color modes and text sizing. In the macOS app, enter
 installed font family names for interface and code text under **Settings →
-Appearance**; an unavailable family falls back to the built-in font. Importable
+Appearance**. The Mac font list offers suggestions; an unavailable manually
+entered family falls back to the built-in font. Importable
 themes and project RAG are not yet available.
 
 ### macOS product direction
@@ -89,7 +90,7 @@ workspace. They are not claims about current availability.
 - **MCP management:** add and manage MCP servers, inspect their tools, and
   control access by agent or project.
 - **Editor personalization:** import compatible theme files, including JSON
-  where practical, and offer a font picker for installed macOS families.
+  where practical, and add font previews to the installed-family choices.
 
 These goals can ship in stages. The feature list above should grow only when
 the corresponding capability works in the macOS app.

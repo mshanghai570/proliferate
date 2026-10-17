@@ -27,6 +27,7 @@ apps/desktop/src-tauri/
       process.rs               # shell command helpers
       shell.rs                 # OS shell, editor, picker, and open actions
       drag_drop.rs             # drag-pasteboard path recovery for webview drops
+      fonts.rs                 # installed macOS font family names for Appearance
       diagnostics.rs           # renderer diagnostics bridge
 ```
 

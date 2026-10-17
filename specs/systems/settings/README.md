@@ -82,12 +82,12 @@ The `environments` / `repo-environment` sections edit cloud environment records 
   only; the appearance-scaling checker bans literal sizes
   ([appearance-scaling.md](appearance-scaling.md),
   [check_appearance_scaling.py](../../../scripts/check_appearance_scaling.py)).
-- **Desktop font families are local preferences.** Appearance accepts an
-  installed macOS family name separately for interface and code text. The
+- **Desktop font families are local preferences.** Appearance lists installed
+  macOS font families and accepts a family name separately for interface and code text. The
   family is validated, stored through ProductHost.storage, and applied through
   the existing font tokens. Clearing it restores the built-in stack. The code
   choice also updates terminal rendering and its creation grid probe. The app
-  does not install font files or assert that a typed family exists on the Mac;
+  does not install font files or assert that a manually typed family exists on the Mac;
   CSS falls back to the built-in stack when it does not.
 
 ## Emits
