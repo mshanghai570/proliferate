@@ -89,6 +89,12 @@ The `environments` / `repo-environment` sections edit cloud environment records 
   choice also updates terminal rendering and its creation grid probe. The app
   does not install font files or assert that a manually typed family exists on the Mac;
   CSS falls back to the built-in stack when it does not.
+- **Desktop theme import is bounded.** Appearance imports strict JSON color
+  themes with a dark/light type and readable editor foreground/background.
+  Optional sidebar and button colors must also have readable text. Only core
+  app surface tokens are overridden at runtime; the generated built-in palette
+  remains authoritative when the imported theme is reset or its mode is not
+  active. Syntax highlighting and installed extension themes remain separate.
 
 ## Emits
 

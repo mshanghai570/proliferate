@@ -17,6 +17,7 @@ import {
 } from "#product/lib/domain/preferences/user/model";
 import { isValidWorktreeAutoDeleteLimit } from "#product/lib/domain/preferences/user/worktree-auto-delete";
 import { normalizeLocalFontFamily } from "#product/lib/domain/preferences/local-font-family";
+import { sanitizeImportedAppTheme } from "#product/lib/domain/preferences/imported-app-theme";
 import type { LegacyUserPreferencesInput } from "#product/lib/domain/preferences/user/persisted-keys";
 import {
   normalizeReleaseTitlePair,
@@ -39,6 +40,9 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
   } as UserPreferences;
   let changed = false;
   if (preferences.uiFontFamily === undefined || preferences.codeFontFamily === undefined) {
+    changed = true;
+  }
+  if (preferences.importedAppTheme === undefined) {
     changed = true;
   }
 
@@ -178,6 +182,11 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
       next[key] = normalized;
       changed = true;
     }
+  }
+  const importedAppTheme = sanitizeImportedAppTheme(next.importedAppTheme);
+  if (JSON.stringify(importedAppTheme) !== JSON.stringify(next.importedAppTheme)) {
+    next.importedAppTheme = importedAppTheme;
+    changed = true;
   }
 
   const windowZoomId = resolveWindowZoomId(next.windowZoomId);

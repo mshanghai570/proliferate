@@ -27,6 +27,7 @@ export function selectPersistedUserPreferencesSlice(
   return {
     themePreset: preferences.themePreset,
     colorMode: preferences.colorMode,
+    importedAppTheme: preferences.importedAppTheme,
     uiFontSizeId: preferences.uiFontSizeId,
     readableCodeFontSizeId: preferences.readableCodeFontSizeId,
     uiFontFamily: preferences.uiFontFamily,

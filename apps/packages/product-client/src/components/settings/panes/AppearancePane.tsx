@@ -13,6 +13,7 @@ import { Minus, Plus } from "#product/primitives/icons/core";
 import { Switch } from "#product/primitives/Switch";
 import { useProductHost } from "@proliferate/product-client/host/ProductHostProvider";
 import { LocalFontPreference } from "#product/components/settings/panes/LocalFontPreference";
+import { ImportedAppThemePreference } from "#product/components/settings/panes/ImportedAppThemePreference";
 import {
   READABLE_CODE_FONT_SIZE_LABELS,
   READABLE_CODE_FONT_SIZE_OPTIONS,
@@ -78,6 +79,7 @@ export function AppearancePane() {
 
       <SettingsSection title="Theme" surface="plain">
         <ThemePreviewCards value={mode} onChange={setMode} />
+        {isDesktop && <ImportedAppThemePreference />}
       </SettingsSection>
 
       <SettingsSection title="Code preview" surface="plain">

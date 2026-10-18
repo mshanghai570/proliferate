@@ -8,6 +8,7 @@ import { useUserPreferencesStore } from "#product/stores/preferences/user-prefer
 function applyStoredAppearancePreference(): void {
   const {
     colorMode,
+    importedAppTheme,
     uiFontSizeId,
     readableCodeFontSizeId,
     uiFontFamily,
@@ -16,6 +17,7 @@ function applyStoredAppearancePreference(): void {
   } = useUserPreferencesStore.getState();
   applyAppearancePreference({
     colorMode,
+    importedAppTheme,
     uiFontSizeId,
     readableCodeFontSizeId,
     uiFontFamily,
@@ -33,6 +35,7 @@ export function useAppearancePreferenceLifecycle(): void {
     const unsubscribeAppearance = useUserPreferencesStore.subscribe((state, prev) => {
       if (
         state.colorMode !== prev.colorMode
+        || state.importedAppTheme !== prev.importedAppTheme
         || state.uiFontSizeId !== prev.uiFontSizeId
         || state.readableCodeFontSizeId !== prev.readableCodeFontSizeId
         || state.uiFontFamily !== prev.uiFontFamily

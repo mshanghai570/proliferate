@@ -14,6 +14,7 @@ import type {
 } from "#product/lib/domain/preferences/review-preferences";
 import { DEFAULT_OPEN_IN_TARGET_ID } from "#product/config/open-target-defaults";
 import type { ReleaseTitle } from "#product/lib/domain/updates/release-notice";
+import type { ImportedAppTheme } from "#product/lib/domain/preferences/imported-app-theme";
 
 export type BranchPrefixType = "none" | "proliferate" | "github_username";
 export type TurnEndSoundId = "ding";
@@ -29,6 +30,7 @@ export type ThemePreset = "mono";
 export interface UserPreferences {
   themePreset: ThemePreset;
   colorMode: ColorMode;
+  importedAppTheme: ImportedAppTheme | null;
   uiFontSizeId: UiFontSizeId;
   readableCodeFontSizeId: ReadableCodeFontSizeId;
   uiFontFamily: string | null;
@@ -68,6 +70,7 @@ export interface UserPreferences {
 export const NEW_USER_DEFAULTS: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
+  importedAppTheme: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
   uiFontFamily: null,
@@ -97,6 +100,7 @@ export const NEW_USER_DEFAULTS: UserPreferences = {
 export const PERSISTED_RECORD_BACKFILL: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
+  importedAppTheme: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
   uiFontFamily: null,
