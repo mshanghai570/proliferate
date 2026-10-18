@@ -177,6 +177,8 @@ pub struct AppState {
     pub plan_service: Arc<PlanService>,
     pub skill_manager: Arc<crate::domains::skills::SkillManager>,
     pub extension_manager: Arc<ExtensionManager>,
+    pub project_mcp_manager:
+        Arc<crate::domains::sessions::mcp_bindings::project::ProjectMcpManager>,
     /// Origin the registry install route fetches from. Production uses Open VSX;
     /// tests point it at a local stub.
     pub extension_registry_base_url: String,
@@ -208,6 +210,12 @@ impl AppState {
         let auth_manager = AuthManager::new(load_runtime_target_id());
         let session_data_cipher =
             load_data_cipher_from_env().map_err(AppStateInitError::InvalidDataKey)?;
+        let project_mcp_manager = Arc::new(
+            crate::domains::sessions::mcp_bindings::project::ProjectMcpManager::new(
+                db.clone(),
+                session_data_cipher.clone(),
+            ),
+        );
         let session_delete_workflow = SessionDeleteWorkflow::with_participants(
             db.clone(),
             vec![
@@ -291,7 +299,9 @@ impl AppState {
             runtime_home.clone(),
         ));
         let plan_service = Arc::new(PlanService::new(PlanStore::new(db.clone())));
-        let skill_manager = Arc::new(crate::domains::skills::SkillManager::new(runtime_home.clone()));
+        let skill_manager = Arc::new(crate::domains::skills::SkillManager::new(
+            runtime_home.clone(),
+        ));
         let extension_manager = Arc::new(ExtensionManager::new(db.clone(), runtime_home.clone()));
         let goal_service = Arc::new(GoalService::new(GoalStore::new(db.clone())));
         let loop_service = Arc::new(LoopService::new(LoopStore::new(db.clone())));
@@ -440,6 +450,7 @@ impl AppState {
             subagent_session_hooks.clone(),
             review_session_hooks.clone(),
             integration_gateway_session_launch_extension.clone(),
+            project_mcp_manager.clone(),
             goal_session_hooks,
             loop_session_hooks,
             activity_session_hooks,
@@ -635,6 +646,7 @@ impl AppState {
             plan_service,
             skill_manager,
             extension_manager,
+            project_mcp_manager,
             extension_registry_base_url: OPEN_VSX_BASE_URL.to_string(),
             plan_runtime,
             goal_service,

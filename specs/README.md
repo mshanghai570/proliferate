@@ -58,7 +58,7 @@ One line per system. A spec marked *target* describes an accepted destination an
 - [integration_gateway](systems/integration_gateway/README.md) — *target.* Agents act on company systems without a credential entering the environment; connections, per-call capability, approvals, revocation, audit.
 - [onboarding](systems/onboarding/README.md) — install to first useful prompt with every blocked layer named; sequences readiness owned elsewhere.
 - [runs-triage](systems/runs-triage/README.md) — *target.* One inbox for delegated work: what is running, what finished, what needs a decision.
-- [sessions](systems/sessions/README.md) — the session, both halves in one spec: the runtime's append-only event log (the truth) and the control plane's registry row and bindings; artifacts as a section.
+- [sessions](systems/sessions/README.md) — the runtime's append-only event log, encrypted local project MCP launch settings, and the control plane's registry row and bindings; artifacts as a section.
 - [settings](systems/settings/README.md) — the settings surface: each pane a thin editor over the owning system's contract, with the blocked layer named.
 - [slack](systems/slack/README.md) — *target.* The product Slack app as trigger and client over session bindings; not Slack-as-tool.
 - [subagents](systems/subagents/README.md) — a parent agent's bounded roster of child sessions on the same checkout, each woken exactly once with its result; the product MCP; [steering](systems/subagents/steering.md) as target.

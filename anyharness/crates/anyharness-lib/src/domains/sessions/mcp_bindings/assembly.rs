@@ -281,6 +281,7 @@ mod tests {
     use crate::origin::OriginContext;
 
     mod binding_summaries;
+    mod project_mcp;
     mod workspace_attachment;
 
     #[derive(Clone)]

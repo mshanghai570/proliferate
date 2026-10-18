@@ -1898,6 +1898,159 @@
         }
       }
     },
+    "/v1/repo-roots/{repo_root_id}/mcp-servers": {
+      "get": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Write-only MCP inventory for a project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMcpServersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/repo-roots/{repo_root_id}/mcp-servers/{name}": {
+      "put": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "put",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionMcpServer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Server replaced and enabled; used at next session process launch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMcpServerSummary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "remove",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Server removed; live sessions keep their current configuration"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "set_enabled",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetProjectMcpServerEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Server enabled state updated; used at next session process launch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMcpServerSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/repo-roots/{repo_root_id}/mobility/prepare-destination": {
       "post": {
         "tags": [
@@ -15936,6 +16089,44 @@
           }
         ]
       },
+      "ProjectMcpServerSummary": {
+        "type": "object",
+        "description": "Public inventory never includes connection URLs, commands, or credentials.",
+        "required": [
+          "name",
+          "enabled",
+          "transport"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "transport": {
+            "$ref": "#/components/schemas/SessionMcpTransport"
+          }
+        }
+      },
+      "ProjectMcpServersResponse": {
+        "type": "object",
+        "required": [
+          "servers",
+          "encryptionAvailable"
+        ],
+        "properties": {
+          "encryptionAvailable": {
+            "type": "boolean"
+          },
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectMcpServerSummary"
+            }
+          }
+        }
+      },
       "PromptAttachmentSource": {
         "type": "string",
         "enum": [
@@ -19791,6 +19982,18 @@
             "$ref": "#/components/schemas/AgentOperationsAgent"
           }
         }
+      },
+      "SetProjectMcpServerEnabledRequest": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "SetSessionConfigOptionRequest": {
         "type": "object",

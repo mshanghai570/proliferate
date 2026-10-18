@@ -49,6 +49,7 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 - **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
 - **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
 - **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
+- **Local project MCP servers** - configure HTTP and stdio servers for a repository's local sessions, with encrypted credentials and enable, disable, replace, and remove controls
 - **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and copy supported theme colors into the macOS app; extension code remains inactive
 - **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
 
@@ -65,7 +66,8 @@ are unsupported. Extension code does not activate in the editor. Set
 Custom OpenAI-compatible providers currently add models to local OpenCode
 sessions; they do not create standalone agents or configure every harness.
 Custom ACP agents are a separate option and must implement Agent Client
-Protocol. MCP tools are available through supported integrations. Appearance
+Protocol. MCP tools are available through supported integrations and local
+project server settings described below. Appearance
 settings cover built-in color modes and text sizing. The macOS app can import
 core app colors from a readable, strict JSON color theme with `type`,
 `editor.background`, and `editor.foreground`; syntax colors remain unsupported.
@@ -106,8 +108,8 @@ workspace. They are not claims about current availability.
   first-class capability alongside native harnesses and ACP agents.
 - **Project RAG:** index project content, retrieve relevant context for agent
   tasks, and show what information is indexed and sent to a model.
-- **MCP management:** add and manage MCP servers, inspect their tools, and
-  control access by agent or project.
+- **MCP management:** extend local project server management with connection
+  checks, tool inspection, OAuth setup, and access controls for individual agents.
 - **Editor personalization:** extend imported color themes to syntax highlighting
   and extension themes, and add font previews to the installed-family choices.
 
@@ -172,6 +174,50 @@ remain available.
 
 This configuration currently applies to local OpenCode sessions. Other harnesses
 retain their own authentication and provider settings.
+
+## Connect a local project MCP server
+
+In the macOS app, open **Settings → Repo**, select your local repository,
+and open **Environment → Project MCP servers**. Enter a server name and its JSON
+configuration, then choose **Save server**. For example:
+
+```json
+{
+  "transport": "http",
+  "url": "http://localhost:8000/mcp",
+  "headers": {}
+}
+```
+
+For a local process, use `"transport": "stdio"`, a `command`, optional `args`
+(an array of strings), and optional `env` (an object with string values). A
+command can be an absolute executable path or a command available on the app's
+shell `PATH`; arguments are passed separately, without shell expansion.
+
+```json
+{
+  "transport": "stdio",
+  "command": "/absolute/path/to/mcp-server",
+  "args": [],
+  "env": {}
+}
+```
+
+Configurations and credentials are encrypted in the local runtime database
+using the macOS app's keychain-backed data key. Credentials cannot be read back
+from the settings screen. To edit a server, enter the same name and its complete
+configuration, then confirm replacement. Saving a replacement enables it.
+Each project supports up to 32 servers; names have 1–50 letters, digits, hyphens,
+or underscores and cannot start with `proliferate_`.
+
+Enabled servers are passed to supported agent harnesses when a session process
+starts, including sessions in that repository's worktrees. Disable or remove a
+server to exclude it from future launches. Running sessions keep their current
+tools until their process stops. Start a new session to use saved changes
+immediately. Saving does not check connectivity or discover
+tools. Harness support determines which transports and tools are usable. OAuth
+setup, tool inspection, and per-agent server selection are not yet available.
+Project MCP settings remain local and are not exported with workspace archives.
 
 ## Connect an ACP agent
 

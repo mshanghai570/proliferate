@@ -601,6 +601,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/repo-roots/{repo_root_id}/mcp-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/repo-roots/{repo_root_id}/mcp-servers/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["put"];
+        post?: never;
+        delete: operations["remove"];
+        options?: never;
+        head?: never;
+        patch: operations["set_enabled"];
+        trace?: never;
+    };
     "/v1/repo-roots/{repo_root_id}/mobility/prepare-destination": {
         parameters: {
             query?: never;
@@ -4259,6 +4291,16 @@ export interface components {
             /** @enum {string} */
             status: "exited";
         };
+        /** @description Public inventory never includes connection URLs, commands, or credentials. */
+        ProjectMcpServerSummary: {
+            enabled: boolean;
+            name: string;
+            transport: components["schemas"]["SessionMcpTransport"];
+        };
+        ProjectMcpServersResponse: {
+            encryptionAvailable: boolean;
+            servers: components["schemas"]["ProjectMcpServerSummary"][];
+        };
         /** @enum {string} */
         PromptAttachmentSource: "upload" | "paste";
         PromptCapabilities: {
@@ -5162,6 +5204,9 @@ export interface components {
         SessionSubagentsResponse: {
             children: components["schemas"]["SubagentRosterEntry"][];
             parent: components["schemas"]["AgentOperationsAgent"];
+        };
+        SetProjectMcpServerEnabledRequest: {
+            enabled: boolean;
         };
         /** @description Request payload for changing a single live session config option. */
         SetSessionConfigOptionRequest: {
@@ -7486,6 +7531,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Write-only MCP inventory for a project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServersResponse"];
+                };
+            };
+        };
+    };
+    put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionMcpServer"];
+            };
+        };
+        responses: {
+            /** @description Server replaced and enabled; used at next session process launch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServerSummary"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Server removed; live sessions keep their current configuration */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetProjectMcpServerEnabledRequest"];
+            };
+        };
+        responses: {
+            /** @description Server enabled state updated; used at next session process launch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServerSummary"];
                 };
             };
         };

@@ -12,6 +12,8 @@ mod extensions_tests;
 #[cfg(test)]
 mod openapi_tests;
 #[cfg(test)]
+mod project_mcp_tests;
+#[cfg(test)]
 mod review_admission_tests;
 #[cfg(test)]
 mod router_tests;

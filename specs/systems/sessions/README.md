@@ -24,9 +24,15 @@ session_pending_config_changes
 session_adapter_markers        adapter migration markers
 session links / fork operations / launch intents / pending prompts /
 completion deliveries / support windows / attachments / titles
+project_mcp_servers            (repo_root_id, name) · enabled · transport · encrypted configuration
 ```
 
 Written only through [domains/sessions/store/](../../../anyharness/crates/anyharness-lib/src/domains/sessions/store/mod.rs). The durable session row (`SessionRecord`, [model.rs](../../../anyharness/crates/anyharness-lib/src/domains/sessions/model.rs)) and the event record (`SessionEventRecord`) are this system's two core models.
+
+Local project MCP settings use the dedicated store under
+[`mcp_bindings/project/`](../../../anyharness/crates/anyharness-lib/src/domains/sessions/mcp_bindings/project/).
+They are repository-scoped launch inputs, rather than session snapshots. The
+[project MCP reference](project-mcp.md) describes management and launch behavior.
 
 Control plane (※ new): the **session registry row** — id, subject, environment binding, status, external bindings (`{kind: "slack", team_id, channel_id, thread_ts}` and later Linear/GitHub/ email), and the queued-prompt content the seam's outbox delivers — plus the **checkpointed record**: the shipped event log, with retention tiers.
 
@@ -52,6 +58,7 @@ Runtime HTTP (route modules under [api/http/](../../../anyharness/crates/anyharn
 | `…/interactions/{request_id}/resolve` · `…/mcp-url/reveal` | permission and interaction resolution |
 | `…/live-config` · `…/config-options` · `…/title` · `…/goal` · `…/loops` · `…/reviews` | live configuration and session-scoped features |
 | `…/subagents` · `…/subagents/{child}/open|close|promote` | in-environment subagent fan-out (surface here; laws in the subagents spec) |
+| `GET /v1/repo-roots/{id}/mcp-servers` · `PUT/PATCH/DELETE …/{name}` | owner-only local project MCP inventory, replacement, enable state, and removal |
 
 Runtime SSE: `GET /v1/sessions/{id}/stream` ([api/sse/sessions.rs](../../../anyharness/crates/anyharness-lib/src/api/sse/sessions.rs)) — the loopback source the seam's shipper subscribes to.
 
@@ -128,6 +135,9 @@ Target laws (※ new):
   message.
 - Session status transitions (`status` on the row), consumed by workspace
   surfaces and the registry projection.
+- Local project MCP changes emit `anyharness.project_mcp.changed` with only
+  `action` (`replace`, `toggle`, or `remove`); connection settings, names,
+  paths, and credentials are excluded.
 - Target: the checkpointed record and `run result` linkage consumed by
   runs/triage, and binding fan-out posts consumed by the Slack system.
 
@@ -165,10 +175,12 @@ Target laws (※ new):
 
 ```text
 anyharness/crates/anyharness-contract/src/v1/
-└── events.rs                                    SessionEvent · SessionEventEnvelope — the envelope
+├── events.rs                                    SessionEvent · SessionEventEnvelope — the envelope
+└── mcp.rs                                       launch server shapes · project MCP inventory
 
 anyharness/crates/anyharness-lib/src/
 ├── persistence/sql/0001_initial.sql             sessions + session_events + UNIQUE (session_id, seq)
+├── persistence/sql/0078_project_mcp_servers.sql encrypted project MCP settings
 ├── domains/sessions/
 │   ├── mod.rs
 │   ├── model.rs                                 SessionRecord · SessionEventRecord
@@ -188,7 +200,7 @@ anyharness/crates/anyharness-lib/src/
 │   ├── prompt/                                  prompt shapes
 │   ├── runtime/                                 create-and-start, resume, prompt dispatch, fork, lifecycle
 │   ├── live_config/                             persisted live configuration
-│   ├── mcp_bindings/                            per-session MCP assembly (consumes integration gateway)
+│   ├── mcp_bindings/                            launch assembly, including project/ encrypted settings
 │   ├── links/                                   durable session links
 │   ├── admission.rs · delegation.rs · deletion.rs · extensions.rs
 │   ├── execution_summary.rs · fork_operation.rs · launch_intent.rs · live_ports.rs
@@ -196,6 +208,7 @@ anyharness/crates/anyharness-lib/src/
 │   └── active_goals.rs · active_loops.rs · active_activity_roster.rs   observers (fenced above)
 ├── live/sessions/                               actor · driver · sink · manager · rendezvous (owner docs)
 ├── api/http/sessions_*.rs                       routes above
+├── api/http/project_mcp.rs · api/project_mcp_tests.rs  owner-only project MCP management and proof
 └── api/sse/sessions.rs                          the event stream
 
 server/proliferate/server/                       ※ new: sessions/ (registry, bindings, record, retention)
@@ -203,6 +216,8 @@ server/proliferate/server/                       ※ new: sessions/ (registry, b
 
 ## 9. Proof
 
+- Local project MCP encryption, management, and launch delivery are covered by
+  the tests listed in the [project MCP reference](project-mcp.md#code-and-proof).
 - [store/tests/events.rs](../../../anyharness/crates/anyharness-lib/src/domains/sessions/store/tests/events.rs)
   — append/seq/ordering.
 - [store/tests/runtime_event_idempotency.rs](../../../anyharness/crates/anyharness-lib/src/domains/sessions/store/tests/runtime_event_idempotency.rs)

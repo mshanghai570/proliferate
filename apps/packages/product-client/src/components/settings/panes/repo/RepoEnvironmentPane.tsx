@@ -8,17 +8,16 @@ import { type RepoSettingsContext } from "#product/lib/domain/settings/repo-scop
 import { type SettingsRepositoryEntry } from "#product/lib/domain/settings/repositories";
 import { useProductHost } from "@proliferate/product-client/host/ProductHostProvider";
 import { RepoCloudGate } from "#product/components/settings/panes/repo/RepoCloudGate";
+import { ProjectMcpSettings } from "#product/components/settings/panes/repo/ProjectMcpSettings";
 import {
   RepoScopeEmptyState,
   type RepoScopePaneProps,
 } from "#product/components/settings/panes/repo/RepoScopeStates";
 
 /**
- * Repo → Environment: variables and files synced into cloud workspaces for
- * this repo. The store is cloud-side only, so the Local context renders an
- * explanatory state instead of fake local controls; secret values are
- * write-only on the API (list returns name/size metadata), so the cloud side
- * uses the add/replace/delete secrets panel rather than editable value fields.
+ * Repository environment settings: cloud variables/files and macOS project
+ * MCP launch configuration. Local workspaces inherit their shell environment;
+ * both editors keep saved secret values write-only.
  */
 export function RepoEnvironmentPane({
   repository,
@@ -33,6 +32,7 @@ export function RepoEnvironmentPane({
 }: RepoScopePaneProps & {
   onSelectRepoContext: (context: RepoSettingsContext) => void;
 }) {
+  const host = useProductHost();
   if (!repository) {
     return (
       <RepoScopeEmptyState
@@ -46,7 +46,7 @@ export function RepoEnvironmentPane({
       <PageHeader
         variant="flat"
         title="Environment"
-        description="Variables and files synced to this repo's workspaces."
+        description="Environment and tools for this repo's workspaces."
       />
       {context === "cloud" ? (
         <EnvironmentCloud
@@ -57,7 +57,10 @@ export function RepoEnvironmentPane({
           cloudSignInAvailable={cloudSignInAvailable}
         />
       ) : (
-        <EnvironmentLocal onSelectRepoContext={onSelectRepoContext} />
+        <>
+          <EnvironmentLocal onSelectRepoContext={onSelectRepoContext} />
+          {host.desktop && repository.localWorkspaceId && <ProjectMcpSettings repoRootId={repository.repoRootId} />}
+        </>
       )}
     </SettingsPageBody>
   );

@@ -119,6 +119,28 @@ pub enum SessionMcpTransport {
     Stdio,
 }
 
+/// Public inventory never includes connection URLs, commands, or credentials.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMcpServerSummary {
+    pub name: String,
+    pub enabled: bool,
+    pub transport: SessionMcpTransport,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectMcpServersResponse {
+    pub servers: Vec<ProjectMcpServerSummary>,
+    pub encryption_available: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SetProjectMcpServerEnabledRequest {
+    pub enabled: bool,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum SessionMcpBindingOutcome {

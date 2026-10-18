@@ -102,6 +102,8 @@ export type {
 
 export type {
   RepoRootKind,
+  ProjectMcpServerSummary,
+  ProjectMcpServersResponse,
   RepoRoot,
   ResolveRepoRootFromPathRequest,
   PrepareRepoRootMobilityDestinationRequest,

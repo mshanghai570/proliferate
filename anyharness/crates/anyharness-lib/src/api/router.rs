@@ -160,6 +160,16 @@ pub fn build_router(state: AppState) -> Router {
         )
         .route("/repo-roots/{repo_root_id}", get(repo_roots::get_repo_root))
         .route(
+            "/repo-roots/{repo_root_id}/mcp-servers",
+            get(super::http::project_mcp::list),
+        )
+        .route(
+            "/repo-roots/{repo_root_id}/mcp-servers/{name}",
+            put(super::http::project_mcp::put)
+                .patch(super::http::project_mcp::set_enabled)
+                .delete(super::http::project_mcp::remove),
+        )
+        .route(
             "/repo-roots/{repo_root_id}/workspace-materializations",
             post(repo_roots::materialize_workspace_at_ref),
         )

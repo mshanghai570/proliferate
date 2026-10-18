@@ -264,6 +264,10 @@ pub(super) const MIGRATIONS: &[(&str, &str)] = &[
         "0077_installed_extensions",
         include_str!("sql/0077_installed_extensions.sql"),
     ),
+    (
+        "0078_project_mcp_servers",
+        include_str!("sql/0078_project_mcp_servers.sql"),
+    ),
 ];
 
 pub fn run_migrations(conn: &mut Connection) -> rusqlite::Result<()> {
