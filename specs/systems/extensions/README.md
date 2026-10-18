@@ -256,7 +256,8 @@ anyharness/crates/anyharness-lib/src/domains/extensions/
 ├── installer.rs · installer_tests.rs          local install use case and receipts
 ├── model.rs · store.rs                        registered lifecycle state and SQLite access
 ├── manager.rs · manager_tests.rs              install/list/remove and interruption recovery
-└── themes.rs                                 bounded declared color theme reads
+├── themes.rs                                 bounded declared app color reads
+└── syntax_themes.rs                          bounded foreground scope/color rules
 anyharness/crates/anyharness-lib/src/persistence/
 └── sql/0077_installed_extensions.sql          additive registration migration
 anyharness/crates/anyharness-contract/src/v1/extensions.rs   public wire models
