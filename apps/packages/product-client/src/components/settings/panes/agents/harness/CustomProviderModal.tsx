@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 import type { CreateAgentProviderConfigRequest } from "@proliferate/cloud-sdk";
+import { CUSTOM_PROVIDER_PRESETS } from "#product/config/custom-provider-presets";
+import { validateCustomProviderDraft } from "#product/lib/domain/settings/custom-provider-draft";
 import { Button } from "#product/primitives/Button";
 import { Input } from "#product/primitives/Input";
 import { Label } from "#product/primitives/Label";
@@ -16,6 +18,8 @@ interface CustomProviderModalProps {
 }
 
 export function CustomProviderModal({ onClose, onSubmit, busy, error }: CustomProviderModalProps) {
+  const [preset, setPreset] = useState("custom");
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [endpoint, setEndpoint] = useState("");
   const [apiKey, setApiKey] = useState("");
@@ -26,6 +30,9 @@ export function CustomProviderModal({ onClose, onSubmit, busy, error }: CustomPr
   function submit(event: FormEvent) {
     event.preventDefault();
     if (!canSubmit) return;
+    const problem = validateCustomProviderDraft({ name, endpoint, apiKey, models, apiFormat });
+    setValidationError(problem);
+    if (problem) return;
     onSubmit({ title: name.trim(), kind: "openai_compatible", value: {
       name: name.trim(), endpoint: endpoint.trim(), models: models.trim(), apiFormat,
       ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
@@ -37,7 +44,27 @@ export function CustomProviderModal({ onClose, onSubmit, busy, error }: CustomPr
       title="Add OpenAI-compatible provider"
       description="Use your own endpoint with OpenCode. Models appear after the runtime refreshes its available models."
     >
-      <form className="space-y-4" onSubmit={submit}>
+      <form className="space-y-4" onSubmit={submit} noValidate>
+        <div className="space-y-1.5">
+          <Label htmlFor="custom-provider-preset">Setup</Label>
+          <Select id="custom-provider-preset" value={preset} disabled={busy} onChange={(event) => {
+            const next = CUSTOM_PROVIDER_PRESETS.find((item) => item.id === event.target.value);
+            if (!next) return;
+            setPreset(next.id);
+            setName(next.name);
+            setEndpoint(next.endpoint);
+            setApiKey("");
+            setModels("");
+            setApiFormat("chat");
+            setValidationError(null);
+          }}>
+            {CUSTOM_PROVIDER_PRESETS.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+          </Select>
+          <p className="text-ui-sm text-muted-foreground">
+            Local presets fill the server address. Start your model server and enter its loaded model IDs.
+            Changing setup clears the key and models.
+          </p>
+        </div>
         <div className="space-y-1.5">
           <Label htmlFor="custom-provider-name">Name</Label>
           <Input id="custom-provider-name" value={name} maxLength={255} required disabled={busy}
@@ -71,7 +98,7 @@ export function CustomProviderModal({ onClose, onSubmit, busy, error }: CustomPr
             onChange={(event) => setModels(event.target.value)} />
           <p id="custom-provider-models-help" className="text-ui-sm text-muted-foreground">One model ID per line.</p>
         </div>
-        {error ? <NoticeBanner tone="destructive">{error}</NoticeBanner> : null}
+        {validationError || error ? <NoticeBanner tone="destructive">{validationError ?? error}</NoticeBanner> : null}
         <div className="flex justify-end gap-2">
           <Button type="button" variant="ghost" disabled={busy} onClick={onClose}>Cancel</Button>
           <Button type="submit" disabled={!canSubmit} loading={busy}>Add provider</Button>

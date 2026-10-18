@@ -24,6 +24,25 @@ Let a person (or an org admin) configure their account, appearance, agents and t
 | User/repo preferences | Appearance, zoom, worktree auto-delete adoption, repo preferences — persisted through the host | [user-preferences-store.ts](../../../apps/packages/product-client/src/stores/preferences/user-preferences-store.ts), [repo-preferences-store.ts](../../../apps/packages/product-client/src/stores/preferences/repo-preferences-store.ts) |
 | Active organization | Selected organization id for org-scoped panes | [organization-store.ts](../../../apps/packages/product-client/src/stores/organizations/organization-store.ts) |
 
+## LLM providers
+
+Settings → Agents → LLM providers is a dedicated local provider surface, separate
+from custom ACP agent registrations. It uses the existing agent-auth vault and
+OpenCode local selections, and the target's launch-options model inventory. It
+requires control-plane authentication and reachability, independently of cloud
+compute. The page waits for both saved credentials and selections before enabling
+edits; failed reads offer retry. Pending delivery is shown without claiming the
+configuration has reached the runtime.
+
+The [provider pane](../../../apps/packages/product-client/src/components/settings/panes/agents/providers/LlmProvidersPane.tsx)
+composes the existing hosted-provider picker, custom endpoint editor, and runtime
+model inventory. [Local server presets](../../../apps/packages/product-client/src/config/custom-provider-presets.ts)
+fill editable Ollama or LM Studio compatibility URLs; switching presets clears
+credentials and model drafts. [Draft validation](../../../apps/packages/product-client/src/lib/domain/settings/custom-provider-draft.ts)
+rejects malformed endpoints, embedded URL credentials, substitutions, and invalid
+model lists before the vault write. The server remains authoritative. Saving
+does not verify model connectivity, and provider changes apply to new processes.
+
 ## Public surface
 
 - [`SettingsPage`](../../../apps/packages/product-client/src/pages/SettingsPage.tsx)

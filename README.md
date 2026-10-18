@@ -162,21 +162,38 @@ Proliferate runs each agent through its native harness.
 
 ## Connect a custom AI provider
 
-For local sessions, open **Settings → Agents → OpenCode → Providers** and add a
-custom provider:
+Open **Settings → Agents → LLM providers** to manage model API connections for
+local sessions. **Configure** offers supported hosted providers; **Add
+OpenAI-compatible provider** configures a custom endpoint. Custom ACP agents have
+a separate settings page.
 
-1. Enter a name and the provider's API base URL, including `/v1` if required by
+To add a custom endpoint:
+
+1. Choose **Custom endpoint**, **Ollama**, or **LM Studio**. The local presets
+   fill the default server address; start that server and load a model first.
+   Switching setup clears the key and model fields.
+2. Enter a name and the provider's API base URL, including `/v1` if required by
    that provider. Proliferate uses the URL as entered.
-2. Choose **Chat Completions** or **Responses** to match the provider's API.
-3. Enter an API key if required. Leave it empty for a provider without
+3. Choose **Chat Completions** or **Responses** to match the provider's API.
+4. Enter an API key if required. Leave it empty for a provider without
    authentication.
-4. Enter the model IDs supplied by the provider, one per line, and save.
+5. Enter the model IDs supplied by the provider, one per line, and save.
 
 Connections can be enabled or removed individually. API keys are stored in the
 encrypted credential vault. Models become selectable after the runtime discovers
 them through OpenCode; saving a connection does not verify that its endpoint is
 reachable or that every model supports coding tools. Existing provider logins
 remain available.
+
+Use **Models** on the provider page to inspect and refresh the runtime's model
+list. When creating a chat, choose **OpenCode**, then one of its reported models.
+The page also links to runtime installation and authentication setup. Provider
+settings require a reachable, signed-in control plane for the encrypted vault;
+cloud compute is not required.
+
+The local presets use the documented compatibility endpoints for
+[Ollama](https://github.com/ollama/ollama/blob/main/docs/api/openai-compatibility.mdx)
+and [LM Studio](https://lmstudio.ai/docs/developer/openai-compat).
 
 This configuration currently applies to local OpenCode sessions. Other harnesses
 retain their own authentication and provider settings.

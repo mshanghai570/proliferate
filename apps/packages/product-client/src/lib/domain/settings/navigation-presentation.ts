@@ -3,6 +3,7 @@ import type { SettingsSection } from "#product/config/settings";
 export type SettingsNavIconId =
   | "account"
   | "agent-api-keys"
+  | "agent-providers"
   | "agent-custom"
   | "agent-skills"
   | "agent-claude"
@@ -129,13 +130,14 @@ export const SETTINGS_SCOPES: SettingsScopeNav[] = [
         id: "agents_main",
         heading: null,
         items: [
+          { kind: "section", id: "agent-providers", label: "LLM providers", iconId: "agent-providers" },
           { kind: "section", id: "agent-claude", label: "Claude Code", iconId: "agent-claude" },
           { kind: "section", id: "agent-codex", label: "Codex", iconId: "agent-codex" },
           { kind: "section", id: "agent-opencode", label: "OpenCode", iconId: "agent-opencode" },
           { kind: "section", id: "agent-grok", label: "Grok", iconId: "agent-grok" },
           { kind: "section", id: "agent-cursor", label: "Cursor", iconId: "agent-cursor" },
           { kind: "section", id: "agent-api-keys", label: "API keys", iconId: "agent-api-keys" },
-          { kind: "section", id: "agent-custom", label: "Custom agents", iconId: "agent-custom" },
+          { kind: "section", id: "agent-custom", label: "Custom ACP agents", iconId: "agent-custom" },
           { kind: "section", id: "agent-skills", label: "Skills", iconId: "agent-skills" },
         ],
       },

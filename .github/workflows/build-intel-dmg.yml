@@ -97,6 +97,17 @@ jobs:
           fs.writeFileSync('runtime-version.json', JSON.stringify({ anyharnessVersion: version }));
           JS
           pnpm tauri build --target "$TARGET" --bundles app,dmg --config preview.config.json
+      - name: Check provider settings
+        working-directory: apps/packages/product-client
+        run: |
+          pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
+            src/lib/domain/settings/custom-provider-draft.test.ts \
+            src/lib/domain/settings/navigation-presentation.test.ts \
+            src/lib/domain/settings/navigation.test.ts \
+            src/hooks/agents/workflows/use-custom-providers.test.tsx \
+            src/components/settings/panes/agents/harness/CustomProviderModal.test.tsx \
+            src/components/settings/panes/agents/harness/CustomProvidersSection.test.tsx \
+            src/components/settings/panes/agents/providers/LlmProvidersPane.test.tsx
       - name: Verify app and DMG contents
         run: |
           app="target/$TARGET/release/bundle/macos/Proliferate Preview.app"

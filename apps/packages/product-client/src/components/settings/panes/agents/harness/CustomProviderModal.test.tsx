@@ -27,3 +27,29 @@ it("keeps errors visible and prevents duplicate submissions", () => {
   expect(screen.getByRole("alert").textContent).toContain("Could not save provider");
   expect((screen.getByRole("button", { name: "Add provider" }) as HTMLButtonElement).disabled).toBe(true);
 });
+
+it("fills a local server preset and clears credentials when changing servers", () => {
+  render(<CustomProviderModal onClose={vi.fn()} onSubmit={vi.fn()} busy={false} error={null} />);
+  fireEvent.change(screen.getByLabelText("Setup"), { target: { value: "ollama" } });
+  expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe("Ollama");
+  expect((screen.getByLabelText("API base URL") as HTMLInputElement).value).toBe("http://localhost:11434/v1");
+  fireEvent.change(screen.getByLabelText("API key (optional)"), { target: { value: "secret" } });
+  fireEvent.change(screen.getByLabelText("Model IDs"), { target: { value: "local-model" } });
+  fireEvent.change(screen.getByLabelText("API format"), { target: { value: "responses" } });
+  fireEvent.change(screen.getByLabelText("Setup"), { target: { value: "lmstudio" } });
+  expect((screen.getByLabelText("API base URL") as HTMLInputElement).value).toBe("http://localhost:1234/v1");
+  expect((screen.getByLabelText("API key (optional)") as HTMLInputElement).value).toBe("");
+  expect((screen.getByLabelText("Model IDs") as HTMLTextAreaElement).value).toBe("");
+  expect((screen.getByLabelText("API format") as HTMLSelectElement).value).toBe("chat");
+});
+
+it("shows an actionable error before submitting an invalid endpoint", () => {
+  const onSubmit = vi.fn();
+  render(<CustomProviderModal onClose={vi.fn()} onSubmit={onSubmit} busy={false} error={null} />);
+  fireEvent.change(screen.getByLabelText("Name"), { target: { value: "My server" } });
+  fireEvent.change(screen.getByLabelText("API base URL"), { target: { value: "https://user:secret@example.com/v1" } });
+  fireEvent.change(screen.getByLabelText("Model IDs"), { target: { value: "model-a" } });
+  fireEvent.click(screen.getByRole("button", { name: "Add provider" }));
+  expect(onSubmit).not.toHaveBeenCalled();
+  expect(screen.getByRole("alert").textContent).toContain("without credentials");
+});
