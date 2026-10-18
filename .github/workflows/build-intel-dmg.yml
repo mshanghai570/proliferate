@@ -114,7 +114,8 @@ jobs:
             src/components/extensions/marketplace/InstalledExtensionColors.test.tsx \
             src/components/extensions/marketplace/InstalledExtensionSyntax.test.tsx \
             src/lib/domain/preferences/imported-syntax-theme.test.ts \
-            src/lib/infra/editor/highlighting.test.ts
+            src/lib/infra/editor/highlighting.test.ts \
+            src/hooks/ui/highlighting/use-syntax-highlight-theme.test.tsx
       - name: Check native provider and encryption behavior
         run: |
           cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util local_provider -- --test-threads=1
