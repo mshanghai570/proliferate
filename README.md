@@ -66,11 +66,11 @@ The Extensions destination is visible by default in the macOS app. It provides
 Open VSX discovery, package installation, inventory, and removal. Open **Details
 and versions** from an installed package to inspect its registry listing and
 version history, then return to Installed. In **Installed →
-App color themes**, copy readable core colors from a declared standalone JSON
+App color themes**, copy readable core colors from a declared standalone JSON or JSONC
 theme into Appearance settings. The copy survives package removal and can be
 reset in Appearance. **Installed → Syntax themes** applies foreground token
 colors from a supported theme to source views, code blocks, and diffs, together
-with matching app colors. The copied theme persists across restarts and package
+with matching background/text colors. The copied theme persists across restarts and package
 removal. Reset it in **Appearance → Imported syntax colors**. Theme includes and executable extensions
 are unsupported. Extension code does not activate in the editor. Set
 `VITE_EXTENSION_MARKETPLACE=0` when building Desktop to hide the preview.
@@ -84,7 +84,7 @@ settings cover built-in color modes and text sizing. The macOS app can import
 core app colors from a readable, strict JSON color theme with `type`,
 `editor.background`, and `editor.foreground`. Syntax colors are available from
 supported installed packages through **Syntax themes**. This accepts at most 256
-foreground rules and 32 KiB of scope/color data per theme. Token font styles,
+token rules and 32 KiB of scope/color data per theme. Token font styles,
 semantic-token overrides, includes, and external token files are unsupported.
 Theme files must use six-digit hex color values without comments or trailing
 commas. In the macOS app, enter

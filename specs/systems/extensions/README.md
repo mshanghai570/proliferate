@@ -73,23 +73,26 @@ does not enable an extension host or syntax theme. The authenticated
 registration and package validity under the management lock, then reads at most
 32 declared theme files, each bounded to 1 MiB. It returns only a bounded label,
 normalized light/dark mode, six supported color fields, availability, and a
-truncation flag. Strict JSON, standalone themes are supported; includes are
+truncation flag. Standalone JSON and JSONC themes are supported; includes are
 never followed. The client validates color syntax and text contrast before
 offering the copy action. Queries retain runtime and actor isolation.
 
 On Desktop, **Syntax themes** reads the exact installed version through
 `GET /v1/extensions/{namespace}/{name}/{version}/syntax-themes`. It applies a
 validated preference snapshot containing foreground rules and matching app
-colors. Source views, transcript code blocks, and code diffs use the existing
+background/text colors. Source views, transcript code blocks, and code diffs use the existing
 syntax highlighter with the imported theme object. Selection survives restart
 and uninstall; Appearance resets syntax independently from app colors. The
 selection applies only in its matching light/dark mode. Markdown uses its grammar
 when imported syntax colors are selected; built-in Markdown rendering is unchanged.
 The same receipt, resource, registration, owner-authentication, and management-lock
-checks as app color reads apply. At most 32 themes, 256 rules per theme, 16 scopes
-per rule, and 32 KiB of UTF-8 scope/color data per theme are admitted. Foreground
-colors must be six-digit hex. Includes, token-file paths, JSON comments, semantic
-token colors, and font styles are not loaded. The client revalidates preferences
+checks as app color reads apply. At most 32 themes, 256 rules per theme, 32 scopes
+per rule (at most 1,024 UTF-8 bytes each), and 32 KiB of UTF-8 scope/color data per theme are admitted. Foreground
+colors must be six-digit hex. Includes, token-file paths, semantic token colors, and font styles are not
+loaded. Theme resource parsing accepts line/block comments, trailing commas,
+and a UTF-8 BOM before validating values with the existing JSON parser. Package
+manifests and receipts remain strict JSON. Syntax application copies only editor
+background/text colors, so optional UI colors with alpha do not block syntax. The client revalidates preferences
 and app-color contrast. Highlight cache accounting includes custom theme data,
 so switching themes cannot bypass its existing memory budget. Theme data never
 executes code or registers additional editor APIs.
@@ -249,7 +252,8 @@ anyharness/crates/anyharness-lib/src/adapters/extensions/
 ├── mod.rs                                    adapter registration
 ├── vsix.rs · vsix_tests.rs                    bounded archive validation/extraction
 ├── package.rs · package_tests.rs              snapshot, integrity, staging, publication
-└── management.rs                             lock, bounded reads, quarantine/removal
+├── management.rs                             lock, bounded reads, quarantine/removal
+└── theme_json.rs                             theme-only JSONC normalization
 anyharness/crates/anyharness-lib/src/domains/extensions/
 ├── mod.rs                                    domain registration
 ├── manifest.rs                               identity and declarative admission policy
@@ -326,7 +330,7 @@ anyharness/sdk/src/types/extensions.ts                     generated type aliase
   communicates that boundary and shows bounded success/failure outcomes.
 - Declared color themes supply only core app colors through an explicit copy.
   Syntax foreground colors are available through an explicit copy of supported
-  installed themes. Includes, JSON comments, token font styles, semantic token
+  installed JSON/JSONC themes. Includes, token font styles, semantic token
   overrides, and theme asset loading are absent.
   Only the first 32 declared themes are offered; truncation is visible.
 - Featured and recommended collections have no owned source. Discovery exposes

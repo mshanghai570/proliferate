@@ -1,6 +1,7 @@
 pub mod management;
 pub mod package;
 pub mod registry;
+mod theme_json;
 pub mod vsix;
 
 #[cfg(test)]

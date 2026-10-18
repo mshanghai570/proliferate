@@ -22,11 +22,13 @@ export function sanitizeImportedSyntaxTheme(value: unknown): ImportedSyntaxTheme
   const encoder = new TextEncoder();
   for (const value of input.rules) {
     const rule = record(value);
-    if (!rule || !color(rule.foreground) || !Array.isArray(rule.scopes) || !rule.scopes.length || rule.scopes.length > 16) return null;
+    if (!rule || !color(rule.foreground) || !Array.isArray(rule.scopes) || !rule.scopes.length || rule.scopes.length > 32) return null;
     const scopes: string[] = [];
     for (const scope of rule.scopes) {
-      if (typeof scope !== "string" || !scope.trim() || scope.length > 256 || /[\u0000-\u001f\u007f-\u009f]/u.test(scope)) return null;
-      chars += encoder.encode(scope).length;
+      if (typeof scope !== "string" || !scope.trim() || scope.length > 1024 || /[\u0000-\u001f\u007f-\u009f]/u.test(scope)) return null;
+      const bytes = encoder.encode(scope).length;
+      if (bytes > 1024) return null;
+      chars += bytes;
       scopes.push(scope);
     }
     chars += rule.foreground.length;

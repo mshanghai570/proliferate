@@ -118,7 +118,7 @@ The `environments` / `repo-environment` sections edit cloud environment records 
   app surface tokens are overridden at runtime; the generated built-in palette
   remains authoritative when the imported theme is reset or its mode is not
   active. Desktop can also copy the same bounded palette from a registered
-  extension's declared JSON theme through Extensions → Installed. The copied
+  extension's declared JSON/JSONC theme through Extensions → Installed. The copied
   preference survives package removal. Syntax highlighting remains separate.
 
 ## Emits

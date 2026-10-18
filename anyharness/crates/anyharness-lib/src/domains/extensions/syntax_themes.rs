@@ -35,6 +35,9 @@ pub fn read_syntax_themes(
                 .and_then(|path| packages.read_theme(name, &path).ok())
                 .and_then(|source| parse_rules(&source));
             theme.available &= rules.as_ref().is_some_and(|rules| !rules.is_empty());
+            theme
+                .colors
+                .retain(|key, _| key == "editor.background" || key == "editor.foreground");
             PackageSyntaxTheme {
                 theme,
                 rules: rules.unwrap_or_default(),
@@ -66,11 +69,11 @@ fn parse_rules(source: &Value) -> Option<Vec<SyntaxColorRule>> {
             return None;
         }
         let scopes: Vec<String> = match entry.get("scope") {
-            Some(Value::String(scope)) if scope.len() <= 512 => scope
+            Some(Value::String(scope)) if scope.len() <= 32768 => scope
                 .split(',')
                 .map(|scope| scope.trim().to_owned())
                 .collect(),
-            Some(Value::Array(scopes)) if scopes.len() <= 16 => scopes
+            Some(Value::Array(scopes)) if scopes.len() <= 32 => scopes
                 .iter()
                 .map(|scope| scope.as_str().map(str::to_owned))
                 .collect::<Option<_>>()?,
@@ -78,9 +81,9 @@ fn parse_rules(source: &Value) -> Option<Vec<SyntaxColorRule>> {
             _ => return None,
         };
         if scopes.is_empty()
-            || scopes.len() > 16
+            || scopes.len() > 32
             || scopes.iter().any(|scope| {
-                scope.is_empty() || scope.len() > 256 || scope.chars().any(char::is_control)
+                scope.is_empty() || scope.len() > 1024 || scope.chars().any(char::is_control)
             })
         {
             return None;
@@ -111,7 +114,7 @@ mod tests {
             json!({"include":"outside.json", "tokenColors":[]}),
             json!({"tokenColors":"outside.json"}),
             json!({"tokenColors":[{"scope":"comment", "settings":{"foreground":"url(secret)"}}]}),
-            json!({"tokenColors":[{"scope":["a".repeat(257)], "settings":{"foreground":"#ffffff"}}]}),
+            json!({"tokenColors":[{"scope":["a".repeat(1025)], "settings":{"foreground":"#ffffff"}}]}),
             json!({"tokenColors":vec![valid["tokenColors"][0].clone();257]}),
         ] {
             assert!(parse_rules(&value).is_none());

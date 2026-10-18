@@ -12,10 +12,13 @@ describe("imported syntax theme", () => {
     expect(selectPersistedUserPreferencesSlice(preferences).importedSyntaxTheme).toEqual(saved);
     expect(migrateUserPreferences({}).preferences.importedSyntaxTheme).toBeNull();
   });
+  it("admits bounded scope groups used by published themes", () => {
+    expect(sanitizeImportedSyntaxTheme({ ...theme, rules: [{ scopes: Array(26).fill("meta." + "x".repeat(613)), foreground: "#AABBCC" }] })).not.toBeNull();
+  });
   it("rejects unreadable, oversized, and non-data input", () => {
     for (const input of [null, {}, { ...theme, foreground: "#101820" },
       { ...theme, rules: [] }, { ...theme, rules: Array(257).fill(theme.rules[0]) },
-      { ...theme, rules: [{ scopes: ["a".repeat(257)], foreground: "#aabbcc" }] },
+      { ...theme, rules: [{ scopes: ["a".repeat(1025)], foreground: "#aabbcc" }] },
       { ...theme, rules: [{ scopes: ["comment"], foreground: "url(secret)" }] },
       { ...theme, rules: [{ scopes: ["comment\n"], foreground: "#aabbcc" }] },
       { ...theme, rules: Array(256).fill({ scopes: ["a".repeat(256)], foreground: "#aabbcc" }) },

@@ -18,7 +18,7 @@ export function InstalledExtensionColors({ identity }: { identity: ExtensionPack
             {state.themes.map(({ label, colors }, index) => {
               return <div key={index} className="flex flex-wrap items-center gap-2 text-ui-sm">
                 <span>{label}</span>
-                {colors ? <Button variant="secondary" aria-label={`Use ${label} app colors`} onClick={() => state.apply(colors)}>Use app colors</Button> : <span className="text-muted-foreground">Requires readable six-digit hex colors in a standalone JSON theme.</span>}
+                {colors ? <Button variant="secondary" aria-label={`Use ${label} app colors`} onClick={() => state.apply(colors)}>Use app colors</Button> : <span className="text-muted-foreground">Requires readable six-digit hex colors in a standalone JSON or JSONC theme.</span>}
               </div>;
             })}
             {query.data?.truncated && <p className="text-ui-sm text-muted-foreground">Showing the first 32 declared themes.</p>}
