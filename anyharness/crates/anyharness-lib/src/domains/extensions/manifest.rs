@@ -152,7 +152,7 @@ pub fn inspect_install_manifest(
     Ok(resources)
 }
 
-fn resource_path(raw: &str) -> Result<PathBuf, ManifestError> {
+pub(super) fn resource_path(raw: &str) -> Result<PathBuf, ManifestError> {
     if raw.is_empty() || raw.contains(['\\', ':']) || raw.chars().any(char::is_control) {
         return Err(ManifestError::InvalidResourcePath);
     }

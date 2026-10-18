@@ -1,7 +1,8 @@
 # Extensions
 
 Owns Open VSX discovery, extension metadata/content access, manifest compatibility
-analysis, local VSIX package materialization, durable registration/removal, and the VSIX inspection/extraction
+analysis, local VSIX package materialization, durable registration/removal,
+bounded declared color-theme reads, and the VSIX inspection/extraction
 adapter. The
 [workspace surface](../workspace-surface/README.md) owns the shared sidebar and
 route shell; [harnesses](../harnesses/README.md) owns agent skills and harness
@@ -14,8 +15,9 @@ in Proliferate. Desktop includes the discovery preview by default; Web keeps
 it opt-in. The runtime
 library can materialize and register verified local declarative packages, list
 their state, and uninstall selected versions. Typed runtime list/uninstall
-endpoints connect the Installed surface. No contribution loader is connected,
-and no extension code executes.
+endpoints connect the Installed surface. Desktop can copy bounded core colors
+from declared JSON theme resources into its appearance preference. No general
+contribution loader is connected, and no extension code executes.
 
 ## Owned state
 
@@ -59,6 +61,18 @@ and package errors, and requires confirmation before uninstall. Missing runtime
 connections and unsupported management endpoints show authored messages instead
 of a fabricated empty list. Queries include runtime URL and actor cache scope;
 uninstall completion refreshes the originating scope, even after target changes.
+
+On Desktop, **App color themes** reads declared theme data on demand. A readable
+palette can be copied into the existing imported app color preference; this
+snapshot survives package removal and resets through Appearance. The action
+does not enable an extension host or syntax theme. The authenticated
+`GET /v1/extensions/{namespace}/{name}/{version}/color-themes` endpoint verifies
+registration and package validity under the management lock, then reads at most
+32 declared theme files, each bounded to 1 MiB. It returns only a bounded label,
+normalized light/dark mode, six supported color fields, availability, and a
+truncation flag. Strict JSON, standalone themes are supported; includes are
+never followed. The client validates color syntax and text contrast before
+offering the copy action. Queries retain runtime and actor isolation.
 
 The blocking library entrypoint
 [install_local_vsix](../../../anyharness/crates/anyharness-lib/src/domains/extensions/installer.rs)
@@ -109,6 +123,10 @@ analysis, not a demonstrated compatibility guarantee or an installation gate.
 
 - **Installation does not execute an extension.** The detail surface sends only
   an identity to the runtime install mutation; it has no extension-code loader.
+- **Theme reads expose declared color data only.** Registered package receipts,
+  manifests, and resource paths are validated before reading. Unregistered or
+  damaged packages cannot supply themes. The endpoint omits paths, arbitrary
+  JSON fields, and resource error text; unsupported files remain unavailable.
 - **Untrusted content cannot dispatch IDE commands.** The
   [URL rule](../../../apps/packages/product-client/src/lib/domain/extensions/extension-content.ts)
   accepts HTTPS URLs without embedded credentials. The
@@ -203,6 +221,7 @@ apps/packages/product-client/src/
 ├── hooks/access/extensions/                   registry and runtime management queries
 ├── lib/access/extensions/                     registry transport and bounded text reads
 ├── lib/domain/extensions/                     wire mapping, manifests, compatibility, URLs
+│   └── extension-color-theme.ts               readable core palette admission
 ├── lib/domain/capabilities/extension-marketplace.ts   preview gate
 ├── config/extensions/                         categories and page size
 └── copy/extensions/                           authored status/error copy
@@ -216,7 +235,8 @@ anyharness/crates/anyharness-lib/src/domains/extensions/
 ├── manifest.rs                               identity and declarative admission policy
 ├── installer.rs · installer_tests.rs          local install use case and receipts
 ├── model.rs · store.rs                        registered lifecycle state and SQLite access
-└── manager.rs · manager_tests.rs              install/list/remove and interruption recovery
+├── manager.rs · manager_tests.rs              install/list/remove and interruption recovery
+└── themes.rs                                 bounded declared color theme reads
 anyharness/crates/anyharness-lib/src/persistence/
 └── sql/0077_installed_extensions.sql          additive registration migration
 anyharness/crates/anyharness-contract/src/v1/extensions.rs   public wire models
@@ -271,14 +291,21 @@ anyharness/sdk/src/types/extensions.ts                     generated type aliase
 - [Installed surface tests](../../../apps/packages/product-client/src/components/extensions/marketplace/InstalledExtensions.test.tsx)
   exercise inactive status, confirmation and focus restoration, failed removal,
   disconnected/older runtimes, and separation across runtime and actor changes.
+- [Installed color tests](../../../apps/packages/product-client/src/components/extensions/marketplace/InstalledExtensionColors.test.tsx)
+  exercise explicit application, unreadable palette refusal, actor changes, and
+  bounded failure copy. Runtime manager and API tests prove registered theme
+  reads, include refusal, bounded inventory, authentication, and response shape.
 
 ## Current gaps
 
 - Registry installation is implemented for the connected runtime, but registry
   download/upload from a local client, updates, workspace enablement,
-  contribution loading, and executable-host isolation are absent. Packages remain
+  general contribution loading, and executable-host isolation are absent. Packages remain
   inactive; the [detail surface](../../../apps/packages/product-client/src/components/extensions/marketplace/ExtensionDetails.tsx)
   communicates that boundary and shows bounded success/failure outcomes.
+- Declared color themes supply only core app colors through an explicit copy.
+  Syntax colors, includes, JSON comments, and theme asset loading are absent.
+  Only the first 32 declared themes are offered; truncation is visible.
 - Featured and recommended collections have no owned source. Discovery exposes
   real registry sorting without relabeling popularity as recommendations.
 - [Compatibility analysis](../../../apps/packages/product-client/src/lib/domain/extensions/extension-compatibility.ts)

@@ -1,7 +1,10 @@
-use anyharness_contract::v1::skills::{SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse};
 use anyharness_contract::v1::extensions::{
-    ExtensionInstallationState, ExtensionPackageErrorCode, InstallRegistryExtensionRequest,
-    InstalledExtensionSummary, ListInstalledExtensionsResponse,
+    ExtensionColorTheme, ExtensionInstallationState, ExtensionPackageErrorCode,
+    InstallRegistryExtensionRequest, InstalledExtensionSummary, ListExtensionColorThemesResponse,
+    ListInstalledExtensionsResponse,
+};
+use anyharness_contract::v1::skills::{
+    ImportSkillRequest, ListSkillsResponse, SetSkillEnabledRequest, SkillFile, SkillSummary,
 };
 use anyharness_contract::v1::{
     AdvanceReplaySessionResponse, AgentAuthCredentialEvidence, AgentAuthCredentialSource,
@@ -139,6 +142,7 @@ mod support_windows;
         super::http::skills::set_skill_enabled,
         super::http::skills::remove_skill,
         super::http::extensions::list_extensions,
+        super::http::extensions::list_color_themes,
         super::http::extensions::install_registry_extension,
         super::http::extensions::uninstall_extension,
         super::http::health::get_health,
@@ -281,12 +285,18 @@ mod support_windows;
         super::http::reviews::mark_review_revision_ready,
     ),
     components(schemas(
-        SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse,
+        SkillFile,
+        SkillSummary,
+        ImportSkillRequest,
+        SetSkillEnabledRequest,
+        ListSkillsResponse,
         ExtensionInstallationState,
         ExtensionPackageErrorCode,
         InstallRegistryExtensionRequest,
         InstalledExtensionSummary,
         ListInstalledExtensionsResponse,
+        ExtensionColorTheme,
+        ListExtensionColorThemesResponse,
         HealthResponse,
         RuntimeCapabilities,
         RuntimePressureLevel,

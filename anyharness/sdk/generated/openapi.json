@@ -1244,6 +1244,102 @@
         }
       }
     },
+    "/v1/extensions/{namespace}/{name}/{version}/color-themes": {
+      "get": {
+        "tags": [
+          "extensions"
+        ],
+        "operationId": "list_color_themes",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Declared core app color data from an installed package",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListExtensionColorThemesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid extension identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Runtime authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Extension version is not installed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Package validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Extension management unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/replay/recordings": {
       "get": {
         "tags": [
@@ -11687,6 +11783,39 @@
           }
         }
       },
+      "ExtensionColorTheme": {
+        "type": "object",
+        "required": [
+          "label",
+          "colors",
+          "available"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "colorMode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Normalized light/dark mode; absent when the theme cannot be imported."
+          },
+          "colors": {
+            "type": "object",
+            "description": "Only the six supported core app color keys are exposed.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
       "ExtensionInstallationState": {
         "type": "string",
         "enum": [
@@ -13396,6 +13525,24 @@
         "properties": {
           "item": {
             "$ref": "#/components/schemas/TranscriptItemPayload"
+          }
+        }
+      },
+      "ListExtensionColorThemesResponse": {
+        "type": "object",
+        "required": [
+          "themes",
+          "truncated"
+        ],
+        "properties": {
+          "themes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtensionColorTheme"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
           }
         }
       },

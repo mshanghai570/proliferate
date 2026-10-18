@@ -41,6 +41,20 @@ pub(crate) fn manifest(version: &str) -> serde_json::Value {
 }
 
 pub(crate) fn archive(root: &Path, raw: &serde_json::Value, resource: &str) -> (PathBuf, String) {
+    archive_with_content(
+        root,
+        raw,
+        resource,
+        br##"{"colors":{"editor.background":"#171717"}}"##,
+    )
+}
+
+pub(crate) fn archive_with_content(
+    root: &Path,
+    raw: &serde_json::Value,
+    resource: &str,
+    content: &[u8],
+) -> (PathBuf, String) {
     let path = root.join(format!("{}.vsix", Uuid::new_v4()));
     let mut writer = ZipWriter::new(File::create(&path).unwrap());
     let options = SimpleFileOptions::default().compression_method(CompressionMethod::Stored);
@@ -49,9 +63,7 @@ pub(crate) fn archive(root: &Path, raw: &serde_json::Value, resource: &str) -> (
         .unwrap();
     writer.write_all(&serde_json::to_vec(raw).unwrap()).unwrap();
     writer.start_file(resource, options).unwrap();
-    writer
-        .write_all(br##"{"colors":{"editor.background":"#171717"}}"##)
-        .unwrap();
+    writer.write_all(content).unwrap();
     writer.finish().unwrap();
     let digest = format!("{:x}", Sha256::digest(fs::read(&path).unwrap()));
     (path, digest)

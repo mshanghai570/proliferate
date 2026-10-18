@@ -49,14 +49,17 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 - **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
 - **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
 - **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
-- **Extensions marketplace (preview)** - browse Open VSX extensions and register supported declarative packages in the macOS app; installed packages remain inactive
+- **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and copy supported theme colors into the macOS app; extension code remains inactive
 - **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
 
 ### Current macOS customization scope
 
 The Extensions destination is visible by default in the macOS app. It provides
-Open VSX discovery, package installation, inventory, and removal. Packages do
-not yet activate in the editor, and executable extensions are refused. Set
+Open VSX discovery, package installation, inventory, and removal. In **Installed →
+App color themes**, copy readable core colors from a declared standalone JSON
+theme into Appearance settings. The copy survives package removal and can be
+reset in Appearance. Syntax colors, theme includes, and executable extensions
+are unsupported. Extension code does not activate in the editor. Set
 `VITE_EXTENSION_MARKETPLACE=0` when building Desktop to hide the preview.
 
 Custom OpenAI-compatible providers currently add models to local OpenCode
@@ -65,11 +68,25 @@ Custom ACP agents are a separate option and must implement Agent Client
 Protocol. MCP tools are available through supported integrations. Appearance
 settings cover built-in color modes and text sizing. The macOS app can import
 core app colors from a readable, strict JSON color theme with `type`,
-`editor.background`, and `editor.foreground`; syntax colors and extension
-themes remain unsupported. In the macOS app, enter
+`editor.background`, and `editor.foreground`; syntax colors remain unsupported.
+Theme files must use six-digit hex color values without comments or trailing
+commas. In the macOS app, enter
 installed font family names for interface and code text under **Settings →
 Appearance**. The Mac font list offers suggestions; an unavailable manually
 entered family falls back to the built-in font. Project RAG is not yet available.
+
+A minimal file for **Settings → Appearance → Imported app colors**:
+
+```json
+{
+  "name": "Midnight",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#101820",
+    "editor.foreground": "#FFFFFF"
+  }
+}
+```
 
 ### macOS product direction
 

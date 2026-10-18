@@ -200,6 +200,9 @@ async fn install_route_reports_registry_miss_without_registering() {
 fn extensions_openapi_declares_routes_and_typed_inactive_state() {
     let api: Value = serde_json::from_str(&super::openapi::openapi_json()).unwrap();
     assert!(api["paths"]["/v1/extensions"]["get"].is_object());
+    assert!(
+        api["paths"]["/v1/extensions/{namespace}/{name}/{version}/color-themes"]["get"].is_object()
+    );
     assert!(api["paths"]["/v1/extensions/{namespace}/{name}/{version}"]["delete"].is_object());
     assert!(
         api["components"]["schemas"]["InstalledExtensionSummary"]["properties"]["active"]
@@ -230,6 +233,10 @@ fn extensions_global_management_remains_denied_to_workspace_claims() {
     };
     for (method, path) in [
         (Method::GET, "/v1/extensions"),
+        (
+            Method::GET,
+            "/v1/extensions/example/demo/1.0.0/color-themes",
+        ),
         (Method::DELETE, "/v1/extensions/example/demo/1.0.0"),
     ] {
         assert!(matches!(
@@ -237,4 +244,58 @@ fn extensions_global_management_remains_denied_to_workspace_claims() {
             Err(AuthError::UnsupportedRoute)
         ));
     }
+}
+
+#[tokio::test]
+async fn installed_color_themes_are_authenticated_bounded_data() {
+    use crate::domains::extensions::installer_tests::archive_with_content;
+    let _lock = test_support::lock_env().await;
+    let _bearer = test_support::set_bearer_token_env(Some("extension-test-token"));
+    let _key = test_support::set_data_key_env(None);
+    let home = TestDirectory::new();
+    let state = state(&home);
+    let manager = ExtensionManager::new(state.db.clone(), home.0.clone());
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"][0]["uiTheme"] = serde_json::json!("vs-dark");
+    let (archive, digest) = archive_with_content(&home.0, &raw, "extension/themes/demo.json", br##"{"colors":{"editor.background":"#171717","editor.foreground":"#ffffff","private":"not exposed"}}"##);
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let router = build_router(state);
+    let path = "/v1/extensions/example/demo/1.0.0/color-themes";
+    assert_eq!(
+        router
+            .clone()
+            .oneshot(request("GET", path, false))
+            .await
+            .unwrap()
+            .status(),
+        StatusCode::UNAUTHORIZED
+    );
+    let response = router
+        .clone()
+        .oneshot(request("GET", path, true))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let bytes = to_bytes(response.into_body(), 1024 * 1024).await.unwrap();
+    let text = String::from_utf8_lossy(&bytes);
+    assert!(!text.contains(home.0.to_str().unwrap()));
+    assert!(!text.contains("not exposed"));
+    let body: Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(body["themes"][0]["available"], true);
+    assert_eq!(body["themes"][0]["colorMode"], "dark");
+    assert_eq!(body["themes"][0]["colors"]["editor.background"], "#171717");
+    assert_eq!(
+        router
+            .oneshot(request(
+                "GET",
+                "/v1/extensions/example/demo/2.0.0/color-themes",
+                true
+            ))
+            .await
+            .unwrap()
+            .status(),
+        StatusCode::NOT_FOUND
+    );
 }

@@ -5,6 +5,10 @@ export function listInstalledExtensions(connection: AnyHarnessClientConnection, 
   return getAnyHarnessClient(connection).extensions.list(options);
 }
 
+export function listExtensionColorThemes(connection: AnyHarnessClientConnection, identity: ExtensionPackageIdentity, options?: AnyHarnessRequestOptions) {
+  return getAnyHarnessClient(connection).extensions.colorThemes(identity, options);
+}
+
 export function uninstallRegisteredExtension(connection: AnyHarnessClientConnection, identity: ExtensionPackageIdentity) {
   return getAnyHarnessClient(connection).extensions.uninstall(identity);
 }

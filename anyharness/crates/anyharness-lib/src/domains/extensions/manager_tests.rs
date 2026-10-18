@@ -6,6 +6,74 @@ use super::model::ExtensionState;
 use crate::persistence::Db;
 
 #[test]
+fn color_themes_read_only_declared_core_colors_from_registered_packages() {
+    use super::installer_tests::archive_with_content;
+    let home = TestDirectory::new();
+    let manager = ExtensionManager::new(Db::open(&home.0).unwrap(), home.0.clone());
+    assert!(matches!(
+        manager.color_themes(&identity("1.0.0")),
+        Err(super::manager::ManagementError::NotInstalled)
+    ));
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"][0]["uiTheme"] = serde_json::json!("vs-dark");
+    let (archive, digest) = archive_with_content(&home.0, &raw, "extension/themes/demo.json", br##"{
+        "colors":{"editor.background":"#171717","editor.foreground":"#ffffff","secret":"do not expose"},
+        "tokenColors":[{"scope":"comment"}]
+    }"##);
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let (themes, truncated) = manager.color_themes(&identity("1.0.0")).unwrap();
+    assert!(!truncated);
+    assert_eq!(themes.len(), 1);
+    assert_eq!(themes[0].label, "Demo");
+    assert_eq!(themes[0].color_mode, Some("dark"));
+    assert!(themes[0].available);
+    assert_eq!(themes[0].colors.len(), 2);
+    assert_eq!(themes[0].colors["editor.foreground"], "#ffffff");
+    fs::write(home.0.join("extensions/packages/example.demo-1.0.0/extension/themes/demo.json"), br##"{"include":"../../outside.json","colors":{"editor.background":"#171717","editor.foreground":"#ffffff"}}"##).unwrap();
+    assert!(!manager.color_themes(&identity("1.0.0")).unwrap().0[0].available);
+    fs::write(
+        home.0
+            .join("extensions/packages/example.demo-1.0.0/extension/themes/demo.json"),
+        b"// unsupported JSON comments",
+    )
+    .unwrap();
+    let (themes, _) = manager.color_themes(&identity("1.0.0")).unwrap();
+    assert!(!themes[0].available);
+    assert!(themes[0].colors.is_empty());
+    let resource = home
+        .0
+        .join("extensions/packages/example.demo-1.0.0/extension/themes/demo.json");
+    fs::write(&resource, vec![b' '; 1_048_577]).unwrap();
+    assert!(!manager.color_themes(&identity("1.0.0")).unwrap().0[0].available);
+    #[cfg(unix)]
+    {
+        let outside = home.0.join("outside.json");
+        fs::write(&outside, br##"{"type":"dark","colors":{"editor.background":"#171717","editor.foreground":"#ffffff"}}"##).unwrap();
+        fs::remove_file(&resource).unwrap();
+        std::os::unix::fs::symlink(outside, resource).unwrap();
+        assert!(manager.color_themes(&identity("1.0.0")).is_err());
+    }
+}
+
+#[test]
+fn color_theme_inventory_is_bounded() {
+    let home = TestDirectory::new();
+    let manager = ExtensionManager::new(Db::open(&home.0).unwrap(), home.0.clone());
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"] =
+        serde_json::Value::Array(vec![raw["contributes"]["themes"][0].clone(); 33]);
+    let (archive, digest) = archive(&home.0, &raw, "extension/themes/demo.json");
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let (themes, truncated) = manager.color_themes(&identity("1.0.0")).unwrap();
+    assert_eq!(themes.len(), 32);
+    assert!(truncated);
+}
+
+#[test]
 fn registered_install_survives_restart_and_uninstall_removes_only_selected_version() {
     let home = TestDirectory::new();
     let db = Db::open(&home.0).unwrap();

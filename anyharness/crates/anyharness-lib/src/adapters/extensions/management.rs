@@ -71,6 +71,14 @@ impl PackageDirectory {
             .is_ok()
     }
 
+    pub fn read_theme(&self, name: &str, relative: &Path) -> Result<Value, PackageError> {
+        self.read_json(
+            name,
+            &Path::new("extension").join(relative),
+            MAX_VSIX_MANIFEST_BYTES,
+        )
+    }
+
     pub fn quarantine(&self, name: &str, removal_id: &str) -> Result<(), PackageError> {
         let source = self.package_path(name)?;
         let target = self.removal_path(removal_id)?;

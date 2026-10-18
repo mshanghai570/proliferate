@@ -409,6 +409,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/extensions/{namespace}/{name}/{version}/color-themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_color_themes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/replay/recordings": {
         parameters: {
             query?: never;
@@ -3164,6 +3180,16 @@ export interface components {
             expectedHandoffOpId?: string | null;
             requireCleanGitState?: boolean;
         };
+        ExtensionColorTheme: {
+            available: boolean;
+            /** @description Normalized light/dark mode; absent when the theme cannot be imported. */
+            colorMode?: string | null;
+            /** @description Only the six supported core app color keys are exposed. */
+            colors: {
+                [key: string]: string;
+            };
+            label: string;
+        };
         /** @enum {string} */
         ExtensionInstallationState: "installing" | "installed" | "removing" | "error";
         /** @enum {string} */
@@ -3610,6 +3636,10 @@ export interface components {
         };
         ItemStartedEvent: {
             item: components["schemas"]["TranscriptItemPayload"];
+        };
+        ListExtensionColorThemesResponse: {
+            themes: components["schemas"]["ExtensionColorTheme"][];
+            truncated: boolean;
         };
         ListInstalledExtensionsResponse: {
             extensions: components["schemas"]["InstalledExtensionSummary"][];
@@ -6921,6 +6951,75 @@ export interface operations {
                 };
             };
             /** @description Package validation failed; package preserved */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension management unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_color_themes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                namespace: string;
+                name: string;
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Declared core app color data from an installed package */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListExtensionColorThemesResponse"];
+                };
+            };
+            /** @description Invalid extension identity */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Runtime authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension version is not installed */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Package validation failed */
             409: {
                 headers: {
                     [name: string]: unknown;

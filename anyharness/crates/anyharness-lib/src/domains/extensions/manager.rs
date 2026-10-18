@@ -25,6 +25,8 @@ pub enum ManagementError {
     AlreadyRegistered,
     #[error("package receipt or manifest does not match its registration")]
     InvalidPackage,
+    #[error("extension version is not installed")]
+    NotInstalled,
 }
 
 /// Blocking use cases. Transports must call these off their async executor.
@@ -51,6 +53,28 @@ impl ExtensionManager {
         let packages = PackageDirectory::lock(&self.home)?;
         self.recover(&packages)?;
         Ok(self.store.list()?)
+    }
+
+    #[tracing::instrument(skip_all)]
+    pub fn color_themes(
+        &self,
+        identity: &ExtensionPackageIdentity,
+    ) -> Result<(Vec<super::themes::PackageColorTheme>, bool), ManagementError> {
+        let name = identity.directory_name()?;
+        let packages = PackageDirectory::lock(&self.home)?;
+        self.recover(&packages)?;
+        let row = self
+            .store
+            .list()?
+            .into_iter()
+            .find(|row| row.identity == *identity && row.state == ExtensionState::Installed)
+            .ok_or(ManagementError::NotInstalled)?;
+        self.validate_package(&packages, &row)?;
+        Ok(super::themes::read_color_themes(
+            &packages,
+            &name,
+            &packages.read_manifest(&name)?,
+        ))
     }
 
     #[tracing::instrument(skip_all)]

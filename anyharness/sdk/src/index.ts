@@ -23,6 +23,8 @@ export type {
   ExtensionPackageIdentity,
   InstalledExtensionSummary,
   ListInstalledExtensionsResponse,
+  ExtensionColorTheme,
+  ListExtensionColorThemesResponse,
 } from "./types/extensions.js";
 
 export type {

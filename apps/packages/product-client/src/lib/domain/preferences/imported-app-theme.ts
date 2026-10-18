@@ -46,6 +46,8 @@ export function sanitizeImportedAppTheme(value: unknown): ImportedAppTheme | nul
   const buttonBackground = input.buttonBackground == null ? null : color(input.buttonBackground);
   const buttonForeground = input.buttonForeground == null ? null : color(input.buttonForeground);
   if (!background || !foreground || !sidebarBackground || !sidebarForeground
+    || (input.buttonBackground != null && !buttonBackground)
+    || (input.buttonForeground != null && !buttonForeground)
     || (buttonBackground === null) !== (buttonForeground === null)) return null;
   if (contrast(background, foreground) < 4.5
     || contrast(sidebarBackground, sidebarForeground) < 4.5
@@ -63,6 +65,11 @@ export function parseImportedAppTheme(source: string): ImportedAppTheme {
   }
   const theme = record(input);
   const colors = record(theme?.colors);
+  for (const key of ["button.background", "button.foreground"]) {
+    if (colors && key in colors && !color(colors[key])) {
+      throw new Error("Optional button colors must use six-digit hex values.");
+    }
+  }
   const background = color(colors?.["editor.background"]);
   const foreground = color(colors?.["editor.foreground"]);
   const sidebarBackground = colors && "sideBar.background" in colors

@@ -34,6 +34,11 @@ describe("imported app theme", () => {
     expect(() => parseImportedAppTheme(source.replace("#ffffff", "#111111"))).toThrow();
     expect(() => parseImportedAppTheme(source.replace("#202830", "not a color"))).toThrow();
     expect(sanitizeImportedAppTheme({ ...parseImportedAppTheme(source), background: "var(--bad)" })).toBeNull();
+    expect(() => parseImportedAppTheme(JSON.stringify({ name: "Invalid buttons", type: "dark", colors: {
+      "editor.background": "#101820", "editor.foreground": "#ffffff",
+      "button.background": "red", "button.foreground": "blue",
+    } }))).toThrow("six-digit hex");
+    expect(sanitizeImportedAppTheme({ ...parseImportedAppTheme(source), buttonBackground: "red", buttonForeground: "blue" })).toBeNull();
   });
 
   it("reports strict JSON and mode requirements", () => {

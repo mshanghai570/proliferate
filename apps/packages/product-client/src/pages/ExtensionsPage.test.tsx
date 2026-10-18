@@ -5,6 +5,10 @@ import { afterEach, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import { ExtensionsPage } from "./ExtensionsPage";
 
+vi.mock("@proliferate/product-client/host/ProductHostProvider", () => ({
+  useProductHost: () => ({ desktop: {} }),
+}));
+
 vi.mock("#product/components/workspace/shell/screen/MainSidebarPageShell", () => ({
   MainSidebarPageShell: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
@@ -16,7 +20,7 @@ it("does not contact the registry while discovery is disabled", () => {
   const fetchImpl = vi.fn();
   vi.stubGlobal("fetch", fetchImpl);
   render(<ExtensionsPage />);
-  expect(screen.getByRole("heading", { name: "Extensions preview is disabled" })).toBeTruthy();
+  expect(screen.getByRole("heading", { name: "Extensions discovery is disabled" })).toBeTruthy();
   expect(fetchImpl).not.toHaveBeenCalled();
 });
 

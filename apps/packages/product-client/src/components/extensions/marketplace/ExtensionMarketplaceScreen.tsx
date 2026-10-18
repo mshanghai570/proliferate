@@ -11,7 +11,7 @@ import { ExtensionDetails } from "./ExtensionDetails";
 import { ExtensionRegistryFailure } from "./ExtensionRegistryFailure";
 import { InstalledExtensions } from "./InstalledExtensions";
 
-export function ExtensionMarketplaceScreen() {
+export function ExtensionMarketplaceScreen({ appColorsAvailable = false }: { appColorsAvailable?: boolean }) {
   const state = useExtensionMarketplace();
   const { search } = state;
   return (
@@ -36,7 +36,7 @@ export function ExtensionMarketplaceScreen() {
             </>}
           </div>
           <div className="min-h-0 flex-1 overflow-auto">
-            {state.installed ? <InstalledExtensions />
+            {state.installed ? <InstalledExtensions appColorsAvailable={appColorsAvailable} />
               : search.isError ? <ExtensionRegistryFailure error={search.error} onRetry={() => { void search.refetch(); }} />
                 : search.isPending ? <p role="status" className="p-5 text-ui text-muted-foreground">{copy.loading}</p>
                   : search.data.extensions.length === 0 ? <div className="p-5"><h2 className="text-ui font-semibold">{copy.empty}</h2><p className="mt-2 text-ui text-muted-foreground">{copy.emptyHint}</p></div>

@@ -2,8 +2,9 @@ import { Button } from "#product/primitives/Button";
 import { Badge } from "#product/primitives/Badge";
 import { EXTENSION_MANAGEMENT_COPY as copy } from "#product/copy/extensions/management";
 import { useInstalledExtensions } from "#product/hooks/extensions/ui/use-installed-extensions";
+import { InstalledExtensionColors } from "#product/components/extensions/marketplace/InstalledExtensionColors";
 
-export function InstalledExtensions() {
+export function InstalledExtensions({ appColorsAvailable = false }: { appColorsAvailable?: boolean }) {
   const state = useInstalledExtensions();
   if (!state.runtimeAvailable) {
     return <p className="p-5 text-ui text-muted-foreground">{copy.disconnected}</p>;
@@ -38,6 +39,7 @@ export function InstalledExtensions() {
                 <Badge>{copy.states[extension.state] ?? copy.states.error}</Badge>
               </div>
               {extension.errorCode && <p className="text-ui text-destructive">{copy.packageErrors[extension.errorCode] ?? copy.packageErrors.package_invalid}</p>}
+              {appColorsAvailable && extension.state === "installed" && <InstalledExtensionColors key={`${state.scope}:${id}`} identity={extension} />}
               <Button
                 variant="secondary"
                 aria-label={`Uninstall ${id}`}

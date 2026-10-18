@@ -1,6 +1,7 @@
 use anyharness_contract::v1::extensions::{
-    ExtensionInstallationState, ExtensionPackageErrorCode, InstallRegistryExtensionRequest,
-    InstalledExtensionSummary, ListInstalledExtensionsResponse,
+    ExtensionColorTheme, ExtensionInstallationState, ExtensionPackageErrorCode,
+    InstallRegistryExtensionRequest, InstalledExtensionSummary, ListExtensionColorThemesResponse,
+    ListInstalledExtensionsResponse,
 };
 use axum::{
     extract::{Path, State},
@@ -35,6 +36,47 @@ pub async fn list_extensions(
         .map_err(map_error)?;
     Ok(Json(ListInstalledExtensionsResponse {
         extensions: rows.into_iter().map(to_summary).collect(),
+    }))
+}
+
+#[utoipa::path(
+    get, path = "/v1/extensions/{namespace}/{name}/{version}/color-themes",
+    params(("namespace" = String, Path), ("name" = String, Path), ("version" = String, Path)),
+    responses(
+        (status = 200, description = "Declared core app color data from an installed package", body = ListExtensionColorThemesResponse),
+        (status = 400, description = "Invalid extension identity", body = anyharness_contract::v1::ProblemDetails),
+        (status = 401, description = "Runtime authentication required", body = anyharness_contract::v1::ProblemDetails),
+        (status = 404, description = "Extension version is not installed", body = anyharness_contract::v1::ProblemDetails),
+        (status = 409, description = "Package validation failed", body = anyharness_contract::v1::ProblemDetails),
+        (status = 503, description = "Extension management unavailable", body = anyharness_contract::v1::ProblemDetails)
+    ), tag = "extensions"
+)]
+pub async fn list_color_themes(
+    State(state): State<AppState>,
+    Path((namespace, name, version)): Path<(String, String, String)>,
+) -> Result<Json<ListExtensionColorThemesResponse>, ApiError> {
+    let manager = state.extension_manager.clone();
+    let (themes, truncated) = run_blocking("extension_color_themes", move || {
+        manager.color_themes(&ExtensionPackageIdentity {
+            namespace,
+            name,
+            version,
+        })
+    })
+    .await
+    .map_err(|_| unavailable())?
+    .map_err(map_error)?;
+    Ok(Json(ListExtensionColorThemesResponse {
+        themes: themes
+            .into_iter()
+            .map(|theme| ExtensionColorTheme {
+                label: theme.label,
+                color_mode: theme.color_mode.map(str::to_owned),
+                colors: theme.colors,
+                available: theme.available,
+            })
+            .collect(),
+        truncated,
     }))
 }
 
@@ -135,6 +177,10 @@ fn to_summary(row: RegisteredExtension) -> InstalledExtensionSummary {
 
 fn map_error(error: ManagementError) -> ApiError {
     match error {
+        ManagementError::NotInstalled => ApiError::not_found(
+            "This extension version is not installed.",
+            "EXTENSION_NOT_INSTALLED",
+        ),
         ManagementError::Manifest(_) => ApiError::bad_request(
             "Extension identity is invalid.",
             "EXTENSION_INVALID_IDENTITY",
