@@ -20,6 +20,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agent-auth/local-providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_local_providers"];
+        put?: never;
+        post: operations["create_local_provider"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agent-auth/local-providers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_local_provider"];
+        options?: never;
+        head?: never;
+        patch: operations["set_local_provider_enabled"];
+        trace?: never;
+    };
     "/v1/agent-auth/native-bridge": {
         parameters: {
             query?: never;
@@ -3022,6 +3054,13 @@ export interface components {
             thread: components["schemas"]["CoworkThread"];
             workspace: components["schemas"]["Workspace"];
         };
+        CreateLocalProviderRequest: {
+            apiFormat: string;
+            apiKey?: string | null;
+            endpoint: string;
+            models: string[];
+            name: string;
+        };
         CreatePullRequestRequest: {
             baseBranch: string;
             body?: string | null;
@@ -3688,6 +3727,17 @@ export interface components {
         ListWorkspaceFilesResponse: {
             directoryPath: string;
             entries: components["schemas"]["WorkspaceFileEntry"][];
+        };
+        LocalProviderSummary: {
+            enabled: boolean;
+            id: string;
+            modelCount: number;
+            name: string;
+        };
+        LocalProvidersResponse: {
+            encryptionAvailable: boolean;
+            managedAuthActive: boolean;
+            providers: components["schemas"]["LocalProviderSummary"][];
         };
         LoginCommand: {
             args: string[];
@@ -5205,6 +5255,9 @@ export interface components {
             children: components["schemas"]["SubagentRosterEntry"][];
             parent: components["schemas"]["AgentOperationsAgent"];
         };
+        SetLocalProviderEnabledRequest: {
+            enabled: boolean;
+        };
         SetProjectMcpServerEnabledRequest: {
             enabled: boolean;
         };
@@ -5986,6 +6039,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    list_local_providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProvidersResponse"];
+                };
+            };
+        };
+    };
+    create_local_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLocalProviderRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProviderSummary"];
+                };
+            };
+        };
+    };
+    remove_local_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_local_provider_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetLocalProviderEnabledRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProviderSummary"];
                 };
             };
         };

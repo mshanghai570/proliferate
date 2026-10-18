@@ -30,6 +30,115 @@
         }
       }
     },
+    "/v1/agent-auth/local-providers": {
+      "get": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "list_local_providers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalProvidersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "create_local_provider",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLocalProviderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalProviderSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agent-auth/local-providers/{id}": {
+      "delete": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "remove_local_provider",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "set_local_provider_enabled",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLocalProviderEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalProviderSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agent-auth/native-bridge": {
       "get": {
         "tags": [
@@ -11115,6 +11224,39 @@
           }
         }
       },
+      "CreateLocalProviderRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "endpoint",
+          "models",
+          "apiFormat"
+        ],
+        "properties": {
+          "apiFormat": {
+            "type": "string"
+          },
+          "apiKey": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreatePullRequestRequest": {
         "type": "object",
         "required": [
@@ -13769,6 +13911,52 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/WorkspaceFileEntry"
+            }
+          }
+        }
+      },
+      "LocalProviderSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "enabled",
+          "modelCount"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "modelCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "LocalProvidersResponse": {
+        "type": "object",
+        "required": [
+          "providers",
+          "encryptionAvailable",
+          "managedAuthActive"
+        ],
+        "properties": {
+          "encryptionAvailable": {
+            "type": "boolean"
+          },
+          "managedAuthActive": {
+            "type": "boolean"
+          },
+          "providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalProviderSummary"
             }
           }
         }
@@ -19982,6 +20170,18 @@
             "$ref": "#/components/schemas/AgentOperationsAgent"
           }
         }
+      },
+      "SetLocalProviderEnabledRequest": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "SetProjectMcpServerEnabledRequest": {
         "type": "object",
