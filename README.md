@@ -42,7 +42,7 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 ## Features
 
 - **[Native harnesses](https://proliferate.com/docs/product/agents)** - Claude Code, Codex, OpenCode, Cursor, Grok, and more
-- **Custom AI providers** - connect OpenAI-compatible endpoints to local OpenCode sessions, including providers that run on your machine
+- **Local AI providers** - connect OpenAI-compatible endpoints to local OpenCode sessions with encrypted credentials on your Mac; no Proliferate sign-in is required
 - **Custom ACP agents** - connect installed agents with their own command, arguments, and environment
 - **Agent skills** - import `SKILL.md` packages and resources, then enable them for all repositories or individual repositories
 - **[Worktree workspaces](https://proliferate.com/docs/product/workspaces)** - an isolated branch and working directory for every task
@@ -56,8 +56,9 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 Personal Intel preview builds run in GitHub Actions on the
 `codex/macos-extensions-fonts` branch. Download the DMG from the
 **Build Intel preview DMG** run's artifacts. The separate Preview app requires
-macOS 15+, is ad-hoc signed without notarization, and uses the local API on port
-8000; a successful build does not provision that control plane.
+macOS 15+, is ad-hoc signed without notarization. Managed features use the local API on
+port 8000; a successful build does not provision that control plane. Local API
+providers and project MCP settings use the bundled runtime.
 
 ### Current macOS customization scope
 
@@ -69,8 +70,8 @@ reset in Appearance. Syntax colors, theme includes, and executable extensions
 are unsupported. Extension code does not activate in the editor. Set
 `VITE_EXTENSION_MARKETPLACE=0` when building Desktop to hide the preview.
 
-Custom OpenAI-compatible providers currently add models to local OpenCode
-sessions; they do not create standalone agents or configure every harness.
+Local OpenAI-compatible providers add models to local OpenCode sessions without
+a Proliferate account. They do not create standalone agents or configure every harness.
 Custom ACP agents are a separate option and must implement Agent Client
 Protocol. MCP tools are available through supported integrations and local
 project server settings described below. Appearance
@@ -162,41 +163,42 @@ Proliferate runs each agent through its native harness.
 
 ## Connect a custom AI provider
 
-Open **Settings → Agents → LLM providers** to manage model API connections for
-local sessions. **Configure** offers supported hosted providers; **Add
-OpenAI-compatible provider** configures a custom endpoint. Custom ACP agents have
-a separate settings page.
+Open **Settings → Agents → LLM providers → Add API provider**. These connections
+are saved by the local runtime; no control plane or Proliferate account is needed.
+Custom ACP agents have a separate settings page.
 
-To add a custom endpoint:
-
-1. Choose **Custom endpoint**, **Ollama**, or **LM Studio**. The local presets
-   fill the default server address; start that server and load a model first.
+1. Choose **Custom endpoint**, **Ollama**, or **LM Studio**. Local presets fill
+   the default server address; start that server and load a model first.
    Switching setup clears the key and model fields.
-2. Enter a name and the provider's API base URL, including `/v1` if required by
-   that provider. Proliferate uses the URL as entered.
+2. Enter a name and the provider's API base URL, including its API base path,
+   such as `/v1`. Proliferate uses the URL as entered.
 3. Choose **Chat Completions** or **Responses** to match the provider's API.
-4. Enter an API key if required. Leave it empty for a provider without
-   authentication.
-5. Enter the model IDs supplied by the provider, one per line, and save.
+4. Enter an API key if required. Leave it empty for a keyless server.
+5. Enter model IDs, one per line, and save.
 
-Connections can be enabled or removed individually. API keys are stored in the
-encrypted credential vault. Models become selectable after the runtime discovers
-them through OpenCode; saving a connection does not verify that its endpoint is
-reachable or that every model supports coding tools. Existing provider logins
-remain available.
+Connections can be enabled, disabled, and removed independently. Credentials
+are encrypted with the runtime's data key, which the desktop app keeps in the
+Mac keychain. Inventory responses never return keys or full configurations.
+To change a saved connection, remove it and add it again. The runtime supports
+up to 32 local connections and 100 model IDs per connection.
 
-Use **Models** on the provider page to inspect and refresh the runtime's model
-list. When creating a chat, choose **OpenCode**, then one of its reported models.
-The page also links to runtime installation and authentication setup. Provider
-settings require a reachable, signed-in control plane for the encrypted vault;
-cloud compute is not required.
+Choose **OpenCode** when creating a chat, then select one of the runtime's
+reported models. Use **Models** on the provider page to inspect and refresh the
+list. Saving does not test connectivity or confirm coding tool support. Changes
+apply to new agent processes; running sessions retain their credentials.
 
-The local presets use the documented compatibility endpoints for
+When a managed authentication profile is applied, local connections are paused.
+The app shows that state and permits disabling or removing local entries.
+**Runtime setup and managed provider settings** opens OpenCode's existing
+configuration page, including hosted-provider keys in the control-plane vault.
+The local vault is separate and is never uploaded by the auth-state courier.
+
+The local presets use documented compatibility endpoints for
 [Ollama](https://github.com/ollama/ollama/blob/main/docs/api/openai-compatibility.mdx)
 and [LM Studio](https://lmstudio.ai/docs/developer/openai-compat).
 
-This configuration currently applies to local OpenCode sessions. Other harnesses
-retain their own authentication and provider settings.
+This configuration applies to local OpenCode sessions. Other harnesses retain
+their own authentication and provider settings.
 
 ## Connect a local project MCP server
 

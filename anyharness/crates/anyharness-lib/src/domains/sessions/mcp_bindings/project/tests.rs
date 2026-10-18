@@ -16,8 +16,8 @@ impl Drop for TestHome {
     }
 }
 
-fn cipher() -> SessionDataCipher {
-    SessionDataCipher::from_env_value("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=").unwrap()
+fn cipher() -> DataCipher {
+    DataCipher::from_env_value("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=").unwrap()
 }
 fn server() -> SessionMcpServer {
     SessionMcpServer::Http(SessionMcpHttpServer {

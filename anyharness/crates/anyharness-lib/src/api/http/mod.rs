@@ -24,6 +24,7 @@ mod git_task;
 pub mod goals;
 pub mod health;
 pub mod hosting;
+pub mod local_providers;
 pub mod loops;
 pub mod mobility;
 mod mobility_archive_contract;

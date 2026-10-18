@@ -8,7 +8,7 @@ depending on organization integration definitions or an agent skill.
 
 `project_mcp_servers` holds one row per `(repo_root_id, name)`. Only the name,
 transport, and enabled flag are plaintext. The entire server configuration is
-encrypted with the runtime's `SessionDataCipher`; Desktop provisions its data key
+encrypted with the runtime's `DataCipher`; Desktop provisions its data key
 from the keychain. A missing key refuses writes, and unreadable enabled settings
 refuse launch with a redacted error. Disabling or removing a row does not need
 the key. Repository deletion cascades to its rows. These settings are not part

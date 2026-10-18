@@ -58,3 +58,7 @@ export interface AgentAuthStateDocument {
   issuing_server_origin?: string | null;
   harnesses: AgentAuthStateHarness[];
 }
+
+export type CreateLocalProviderRequest = components["schemas"]["CreateLocalProviderRequest"];
+export type LocalProviderSummary = components["schemas"]["LocalProviderSummary"];
+export type LocalProvidersResponse = components["schemas"]["LocalProvidersResponse"];

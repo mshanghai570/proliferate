@@ -3,7 +3,6 @@ use std::sync::Arc;
 
 use anyharness_contract::v1::SessionMcpBindingSummary;
 
-use super::crypto::SessionDataCipher;
 use super::model::SessionMcpServer;
 use super::product_catalog::ProductMcpLaunchCatalog;
 use super::product_launch::ProductMcpLaunchError;
@@ -17,6 +16,7 @@ use crate::domains::sessions::extensions::{
 use crate::domains::sessions::model::SessionRecord;
 use crate::domains::sessions::response_formatting;
 use crate::domains::workspaces::model::WorkspaceRecord;
+use crate::persistence::data_cipher::DataCipher;
 
 pub const SESSION_RESTART_REQUIRED_DETAIL: &str =
     "This session's MCP bindings can't be decrypted. Please restart the session.";
@@ -39,7 +39,7 @@ pub enum SessionMcpLaunchAssemblyError {
 }
 
 pub fn assemble_session_mcp_launch(
-    _cipher: Option<&SessionDataCipher>,
+    _cipher: Option<&DataCipher>,
     session_extensions: &[Arc<dyn SessionExtension>],
     product_mcp_launch_catalog: &ProductMcpLaunchCatalog,
     workspace: &WorkspaceRecord,
@@ -298,9 +298,8 @@ mod tests {
         }
     }
 
-    fn sample_cipher() -> SessionDataCipher {
-        SessionDataCipher::from_env_value("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
-            .expect("cipher")
+    fn sample_cipher() -> DataCipher {
+        DataCipher::from_env_value("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=").expect("cipher")
     }
 
     fn workspace_record() -> WorkspaceRecord {

@@ -14,6 +14,7 @@ pub mod health;
 pub mod hosting;
 pub mod interactions;
 pub mod launch_options;
+pub mod local_providers;
 pub mod loops;
 pub mod mcp;
 pub mod mobility;

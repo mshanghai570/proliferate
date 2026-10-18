@@ -6,6 +6,10 @@ The one-sentence contract: **at session launch, the runtime reads one local docu
 
 This spec reads as ground truth for the final system. Every difference from what `main` runs today is collected in the transitional [Delta vs prod](#delta-vs-prod) section at the end, which is deleted when spec and code converge.
 
+The desktop also supports an independent [local provider vault](local-providers.md)
+for OpenCode when no matching managed document is applied. Its encrypted local
+choices never replace managed selections or travel through the courier.
+
 ## 0 · Scope
 
 **The folder census** — the code inside this system's boundary:

@@ -64,7 +64,6 @@ use crate::domains::sessions::deletion::SessionDeleteWorkflow;
 use crate::domains::sessions::links::completions::LinkCompletionStore;
 use crate::domains::sessions::links::service::SessionLinkService;
 use crate::domains::sessions::links::store::SessionLinkStore;
-use crate::domains::sessions::mcp_bindings::crypto::{load_data_cipher_from_env, DATA_KEY_ENV_VAR};
 use crate::domains::sessions::mcp_bindings::integration_gateway::IntegrationGatewaySessionLaunchExtension;
 use crate::domains::sessions::mcp_bindings::product_registry::ProductMcpEndpointRegistry;
 use crate::domains::sessions::runtime::SessionRuntime;
@@ -95,6 +94,7 @@ use crate::domains::workspaces::worktree_runtime::WorkspaceWorktreeRuntime;
 use crate::live::sessions::LiveSessionManager;
 use crate::live::terminals::{AgentLoginTerminalService, TerminalService};
 use crate::live::workflows::WorkflowManager;
+use crate::persistence::data_cipher::{load_data_cipher_from_env, DATA_KEY_ENV_VAR};
 use crate::persistence::Db;
 
 #[cfg(test)]

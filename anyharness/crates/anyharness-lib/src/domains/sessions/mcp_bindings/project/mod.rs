@@ -5,13 +5,13 @@ mod tests;
 mod validation;
 
 use self::model::{ProjectMcpInventory, ProjectMcpServerMetadata, ProjectMcpTransport};
-use super::crypto::{decrypt_bytes, encrypt_bytes, SessionDataCipher};
 use super::model::SessionMcpServer;
 use crate::domains::repo_roots::store::RepoRootStore;
 use crate::domains::sessions::extensions::{
     SessionExtension, SessionLaunchContext, SessionLaunchExtras,
 };
 use crate::domains::sessions::model::SessionMcpBindingPolicy;
+use crate::persistence::data_cipher::{decrypt_bytes, encrypt_bytes, DataCipher};
 use crate::persistence::Db;
 use store::{ProjectMcpStore, StoredServer};
 
@@ -31,11 +31,11 @@ pub enum ProjectMcpError {
 pub struct ProjectMcpManager {
     store: ProjectMcpStore,
     repos: RepoRootStore,
-    cipher: Option<SessionDataCipher>,
+    cipher: Option<DataCipher>,
 }
 
 impl ProjectMcpManager {
-    pub fn new(db: Db, cipher: Option<SessionDataCipher>) -> Self {
+    pub fn new(db: Db, cipher: Option<DataCipher>) -> Self {
         Self {
             store: ProjectMcpStore(db.clone()),
             repos: RepoRootStore::new(db),

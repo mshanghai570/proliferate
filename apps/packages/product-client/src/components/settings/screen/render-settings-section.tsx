@@ -70,7 +70,7 @@ export function renderSettingsSection(
     return <HarnessPane harnessKind={getHarnessKindForSettingsSection(activeSection)} />;
   }
   if (activeSection === "agent-providers") {
-    return renderCloudGatedPane(authGate, () => <LlmProvidersPane />);
+    return <LlmProvidersPane />;
   }
   if (activeSection === "agent-api-keys") {
     return renderCloudGatedPane(authGate, () => <ApiKeysPane />);

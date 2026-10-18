@@ -9,12 +9,12 @@ use crate::domains::agents::launch_options::{
 use crate::domains::agents::route_auth::{apply_state_file, AgentAuthState};
 use crate::domains::sessions::attachment_storage::PromptAttachmentStorage;
 use crate::domains::sessions::live_ports::SessionAttachmentSource;
-use crate::domains::sessions::mcp_bindings::crypto::DATA_KEY_ENV_VAR;
 use crate::domains::sessions::store::SessionStore;
 use crate::live::sessions::model::ActorCapabilities;
 use crate::live::sessions::product_context::{
     AgentProductContext, AgentProductContextResolutionError, AgentProductContextResolver,
 };
+use crate::persistence::data_cipher::DATA_KEY_ENV_VAR;
 use crate::persistence::Db;
 
 /// Store-backed [`ActorCapabilities`] for tests: the same wiring as

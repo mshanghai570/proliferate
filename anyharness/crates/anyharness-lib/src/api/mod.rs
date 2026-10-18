@@ -1,5 +1,7 @@
 pub mod auth;
 pub mod http;
+#[cfg(test)]
+mod local_provider_tests;
 pub mod openapi;
 pub mod router;
 pub mod sse;

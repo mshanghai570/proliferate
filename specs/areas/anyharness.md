@@ -22,6 +22,14 @@ SQLite registration lives in the extension domain store; package receipts are
 filesystem evidence. Registration does not imply activation or an extension-host
 process.
 
+## Local credential persistence
+
+`domains/agents/local_providers/` owns the standalone local model-provider vault.
+Its current behavior and precedence are described in
+[local providers](../systems/agent_auth/local-providers.md). Shared data encryption
+lives in `persistence/data_cipher.rs`; MCP bindings and the local vault import it
+directly. The API maps public DTOs at `api/http/local_providers.rs`.
+
 ## Launch-option and live-session authority
 
 `domains/agents/launch_options/` owns target-observed pre-launch state and exact validation. `domains/agents/launch_probe/` owns override-free detection. `domains/sessions/launch_intent.rs` and the session store own the atomic resolved intent. The live actor applies and confirms that intent before ready; `domains/sessions/live_config/` owns the latest full per-session snapshot and validated mutation. Catalog modules are distribution, presentation, and compatibility support only and cannot authorize executable values.

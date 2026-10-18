@@ -68,6 +68,38 @@ jobs:
           SKIP_RUST: "1"
           ANYHARNESS_DEV_RUNTIME_BIN: ${{ github.workspace }}/target/x86_64-apple-darwin/release/anyharness
         run: pnpm --filter @anyharness/sdk generate
+      - name: Save generated runtime contracts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: runtime-contract-sources
+          path: |
+            anyharness/sdk/generated/openapi.json
+            anyharness/sdk/src/generated/openapi.ts
+          retention-days: 3
+      - name: Verify generated API compatibility
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          const file = 'anyharness/sdk/generated/openapi.json';
+          const before = JSON.parse(execFileSync('git', ['show', `HEAD:${file}`], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }));
+          const after = JSON.parse(fs.readFileSync(file, 'utf8'));
+          for (const [path, value] of Object.entries(before.paths)) assert.deepEqual(after.paths[path], value, path);
+          for (const [name, value] of Object.entries(before.components.schemas)) assert.deepEqual(after.components.schemas[name], value, name);
+          assert.deepEqual(after.info, before.info);
+          assert.ok(after.paths['/v1/agent-auth/local-providers']);
+          assert.ok(after.paths['/v1/agent-auth/local-providers/{id}']);
+          const ids = Object.values(after.paths).flatMap(path => Object.values(path).filter(value => value && typeof value === 'object' && value.operationId).map(value => value.operationId));
+          assert.equal(new Set(ids).size, ids.length, 'operation IDs must be unique');
+          JS
+      - name: Check native provider and encryption behavior
+        run: |
+          cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util local_provider -- --test-threads=1
+          cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util mcp_bindings -- --test-threads=1
+      - name: Check runtime SDK provider operations
+        working-directory: anyharness/sdk
+        run: pnpm exec vitest run src/client/agent-auth.test.ts --maxWorkers=1 --fileParallelism=false
       - name: Build bundled agents
         run: |
           command -v zstd >/dev/null || brew install zstd
@@ -105,6 +137,7 @@ jobs:
             src/lib/domain/settings/navigation-presentation.test.ts \
             src/lib/domain/settings/navigation.test.ts \
             src/hooks/agents/workflows/use-custom-providers.test.tsx \
+            src/hooks/agents/workflows/use-local-provider-editor.test.tsx \
             src/components/settings/panes/agents/harness/CustomProviderModal.test.tsx \
             src/components/settings/panes/agents/harness/CustomProvidersSection.test.tsx \
             src/components/settings/panes/agents/providers/LlmProvidersPane.test.tsx
@@ -139,7 +172,7 @@ jobs:
           {
             echo 'Intel preview DMG: macOS 15+, ad-hoc signed, not notarized.'
             echo "Source: $GITHUB_SHA"
-            echo 'Default API: http://127.0.0.1:8000. Run your local control plane for the provider vault.'
+            echo 'Managed API: http://127.0.0.1:8000. Local API providers and project MCP settings use the bundled runtime.'
           } > artifacts/BUILD-INFO.txt
       - name: Upload Intel DMG
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

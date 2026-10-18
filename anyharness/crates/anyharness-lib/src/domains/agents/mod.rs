@@ -6,6 +6,7 @@ pub mod installer;
 pub mod launch_options;
 pub mod launch_probe;
 pub(crate) mod live_ports;
+pub mod local_providers;
 pub mod model;
 pub mod model_catalog;
 pub mod portability;

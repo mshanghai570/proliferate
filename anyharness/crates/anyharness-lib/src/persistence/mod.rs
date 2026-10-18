@@ -1,5 +1,6 @@
 mod custom_migration_schema;
 mod custom_migrations;
+pub mod data_cipher;
 pub mod migrations;
 pub mod sqlite;
 mod workflow_run_cancel_status_migration;

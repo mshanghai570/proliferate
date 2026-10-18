@@ -26,22 +26,25 @@ Let a person (or an org admin) configure their account, appearance, agents and t
 
 ## LLM providers
 
-Settings → Agents → LLM providers is a dedicated local provider surface, separate
-from custom ACP agent registrations. It uses the existing agent-auth vault and
-OpenCode local selections, and the target's launch-options model inventory. It
-requires control-plane authentication and reachability, independently of cloud
-compute. The page waits for both saved credentials and selections before enabling
-edits; failed reads offer retry. Pending delivery is shown without claiming the
-configuration has reached the runtime.
+Settings → Agents → LLM providers manages the runtime's encrypted
+[local provider vault](../agent_auth/local-providers.md), separately from custom
+ACP agent registrations. It requires a local runtime and its encryption key,
+with no control-plane sign-in. Managed authentication takes precedence; while
+applied, local entries can be disabled or removed but cannot be newly enabled.
 
 The [provider pane](../../../apps/packages/product-client/src/components/settings/panes/agents/providers/LlmProvidersPane.tsx)
-composes the existing hosted-provider picker, custom endpoint editor, and runtime
-model inventory. [Local server presets](../../../apps/packages/product-client/src/config/custom-provider-presets.ts)
-fill editable Ollama or LM Studio compatibility URLs; switching presets clears
-credentials and model drafts. [Draft validation](../../../apps/packages/product-client/src/lib/domain/settings/custom-provider-draft.ts)
-rejects malformed endpoints, embedded URL credentials, substitutions, and invalid
-model lists before the vault write. The server remains authoritative. Saving
-does not verify model connectivity, and provider changes apply to new processes.
+uses metadata-only inventory, confirmation for removal, and runtime-scoped
+drafts. Switching runtime or actor discards credential drafts. Writes bypass
+the query mutation cache; successful saves close the credential form immediately.
+Failed reads block edits and offer retry. The runtime's launch-options inventory
+owns displayed model choices; saving does not establish endpoint connectivity.
+
+[Local presets](../../../apps/packages/product-client/src/config/custom-provider-presets.ts)
+fill editable Ollama or LM Studio URLs and clear keys/models when switched.
+[Draft validation](../../../apps/packages/product-client/src/lib/domain/settings/custom-provider-draft.ts)
+rejects malformed endpoints, URL credentials, substitutions, and invalid model
+lists before submission; the runtime remains authoritative. Managed provider
+configuration remains available through the OpenCode settings link.
 
 ## Public surface
 

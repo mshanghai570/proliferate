@@ -60,6 +60,9 @@ export type {
   AgentAuthStateDocument,
   ApplyAgentAuthStateResponse,
   NativeBridgeResponse,
+  CreateLocalProviderRequest,
+  LocalProviderSummary,
+  LocalProvidersResponse,
 } from "./types/agent-auth.js";
 
 export type {
@@ -573,10 +576,7 @@ export type {
   UpdateTerminalTitleRequest,
 } from "./types/terminals.js";
 
-export type {
-  RunCommandRequest,
-  RunCommandResponse,
-} from "./types/processes.js";
+export type { RunCommandRequest, RunCommandResponse } from "./types/processes.js";
 
 export {
   connectAgentLoginTerminal,

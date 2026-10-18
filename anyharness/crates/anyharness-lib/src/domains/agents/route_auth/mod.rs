@@ -224,6 +224,11 @@ pub(crate) fn resolve_profile_for_launch(
     state: Option<&AgentAuthState>,
     harness_kind: &str,
 ) -> Result<AgentRuntimeAuthProfile, RouteAuthError> {
+    if harness_kind == "opencode" && state.is_none() {
+        if let Some(profile) = super::local_providers::launch_profile(runtime_home)? {
+            return Ok(profile);
+        }
+    }
     resolve_profile_bridged(
         state,
         harness_kind,
@@ -326,14 +331,8 @@ pub fn launch_route_provides_credentials(runtime_home: &Path, harness_kind: &str
 /// process-global env state. Deliberately mirrors
 /// [`resolve_launch_route_auth_for_server`]'s state load + origin filter so
 /// readiness and launch never disagree on whether a route is in effect. This
-/// one stays on the RAW [`resolve_profile`] on purpose: it only asks "does the
-/// enrolled state provide a non-native route?", and the native-migration
-/// bridge can never produce one — a bridged absent harness is `Native` (route
-/// provides nothing) and a refused absent harness is an error (route provides
-/// nothing), so the raw and bridged answers are provably identical here. A
-/// malformed/unresolvable state is treated as "no route" (native readiness
-/// governs) rather than an error — readiness must never fail closed on a
-/// state file the launcher itself tolerates.
+/// Local provider resolution and managed state use the same seam as launch.
+/// A native migration grant never counts as injected credentials.
 fn launch_route_provides_credentials_for_server(
     runtime_home: &Path,
     harness_kind: &str,
@@ -351,7 +350,7 @@ fn launch_route_provides_credentials_for_server(
         }
     };
     matches!(
-        resolve_profile(state.as_ref(), harness_kind),
+        resolve_profile_for_launch(runtime_home, state.as_ref(), harness_kind),
         Ok(AgentRuntimeAuthProfile::Sources(_))
     )
 }
