@@ -2,7 +2,7 @@ name: Build Intel preview DMG
 
 on:
   push:
-    branches: [build/intel-dmg]
+    branches: [build/intel-dmg, codex/macos-extensions-fonts]
   workflow_dispatch:
 
 permissions:
@@ -44,6 +44,8 @@ jobs:
         with:
           key: intel-preview
           cache-on-failure: true
+      - name: Check runtime architecture
+        run: python3 scripts/check_anyharness_boundaries.py
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
       - name: Build native runtime and helpers

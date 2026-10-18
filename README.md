@@ -53,6 +53,12 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 - **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and copy supported theme colors into the macOS app; extension code remains inactive
 - **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
 
+Personal Intel preview builds run in GitHub Actions on the
+`codex/macos-extensions-fonts` branch. Download the DMG from the
+**Build Intel preview DMG** run's artifacts. The separate Preview app requires
+macOS 15+, is ad-hoc signed without notarization, and uses the local API on port
+8000; a successful build does not provision that control plane.
+
 ### Current macOS customization scope
 
 The Extensions destination is visible by default in the macOS app. It provides

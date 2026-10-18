@@ -21,7 +21,12 @@ use thiserror::Error;
 use uuid::Uuid;
 
 use super::package::private_file;
-use crate::domains::extensions::manifest::ExtensionPackageIdentity;
+/// Exact registry coordinates; package admission belongs to the caller.
+pub struct RegistryPackageIdentity {
+    pub namespace: String,
+    pub name: String,
+    pub version: String,
+}
 
 pub const OPEN_VSX_BASE_URL: &str = "https://open-vsx.org";
 
@@ -62,7 +67,7 @@ pub struct FetchedPackage {
 /// `staging_dir` under a unique hidden name.
 pub fn fetch_registry_package(
     base: &str,
-    identity: &ExtensionPackageIdentity,
+    identity: &RegistryPackageIdentity,
     staging_dir: &Path,
     max_package_bytes: u64,
 ) -> Result<FetchedPackage, RegistryFetchError> {
@@ -109,7 +114,7 @@ pub fn fetch_registry_package(
 
 fn check_identity(
     metadata: &Value,
-    identity: &ExtensionPackageIdentity,
+    identity: &RegistryPackageIdentity,
 ) -> Result<(), RegistryFetchError> {
     let namespace = string_at(metadata, &["namespace"])?;
     let name = string_at(metadata, &["name"])?;

@@ -121,9 +121,9 @@ the collector must not contain the debug placeholder marker.
 ### Fork Intel Preview
 
 The `mshanghai570/proliferate` fork has a separate `build-intel-dmg.yml`
-workflow for personal testing. It runs on pushes to `build/intel-dmg` or a
-manual dispatch, uses `macos-15-intel`, and builds the existing Rust helpers,
-runtime SDK, bundled agent seed, and Tauri app. It uploads an Intel DMG,
+workflow for personal testing. It runs on pushes to `build/intel-dmg` or
+`codex/macos-extensions-fonts`, or a manual dispatch, uses `macos-15-intel`, and builds the existing Rust helpers,
+runtime SDK, bundled agent seed, and Tauri app. Runtime architecture checks run before compilation. It uploads an Intel DMG,
 SHA-256 checksum, and source metadata as a 14-day Actions artifact.
 
 The preview uses `com.mshanghai570.proliferate.preview`, requires macOS 15+,

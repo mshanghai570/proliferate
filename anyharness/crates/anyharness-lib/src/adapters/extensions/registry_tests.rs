@@ -4,9 +4,9 @@ use std::thread;
 
 use sha2::{Digest, Sha256};
 
+use super::registry::RegistryPackageIdentity;
 use super::registry::{fetch_registry_package, FetchedPackage, RegistryFetchError};
 use super::vsix_tests::TempDirGuard;
-use crate::domains::extensions::manifest::ExtensionPackageIdentity;
 
 pub(crate) const PAYLOAD: &[u8] = b"not really a vsix, but bytes are bytes";
 const MAX: u64 = 1024 * 1024;
@@ -17,8 +17,8 @@ pub(crate) struct Route {
     body: Vec<u8>,
 }
 
-fn identity() -> ExtensionPackageIdentity {
-    ExtensionPackageIdentity {
+fn identity() -> RegistryPackageIdentity {
+    RegistryPackageIdentity {
         namespace: "example".into(),
         name: "demo".into(),
         version: "1.0.0".into(),

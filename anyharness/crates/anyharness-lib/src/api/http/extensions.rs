@@ -12,7 +12,9 @@ use axum::{
 use super::blocking::run_blocking;
 use super::error::ApiError;
 use crate::adapters::extensions::package::{PackageError, MAX_PACKAGE_BYTES};
-use crate::adapters::extensions::registry::{fetch_registry_package, RegistryFetchError};
+use crate::adapters::extensions::registry::{
+    fetch_registry_package, RegistryFetchError, RegistryPackageIdentity,
+};
 use crate::app::AppState;
 use crate::domains::extensions::manager::ManagementError;
 use crate::domains::extensions::manifest::ExtensionPackageIdentity;
@@ -140,8 +142,13 @@ pub async fn install_registry_extension(
     let manager = state.extension_manager.clone();
     let base_url = state.extension_registry_base_url.clone();
     let row = run_blocking("extension_registry_install", move || {
+        let coordinates = RegistryPackageIdentity {
+            namespace: identity.namespace.clone(),
+            name: identity.name.clone(),
+            version: identity.version.clone(),
+        };
         let fetched =
-            fetch_registry_package(&base_url, &identity, manager.home(), MAX_PACKAGE_BYTES)
+            fetch_registry_package(&base_url, &coordinates, manager.home(), MAX_PACKAGE_BYTES)
                 .map_err(map_fetch_error)?;
         let result = manager
             .install(&fetched.archive, &identity, &fetched.sha256)
