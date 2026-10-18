@@ -7,6 +7,7 @@ export const EXTENSION_MANAGEMENT_COPY = {
   emptyHint: "Browse the registry to install an extension on this runtime.",
   refresh: "Refresh",
   retry: "Retry",
+  details: "Details and versions",
   uninstall: "Uninstall",
   confirm: "Confirm uninstall",
   cancel: "Cancel",

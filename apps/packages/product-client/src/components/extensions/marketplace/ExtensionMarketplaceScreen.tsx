@@ -25,7 +25,7 @@ export function ExtensionMarketplaceScreen({ appColorsAvailable = false }: { app
           <div className="shrink-0 space-y-3 border-b border-border p-5">
             <div className="flex gap-1">
               <Button variant={!state.installed ? "secondary" : "ghost"} aria-pressed={!state.installed} onClick={() => state.setInstalled(false)}>Discover</Button>
-              <Button variant={state.installed ? "secondary" : "ghost"} aria-pressed={state.installed} onClick={() => state.setInstalled(true)}>Installed</Button>
+              <Button ref={state.installedTabRef} variant={state.installed ? "secondary" : "ghost"} aria-pressed={state.installed} onClick={() => state.setInstalled(true)}>Installed</Button>
             </div>
             {!state.installed && <>
               <Input ref={state.searchInputRef} type="search" aria-label="Search extensions" placeholder="Search by name, description, or publisher" value={state.filters.query} onChange={(event) => state.changeFilters({ query: event.target.value })} />
@@ -36,7 +36,7 @@ export function ExtensionMarketplaceScreen({ appColorsAvailable = false }: { app
             </>}
           </div>
           <div className="min-h-0 flex-1 overflow-auto">
-            {state.installed ? <InstalledExtensions appColorsAvailable={appColorsAvailable} />
+            {state.installed ? <InstalledExtensions appColorsAvailable={appColorsAvailable} onSelect={state.setSelected} />
               : search.isError ? <ExtensionRegistryFailure error={search.error} onRetry={() => { void search.refetch(); }} />
                 : search.isPending ? <p role="status" className="p-5 text-ui text-muted-foreground">{copy.loading}</p>
                   : search.data.extensions.length === 0 ? <div className="p-5"><h2 className="text-ui font-semibold">{copy.empty}</h2><p className="mt-2 text-ui text-muted-foreground">{copy.emptyHint}</p></div>

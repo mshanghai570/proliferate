@@ -56,11 +56,14 @@ The UI reports success while clearly stating that the package remains inactive;
 failures use bounded authored feedback. Installation remains disabled when no
 runtime is connected. The
 [Installed section](../../../apps/packages/product-client/src/components/extensions/marketplace/InstalledExtensions.tsx)
-loads the connected runtime's registered versions on demand, shows inactive state
+loads the connected runtime's registered versions on demand, offers **Details and
+versions** for the package's current registry listing, shows inactive state
 and package errors, and requires confirmation before uninstall. Missing runtime
 connections and unsupported management endpoints show authored messages instead
 of a fabricated empty list. Queries include runtime URL and actor cache scope;
 uninstall completion refreshes the originating scope, even after target changes.
+Returning from registry details preserves the Installed destination and restores
+keyboard focus to its tab. Browsing details does not install or remove a version.
 
 On Desktop, **App color themes** reads declared theme data on demand. A readable
 palette can be copied into the existing imported app color preference; this

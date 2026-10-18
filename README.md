@@ -63,7 +63,9 @@ providers and project MCP settings use the bundled runtime.
 ### Current macOS customization scope
 
 The Extensions destination is visible by default in the macOS app. It provides
-Open VSX discovery, package installation, inventory, and removal. In **Installed →
+Open VSX discovery, package installation, inventory, and removal. Open **Details
+and versions** from an installed package to inspect its registry listing and
+version history, then return to Installed. In **Installed →
 App color themes**, copy readable core colors from a declared standalone JSON
 theme into Appearance settings. The copy survives package removal and can be
 reset in Appearance. Syntax colors, theme includes, and executable extensions

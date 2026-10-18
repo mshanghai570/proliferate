@@ -140,7 +140,9 @@ jobs:
             src/hooks/agents/workflows/use-local-provider-editor.test.tsx \
             src/components/settings/panes/agents/harness/CustomProviderModal.test.tsx \
             src/components/settings/panes/agents/harness/CustomProvidersSection.test.tsx \
-            src/components/settings/panes/agents/providers/LlmProvidersPane.test.tsx
+            src/components/settings/panes/agents/providers/LlmProvidersPane.test.tsx \
+            src/components/extensions/marketplace/ExtensionMarketplaceScreen.test.tsx \
+            src/components/extensions/marketplace/InstalledExtensions.test.tsx
       - name: Verify app and DMG contents
         run: |
           app="target/$TARGET/release/bundle/macos/Proliferate Preview.app"
