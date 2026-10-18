@@ -74,8 +74,10 @@ toggle, or remove. It excludes names, paths, model IDs, endpoints, and keys.
 cover encrypted storage, credential redaction, keyless configuration, invalid
 inputs, capacity, corruption, missing keys, and managed precedence.
 [Real-router tests](../../../anyharness/crates/anyharness-lib/src/api/local_provider_tests.rs)
-cover owner authentication, metadata-only responses, launch credential delivery
-without server state, and disabling/removal. SDK and settings tests cover route
+cover owner authentication, metadata-only responses, and full launch-environment
+rendering without server state or gateway model inventory. They assert that
+configuration references the secret through its environment variable, and that
+disabling the provider removes its configuration from subsequent launches. SDK and settings tests cover route
 encoding, write-only drafts, duplicate submits, errors, and scope changes.
 The Intel preview workflow runs these checks on GitHub before publishing its
 artifact; generated API contracts come from the actual built runtime.

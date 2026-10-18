@@ -12,6 +12,17 @@ use axum::{
 use serde_json::{json, Value};
 use tower::util::ServiceExt;
 
+struct NoGatewayModels;
+impl route_auth::GatewayModelResolve for NoGatewayModels {
+    fn resolve_gateway_models(
+        &self,
+        _harness: &str,
+        _revision: i64,
+    ) -> route_auth::GatewayModelPlan {
+        route_auth::GatewayModelPlan::default()
+    }
+}
+
 fn request(method: &str, path: &str, body: &str, authenticated: bool) -> Request<Body> {
     let mut builder = Request::builder()
         .method(method)
@@ -70,6 +81,30 @@ async fn local_provider_routes_use_owner_auth_and_deliver_launch_credentials_wit
         profile,
         route_auth::AgentRuntimeAuthProfile::Sources(_)
     ));
+    let launch = route_auth::resolve_launch_route_auth(&home.0, "opencode", &NoGatewayModels)
+        .expect("local providers render without a control-plane model inventory");
+    let config: Value = serde_json::from_str(&launch.set["OPENCODE_CONFIG_CONTENT"]).unwrap();
+    let id = saved["id"].as_str().unwrap();
+    let provider_id = format!("custom-local-{id}");
+    let key_name = format!(
+        "PROLIFERATE_CUSTOM_LOCAL_{}_KEY",
+        id.replace('-', "_").to_uppercase()
+    );
+    assert_eq!(launch.set[&key_name], "private-provider-marker");
+    assert_eq!(
+        config["provider"][&provider_id]["options"]["apiKey"],
+        format!("{{env:{key_name}}}")
+    );
+    assert_eq!(
+        config["provider"][&provider_id]["options"]["baseURL"],
+        "http://localhost:1234/v1"
+    );
+    assert_eq!(
+        config["provider"][&provider_id]["models"]["model-a"]["name"],
+        "model-a"
+    );
+    assert!(!launch.set["OPENCODE_CONFIG_CONTENT"].contains("private-provider-marker"));
+    assert!(launch.files.is_empty());
     let inventory = router
         .clone()
         .oneshot(request("GET", base, "", true))
@@ -104,6 +139,10 @@ async fn local_provider_routes_use_owner_auth_and_deliver_launch_credentials_wit
     assert!(!route_auth::launch_route_provides_credentials(
         &home.0, "opencode"
     ));
+    let disabled =
+        route_auth::resolve_launch_route_auth(&home.0, "opencode", &NoGatewayModels).unwrap();
+    assert!(disabled.set.is_empty());
+    assert!(disabled.files.is_empty());
     assert_eq!(
         router
             .clone()
