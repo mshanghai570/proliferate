@@ -201,3 +201,9 @@ Target moves (later sweep wave): `components/settings/panes/agents/**` + `hooks/
   primitives slated for rebuild as run envelopes; keep them thin.
 - The `slack-bot` section is parked in the registry comment pending the
   product Slack app.
+
+Imported syntax colors are a validated user-preference snapshot supplied by
+supported installed extension themes. Appearance shows the selected theme and
+resets syntax independently from imported app colors. The extension system owns
+admission and application; the current limits and proof are in
+[Extensions](../extensions/README.md).

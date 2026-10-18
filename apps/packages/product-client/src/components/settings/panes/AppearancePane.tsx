@@ -1,3 +1,4 @@
+import { ImportedSyntaxThemePreference } from "#product/components/settings/panes/ImportedSyntaxThemePreference";
 import { SettingsSection } from "#product/primitives/patterns/settings/SettingsSection";
 import { SettingsRow } from "#product/primitives/patterns/settings/SettingsRow";
 import { SettingsMenu } from "#product/primitives/patterns/settings/SettingsMenu";
@@ -80,6 +81,7 @@ export function AppearancePane() {
       <SettingsSection title="Theme" surface="plain">
         <ThemePreviewCards value={mode} onChange={setMode} />
         {isDesktop && <ImportedAppThemePreference />}
+        {isDesktop && <ImportedSyntaxThemePreference />}
       </SettingsSection>
 
       <SettingsSection title="Code preview" surface="plain">

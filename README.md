@@ -50,7 +50,7 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 - **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
 - **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
 - **Local project MCP servers** - configure HTTP and stdio servers for a repository's local sessions, with encrypted credentials and enable, disable, replace, and remove controls
-- **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and copy supported theme colors into the macOS app; extension code remains inactive
+- **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and apply supported app and syntax theme colors in the macOS app; extension code remains inactive
 - **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
 
 Personal Intel preview builds run in GitHub Actions on the
@@ -68,7 +68,10 @@ and versions** from an installed package to inspect its registry listing and
 version history, then return to Installed. In **Installed →
 App color themes**, copy readable core colors from a declared standalone JSON
 theme into Appearance settings. The copy survives package removal and can be
-reset in Appearance. Syntax colors, theme includes, and executable extensions
+reset in Appearance. **Installed → Syntax themes** applies foreground token
+colors from a supported theme to source views, code blocks, and diffs, together
+with matching app colors. The copied theme persists across restarts and package
+removal. Reset it in **Appearance → Imported syntax colors**. Theme includes and executable extensions
 are unsupported. Extension code does not activate in the editor. Set
 `VITE_EXTENSION_MARKETPLACE=0` when building Desktop to hide the preview.
 
@@ -79,7 +82,10 @@ Protocol. MCP tools are available through supported integrations and local
 project server settings described below. Appearance
 settings cover built-in color modes and text sizing. The macOS app can import
 core app colors from a readable, strict JSON color theme with `type`,
-`editor.background`, and `editor.foreground`; syntax colors remain unsupported.
+`editor.background`, and `editor.foreground`. Syntax colors are available from
+supported installed packages through **Syntax themes**. This accepts at most 256
+foreground rules and 32 KiB of scope/color data per theme. Token font styles,
+semantic-token overrides, includes, and external token files are unsupported.
 Theme files must use six-digit hex color values without comments or trailing
 commas. In the macOS app, enter
 installed font family names for interface and code text under **Settings →
@@ -119,8 +125,8 @@ workspace. They are not claims about current availability.
   tasks, and show what information is indexed and sent to a model.
 - **MCP management:** extend local project server management with connection
   checks, tool inspection, OAuth setup, and access controls for individual agents.
-- **Editor personalization:** extend imported color themes to syntax highlighting
-  and extension themes, and add font previews to the installed-family choices.
+- **Editor personalization:** extend syntax themes to font styles, semantic
+  tokens, and theme includes; add font previews to the installed-family choices.
 
 These goals can ship in stages. The feature list above should grow only when
 the corresponding capability works in the macOS app.

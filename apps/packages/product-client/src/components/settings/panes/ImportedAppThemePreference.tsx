@@ -31,7 +31,7 @@ export function ImportedAppThemePreference() {
 
   return <SettingsRow
     label="Imported app colors"
-    description="Import core background, text, sidebar, and button colors from an editor color-theme JSON file. Syntax colors and extension themes are not imported."
+    description="Import core background, text, sidebar, and button colors from an editor color-theme JSON file. For syntax colors, choose a supported theme from Extensions → Installed."
   >
     <div className="flex w-72 max-w-full flex-col gap-2">
       <input

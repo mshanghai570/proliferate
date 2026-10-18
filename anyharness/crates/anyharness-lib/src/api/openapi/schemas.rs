@@ -1,6 +1,7 @@
 use anyharness_contract::v1::extensions::{
     ExtensionColorTheme, ExtensionInstallationState, ExtensionPackageErrorCode,
-    InstallRegistryExtensionRequest, InstalledExtensionSummary, ListExtensionColorThemesResponse,
+    ExtensionSyntaxRule, ExtensionSyntaxTheme, InstallRegistryExtensionRequest,
+    InstalledExtensionSummary, ListExtensionColorThemesResponse, ListExtensionSyntaxThemesResponse,
     ListInstalledExtensionsResponse,
 };
 use anyharness_contract::v1::local_providers::{
@@ -147,6 +148,9 @@ use utoipa::OpenApi;
     ListInstalledExtensionsResponse,
     ExtensionColorTheme,
     ListExtensionColorThemesResponse,
+    ExtensionSyntaxTheme,
+    ExtensionSyntaxRule,
+    ListExtensionSyntaxThemesResponse,
     HealthResponse,
     RuntimeCapabilities,
     RuntimePressureLevel,

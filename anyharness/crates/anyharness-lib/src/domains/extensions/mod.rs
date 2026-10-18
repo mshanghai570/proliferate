@@ -3,6 +3,7 @@ pub mod manager;
 pub mod manifest;
 pub mod model;
 mod store;
+pub mod syntax_themes;
 pub mod themes;
 
 #[cfg(test)]

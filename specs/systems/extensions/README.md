@@ -2,7 +2,7 @@
 
 Owns Open VSX discovery, extension metadata/content access, manifest compatibility
 analysis, local VSIX package materialization, durable registration/removal,
-bounded declared color-theme reads, and the VSIX inspection/extraction
+bounded declared app/syntax color-theme reads, and the VSIX inspection/extraction
 adapter. The
 [workspace surface](../workspace-surface/README.md) owns the shared sidebar and
 route shell; [harnesses](../harnesses/README.md) owns agent skills and harness
@@ -76,6 +76,23 @@ normalized light/dark mode, six supported color fields, availability, and a
 truncation flag. Strict JSON, standalone themes are supported; includes are
 never followed. The client validates color syntax and text contrast before
 offering the copy action. Queries retain runtime and actor isolation.
+
+On Desktop, **Syntax themes** reads the exact installed version through
+`GET /v1/extensions/{namespace}/{name}/{version}/syntax-themes`. It applies a
+validated preference snapshot containing foreground rules and matching app
+colors. Source views, transcript code blocks, and code diffs use the existing
+syntax highlighter with the imported theme object. Selection survives restart
+and uninstall; Appearance resets syntax independently from app colors. The
+selection applies only in its matching light/dark mode. Markdown uses its grammar
+when imported syntax colors are selected; built-in Markdown rendering is unchanged.
+The same receipt, resource, registration, owner-authentication, and management-lock
+checks as app color reads apply. At most 32 themes, 256 rules per theme, 16 scopes
+per rule, and 32 KiB of UTF-8 scope/color data per theme are admitted. Foreground
+colors must be six-digit hex. Includes, token-file paths, JSON comments, semantic
+token colors, and font styles are not loaded. The client revalidates preferences
+and app-color contrast. Highlight cache accounting includes custom theme data,
+so switching themes cannot bypass its existing memory budget. Theme data never
+executes code or registers additional editor APIs.
 
 The blocking library entrypoint
 [install_local_vsix](../../../anyharness/crates/anyharness-lib/src/domains/extensions/installer.rs)
@@ -307,7 +324,9 @@ anyharness/sdk/src/types/extensions.ts                     generated type aliase
   inactive; the [detail surface](../../../apps/packages/product-client/src/components/extensions/marketplace/ExtensionDetails.tsx)
   communicates that boundary and shows bounded success/failure outcomes.
 - Declared color themes supply only core app colors through an explicit copy.
-  Syntax colors, includes, JSON comments, and theme asset loading are absent.
+  Syntax foreground colors are available through an explicit copy of supported
+  installed themes. Includes, JSON comments, token font styles, semantic token
+  overrides, and theme asset loading are absent.
   Only the first 32 declared themes are offered; truncation is visible.
 - Featured and recommended collections have no owned source. Discovery exposes
   real registry sorting without relabeling popularity as recommendations.
@@ -336,3 +355,12 @@ Local installation additionally reports typed invalid checksum/layout/identity,
 checksum mismatch, archive violation, unsupported entrypoints/dependencies/
 contributions, missing resources, existing-version, and I/O/rollback failures.
 The caller receives an error; the installer does not enable a partial package.
+
+Syntax theme proofs are colocated in `domains/extensions/syntax_themes.rs`,
+manager/router tests, the SDK extension client test, imported syntax preference
+tests, the real highlighter test, and `InstalledExtensionSyntax.test.tsx`. They
+cover bounded admission, includes/symlink refusal, owner access, safe response
+shape, real scope colors, concurrent palette isolation, cache identity, explicit
+application/reset, preference persistence, and actor changes. No new telemetry
+event is emitted; authored query failures remain telemetry-handled and theme
+contents are not logged.

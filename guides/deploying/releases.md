@@ -124,7 +124,10 @@ The `mshanghai570/proliferate` fork has a separate `build-intel-dmg.yml`
 workflow for personal testing. It runs on pushes to `build/intel-dmg` or
 `codex/macos-extensions-fonts`, or a manual dispatch, uses `macos-15-intel`, and builds the existing Rust helpers,
 runtime SDK, bundled agent seed, and Tauri app. Runtime architecture checks run before compilation. Local provider and MCP
-encryption checks run on the runner; generated runtime contract sources are
+encryption and extension package/theme checks run on the runner. The desktop web
+bundle and focused provider/marketplace tests run before native test compilation
+and packaging; the preview Tauri config reuses that bundle instead of rebuilding
+it. Generated runtime contract sources are
 retained as a separate three-day artifact. It uploads an Intel DMG,
 SHA-256 checksum, and source metadata as a 14-day Actions artifact.
 

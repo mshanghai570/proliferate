@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { PROLIFERATE_DARK_THEME } from "#product/lib/infra/editor/code-theme-tokens";
-import { highlightMarkdownDiffLines } from "#product/lib/infra/editor/highlighting";
+import { highlightLines, highlightMarkdownDiffLines } from "#product/lib/infra/editor/highlighting";
 
 // Expected colors come from the generated palette, not repeated hex literals:
 // the design token authority owns these values, and this test asserts which
@@ -48,4 +48,22 @@ describe("highlightMarkdownDiffLines", () => {
       { content: "(guides/local/dev-profiles.md)", color: colors.heading },
     ]);
   });
+});
+
+describe("installed syntax color tokenization", () => {
+  it("uses real scope rules, isolates concurrent palettes and cache entries, and restores built-ins", async () => {
+    const syntax = (foreground: string) => ({ name: "proliferate-imported-syntax", type: "dark" as const,
+      colors: { "editor.background": "#101820", "editor.foreground": "#FFFFFF" },
+      tokenColors: [{ scope: ["comment"], settings: { foreground } }],
+    });
+    const baseline = await highlightLines(["// comment"], "javascript", "dark");
+    const [first, second] = await Promise.all([
+      highlightLines(["// comment"], "javascript", "dark", syntax("#AA55CC")),
+      highlightLines(["// comment"], "javascript", "dark", syntax("#55CCAA")),
+    ]);
+    expect(first[0].some((token) => token.color?.toUpperCase() === "#AA55CC")).toBe(true);
+    expect(second[0].some((token) => token.color?.toUpperCase() === "#55CCAA")).toBe(true);
+    expect(await highlightLines(["// comment"], "javascript", "dark")).toEqual(baseline);
+    expect(await highlightLines(["// comment"], "javascript", "dark", syntax("#AA55CC"))).toEqual(first);
+  }, 20000);
 });

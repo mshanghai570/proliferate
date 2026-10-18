@@ -26,6 +26,10 @@ pub(super) fn routes() -> Router<AppState> {
         )
         .route("/extensions", get(extensions::list_extensions))
         .route(
+            "/extensions/{namespace}/{name}/{version}/syntax-themes",
+            get(extensions::list_syntax_themes),
+        )
+        .route(
             "/extensions/{namespace}/{name}/{version}/color-themes",
             get(extensions::list_color_themes),
         )

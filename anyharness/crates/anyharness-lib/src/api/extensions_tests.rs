@@ -237,6 +237,10 @@ fn extensions_global_management_remains_denied_to_workspace_claims() {
             Method::GET,
             "/v1/extensions/example/demo/1.0.0/color-themes",
         ),
+        (
+            Method::GET,
+            "/v1/extensions/example/demo/1.0.0/syntax-themes",
+        ),
         (Method::DELETE, "/v1/extensions/example/demo/1.0.0"),
     ] {
         assert!(matches!(
@@ -291,6 +295,60 @@ async fn installed_color_themes_are_authenticated_bounded_data() {
             .oneshot(request(
                 "GET",
                 "/v1/extensions/example/demo/2.0.0/color-themes",
+                true
+            ))
+            .await
+            .unwrap()
+            .status(),
+        StatusCode::NOT_FOUND
+    );
+}
+
+#[tokio::test]
+async fn installed_syntax_themes_expose_only_authenticated_bounded_color_data() {
+    use crate::domains::extensions::installer_tests::archive_with_content;
+    let _lock = test_support::lock_env().await;
+    let _bearer = test_support::set_bearer_token_env(Some("extension-test-token"));
+    let _key = test_support::set_data_key_env(None);
+    let home = TestDirectory::new();
+    let state = state(&home);
+    let manager = ExtensionManager::new(state.db.clone(), home.0.clone());
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"][0]["uiTheme"] = serde_json::json!("vs-dark");
+    let (archive, digest) = archive_with_content(&home.0, &raw, "extension/themes/demo.json", br##"{"colors":{"editor.background":"#101820","editor.foreground":"#FFFFFF","private":"private marker"},"tokenColors":[{"scope":["comment"],"settings":{"foreground":"#AA55CC"}}]}"##);
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let router = build_router(state);
+    let path = "/v1/extensions/example/demo/1.0.0/syntax-themes";
+    assert_eq!(
+        router
+            .clone()
+            .oneshot(request("GET", path, false))
+            .await
+            .unwrap()
+            .status(),
+        StatusCode::UNAUTHORIZED
+    );
+    let response = router
+        .clone()
+        .oneshot(request("GET", path, true))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let bytes = to_bytes(response.into_body(), 1_048_576).await.unwrap();
+    let text = String::from_utf8_lossy(&bytes);
+    assert!(!text.contains("private marker"));
+    assert!(!text.contains("themes/demo.json"));
+    let value: Value = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(value["themes"][0]["rules"][0]["scopes"][0], "comment");
+    assert_eq!(value["themes"][0]["rules"][0]["foreground"], "#AA55CC");
+    assert_eq!(value["themes"][0]["available"], true);
+    assert_eq!(
+        router
+            .oneshot(request(
+                "GET",
+                "/v1/extensions/example/demo/2.0.0/syntax-themes",
                 true
             ))
             .await

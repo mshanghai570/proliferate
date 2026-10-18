@@ -1,3 +1,4 @@
+import { InstalledExtensionSyntax } from "#product/components/extensions/marketplace/InstalledExtensionSyntax";
 import type { ExtensionRef } from "#product/lib/domain/extensions/extension-models";
 import { Button } from "#product/primitives/Button";
 import { Badge } from "#product/primitives/Badge";
@@ -44,6 +45,7 @@ export function InstalledExtensions({ appColorsAvailable = false, onSelect }: {
               </div>
               {extension.errorCode && <p className="text-ui text-destructive">{copy.packageErrors[extension.errorCode] ?? copy.packageErrors.package_invalid}</p>}
               {appColorsAvailable && extension.state === "installed" && <InstalledExtensionColors key={`${state.scope}:${id}`} identity={extension} />}
+              {appColorsAvailable && extension.state === "installed" && <InstalledExtensionSyntax key={`syntax:${state.scope}:${id}`} identity={extension} />}
               <div className="flex flex-wrap gap-2">
                 {onSelect && <Button
                   variant="secondary"

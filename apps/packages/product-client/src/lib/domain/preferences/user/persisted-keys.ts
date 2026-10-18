@@ -4,6 +4,7 @@ const USER_PREFERENCE_KEYS = [
   "themePreset",
   "colorMode",
   "importedAppTheme",
+  "importedSyntaxTheme",
   "uiFontSizeId",
   "readableCodeFontSizeId",
   "uiFontFamily",

@@ -1,6 +1,6 @@
 export const EXTENSION_MANAGEMENT_COPY = {
   title: "Installed extensions",
-  inactive: "Extension code remains inactive. Installed color themes can supply core app colors in the macOS app; other editor contributions are not loaded in this preview.",
+  inactive: "Extension code remains inactive. Supported themes can supply app and syntax colors in the macOS app; other editor contributions are not loaded in this preview.",
   disconnected: "Connect a runtime to manage installed extensions.",
   loading: "Loading installed extensions…",
   empty: "No installed extensions",

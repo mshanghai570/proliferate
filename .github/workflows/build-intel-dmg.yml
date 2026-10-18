@@ -90,16 +90,40 @@ jobs:
           assert.deepEqual(after.info, before.info);
           assert.ok(after.paths['/v1/agent-auth/local-providers']);
           assert.ok(after.paths['/v1/agent-auth/local-providers/{id}']);
+          assert.ok(after.paths['/v1/extensions/{namespace}/{name}/{version}/syntax-themes']);
           const ids = Object.values(after.paths).flatMap(path => Object.values(path).filter(value => value && typeof value === 'object' && value.operationId).map(value => value.operationId));
           assert.equal(new Set(ids).size, ids.length, 'operation IDs must be unique');
           JS
+      - name: Build desktop web bundle
+        working-directory: apps/desktop
+        run: pnpm build
+      - name: Check provider settings
+        working-directory: apps/packages/product-client
+        run: |
+          pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
+            src/lib/domain/settings/custom-provider-draft.test.ts \
+            src/lib/domain/settings/navigation-presentation.test.ts \
+            src/lib/domain/settings/navigation.test.ts \
+            src/hooks/agents/workflows/use-custom-providers.test.tsx \
+            src/hooks/agents/workflows/use-local-provider-editor.test.tsx \
+            src/components/settings/panes/agents/harness/CustomProviderModal.test.tsx \
+            src/components/settings/panes/agents/harness/CustomProvidersSection.test.tsx \
+            src/components/settings/panes/agents/providers/LlmProvidersPane.test.tsx \
+            src/components/extensions/marketplace/ExtensionMarketplaceScreen.test.tsx \
+            src/components/extensions/marketplace/InstalledExtensions.test.tsx \
+            src/components/extensions/marketplace/InstalledExtensionColors.test.tsx \
+            src/components/extensions/marketplace/InstalledExtensionSyntax.test.tsx \
+            src/lib/domain/preferences/imported-syntax-theme.test.ts \
+            src/lib/infra/editor/highlighting.test.ts
       - name: Check native provider and encryption behavior
         run: |
           cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util local_provider -- --test-threads=1
           cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util mcp_bindings -- --test-threads=1
+      - name: Check installed extension themes
+        run: cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util extensions -- --test-threads=1
       - name: Check runtime SDK provider operations
         working-directory: anyharness/sdk
-        run: pnpm exec vitest run src/client/agent-auth.test.ts --maxWorkers=1 --fileParallelism=false
+        run: pnpm exec vitest run src/client/agent-auth.test.ts src/client/extensions.test.ts --maxWorkers=1 --fileParallelism=false
       - name: Build bundled agents
         run: |
           command -v zstd >/dev/null || brew install zstd
@@ -117,6 +141,7 @@ jobs:
           import fs from 'node:fs';
           const base = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
           fs.writeFileSync('preview.config.json', JSON.stringify({
+            build: { beforeBuildCommand: '' },
             productName: 'Proliferate Preview',
             identifier: 'com.mshanghai570.proliferate.preview',
             app: { windows: base.app.windows.map(window => ({ ...window, title: 'Proliferate Preview' })) },
@@ -129,20 +154,6 @@ jobs:
           fs.writeFileSync('runtime-version.json', JSON.stringify({ anyharnessVersion: version }));
           JS
           pnpm tauri build --target "$TARGET" --bundles app,dmg --config preview.config.json
-      - name: Check provider settings
-        working-directory: apps/packages/product-client
-        run: |
-          pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
-            src/lib/domain/settings/custom-provider-draft.test.ts \
-            src/lib/domain/settings/navigation-presentation.test.ts \
-            src/lib/domain/settings/navigation.test.ts \
-            src/hooks/agents/workflows/use-custom-providers.test.tsx \
-            src/hooks/agents/workflows/use-local-provider-editor.test.tsx \
-            src/components/settings/panes/agents/harness/CustomProviderModal.test.tsx \
-            src/components/settings/panes/agents/harness/CustomProvidersSection.test.tsx \
-            src/components/settings/panes/agents/providers/LlmProvidersPane.test.tsx \
-            src/components/extensions/marketplace/ExtensionMarketplaceScreen.test.tsx \
-            src/components/extensions/marketplace/InstalledExtensions.test.tsx
       - name: Verify app and DMG contents
         run: |
           app="target/$TARGET/release/bundle/macos/Proliferate Preview.app"

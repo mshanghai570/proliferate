@@ -72,7 +72,7 @@ describe("extension discovery", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Example Theme/ }, { timeout: 5000 }));
     await screen.findByRole("heading", { name: "Theme guide" });
     fireEvent.click(screen.getByRole("button", { name: "Install" }));
-    expect(await screen.findByText("Extension installed. On macOS, check Installed for supported app color themes. Extension code remains inactive.")).toBeTruthy();
+    expect(await screen.findByText("Extension installed. On macOS, check Installed for supported app and syntax themes. Extension code remains inactive.")).toBeTruthy();
     await waitFor(() => expect(runtimeFetch).toHaveBeenCalledWith("http://runtime.test/v1/extensions/install", expect.objectContaining({ method: "POST" })));
     expect(runtimeFetch.mock.calls[0]?.[1]).toMatchObject({
       body: JSON.stringify({ namespace: "example", name: "theme", version: "1.0.0" }),

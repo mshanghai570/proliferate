@@ -1,6 +1,7 @@
 use anyharness_contract::v1::extensions::{
     ExtensionColorTheme, ExtensionInstallationState, ExtensionPackageErrorCode,
-    InstallRegistryExtensionRequest, InstalledExtensionSummary, ListExtensionColorThemesResponse,
+    ExtensionSyntaxRule, ExtensionSyntaxTheme, InstallRegistryExtensionRequest,
+    InstalledExtensionSummary, ListExtensionColorThemesResponse, ListExtensionSyntaxThemesResponse,
     ListInstalledExtensionsResponse,
 };
 use axum::{
@@ -76,6 +77,48 @@ pub async fn list_color_themes(
                 color_mode: theme.color_mode.map(str::to_owned),
                 colors: theme.colors,
                 available: theme.available,
+            })
+            .collect(),
+        truncated,
+    }))
+}
+
+#[utoipa::path(
+    get, operation_id = "list_extension_syntax_themes", path = "/v1/extensions/{namespace}/{name}/{version}/syntax-themes",
+    params(("namespace" = String, Path), ("name" = String, Path), ("version" = String, Path)),
+    responses((status = 200, body = ListExtensionSyntaxThemesResponse)), tag = "extensions"
+)]
+pub async fn list_syntax_themes(
+    State(state): State<AppState>,
+    Path((namespace, name, version)): Path<(String, String, String)>,
+) -> Result<Json<ListExtensionSyntaxThemesResponse>, ApiError> {
+    let manager = state.extension_manager.clone();
+    let (themes, truncated) = run_blocking("extension_syntax_themes", move || {
+        manager.syntax_themes(&ExtensionPackageIdentity {
+            namespace,
+            name,
+            version,
+        })
+    })
+    .await
+    .map_err(|_| unavailable())?
+    .map_err(map_error)?;
+    Ok(Json(ListExtensionSyntaxThemesResponse {
+        themes: themes
+            .into_iter()
+            .map(|item| ExtensionSyntaxTheme {
+                label: item.theme.label,
+                color_mode: item.theme.color_mode.map(str::to_owned),
+                colors: item.theme.colors,
+                available: item.theme.available,
+                rules: item
+                    .rules
+                    .into_iter()
+                    .map(|rule| ExtensionSyntaxRule {
+                        scopes: rule.scopes,
+                        foreground: rule.foreground,
+                    })
+                    .collect(),
             })
             .collect(),
         truncated,

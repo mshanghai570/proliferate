@@ -23,6 +23,7 @@ mod support_windows;
         super::http::project_mcp::set_enabled,
         super::http::project_mcp::remove,
         super::http::extensions::list_color_themes,
+        super::http::extensions::list_syntax_themes,
         super::http::extensions::install_registry_extension,
         super::http::extensions::uninstall_extension,
         super::http::health::get_health,
