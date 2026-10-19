@@ -28,9 +28,12 @@ function ContextDialog({ workspace, onAdd, onClose }: { workspace: string; onAdd
   const failure = access.refresh.isError || access.clear.isError || access.search.isError;
   return <ModalShell open onClose={onClose} title="Project context" sizeClassName="max-w-2xl max-h-[84vh]" bodyClassName="overflow-y-auto px-5 pb-5 pt-4" telemetryBlocked
     description="Search local project source, review excerpts, and add selected text to your draft. Sending the prompt shares that text with the selected provider."
-    footer={<><Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-      <Button type="button" disabled={!ready || picker.busy || !picker.selected.length} onClick={() => { if (picker.add()) onClose(); }}>Add context to draft</Button>
-    </>}>
+    footer={<div className="w-full space-y-2">
+      {picker.error ? <p role="alert" className="text-ui-sm text-destructive">{picker.error}</p> : null}
+      <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+        <Button type="button" disabled={!ready || picker.busy || !picker.selected.length} onClick={() => { if (picker.add()) onClose(); }}>Add context to draft</Button>
+      </div>
+    </div>}>
     <div className="space-y-4">
       <p className="text-ui-sm text-muted-foreground">Local keyword retrieval (RAG). Indexes supported text files using Git ignores and credential exclusions. Source files can still contain private data. No model is called during indexing or search.</p>
       {!access.available ? <p role="status" className="text-ui-sm">Connect a local runtime to use project context.</p> : null}
@@ -48,7 +51,7 @@ function ContextDialog({ workspace, onAdd, onClose }: { workspace: string; onAdd
       </label>
       <Button type="button" size="sm" disabled={!ready || !status?.enabled || picker.busy || !picker.query.trim()} onClick={picker.search}>Search</Button>
       {picker.busy ? <p role="status" className="text-ui-sm">{access.search.isPending ? "Refreshing and searching source…" : "Updating local index…"}</p> : null}
-      {failure || picker.error ? <p role="alert" className="text-ui-sm text-destructive">{picker.error ?? "Could not update or search the project. Check access to the local Git workspace and retry with 1–32 terms (up to 512 UTF-8 bytes)."}</p> : null}
+      {failure ? <p role="alert" className="text-ui-sm text-destructive">Could not update or search the project. Check access to the local Git workspace and retry with 1–32 terms (up to 512 UTF-8 bytes).</p> : null}
       {access.search.isSuccess && !picker.excerpts.length ? <p role="status" className="text-ui-sm">No matching excerpts. Try other words or check the index limits.</p> : null}
       <ul className="space-y-3">
         {picker.excerpts.map((excerpt, index) => <li key={`${excerpt.path}:${excerpt.startLine}`} className="space-y-2">

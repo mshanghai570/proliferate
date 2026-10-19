@@ -1,21 +1,21 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { ProjectContextButton } from "./ProjectContextButton";
 const state = vi.hoisted(() => ({ refresh: vi.fn(), clear: vi.fn(), search: vi.fn(), scope: "actor", local: true,
-  enabled: false, queryError: false, results: false,
+  enabled: false, queryError: false, results: false, large: false,
 }));
 vi.mock("@anyharness/sdk-react", () => ({ useAnyHarnessRuntimeContext: () => ({ runtimeUrl: "http://runtime" }), resolveRuntimeCacheScopeKey: () => state.scope }));
 vi.mock("#product/stores/ui/agent-surface-store", () => ({ useAgentSurfaceStore: (select: (value: { surface: string }) => unknown) => select({ surface: state.local ? "local" : "cloud" }) }));
-vi.mock("#product/primitives/patterns/ModalShell", () => ({ ModalShell: ({ children, footer }: { children: import("react").ReactNode; footer?: import("react").ReactNode }) => <div role="dialog">{children}{footer}</div> }));
+vi.mock("#product/primitives/patterns/ModalShell", () => ({ ModalShell: ({ children, footer }: { children: import("react").ReactNode; footer?: import("react").ReactNode }) => <div role="dialog">{children}<footer data-testid="context-footer">{footer}</footer></div> }));
 vi.mock("#product/hooks/access/retrieval/use-project-retrieval-access", () => ({ useProjectRetrievalAccess: () => ({ available: true,
   query: { data: { enabled: state.enabled, indexedFiles: 1, chunks: 1, skippedFiles: 0 }, isSuccess: !state.queryError, isError: state.queryError, refetch: vi.fn() },
   refresh: { mutate: state.refresh, reset: vi.fn() }, clear: { mutate: state.clear, reset: vi.fn() },
   search: { mutate: state.search, reset: vi.fn(), isSuccess: state.results,
-    data: state.results ? { workspaceId: "workspace", excerpts: [{ path: "auth.ts", startLine: 1, endLine: 2, contentHash: "a".repeat(64), text: "function login() {}" }] } : undefined },
+    data: state.results ? { workspaceId: "workspace", excerpts: state.large ? [0, 1, 2, 3].map((index) => ({ path: `auth${index}.ts`, startLine: 1, endLine: 1, contentHash: "a".repeat(64), text: "x".repeat(8192) })) : [{ path: "auth.ts", startLine: 1, endLine: 2, contentHash: "a".repeat(64), text: "function login() {}" }] } : undefined },
 }) }));
 afterEach(cleanup);
-beforeEach(() => { vi.clearAllMocks(); state.scope = "actor"; state.enabled = false; state.queryError = false; state.results = false; state.local = true; });
+beforeEach(() => { vi.clearAllMocks(); state.scope = "actor"; state.enabled = false; state.queryError = false; state.results = false; state.local = true; state.large = false; });
 it("only indexes after an explicit action", () => {
   render(<ProjectContextButton workspaceId="workspace" disabled={false} onAdd={vi.fn()} />);
   fireEvent.click(screen.getByRole("button", { name: "Project context" }));
@@ -70,4 +70,20 @@ it("searches with Enter without adding text or sending a prompt", () => {
   fireEvent.keyDown(query, { key: "Enter" });
   expect(state.search).toHaveBeenCalledWith("session auth");
   expect(add).not.toHaveBeenCalled();
+});
+
+it("shows size feedback beside the action and recovers after selecting fewer excerpts", () => {
+  state.enabled = true; state.results = true; state.large = true;
+  const add = vi.fn();
+  render(<ProjectContextButton workspaceId="workspace" disabled={false} onAdd={add} />);
+  fireEvent.click(screen.getByRole("button", { name: "Project context" }));
+  screen.getAllByRole("checkbox").forEach((box) => fireEvent.click(box));
+  fireEvent.click(screen.getByRole("button", { name: "Add context to draft" }));
+  expect(within(screen.getByTestId("context-footer")).getByRole("alert").textContent).toContain("Choose fewer");
+  expect(add).not.toHaveBeenCalled();
+  fireEvent.click(screen.getAllByRole("checkbox")[3]!);
+  expect(screen.queryByRole("alert")).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Add context to draft" }));
+  expect(add).toHaveBeenCalledOnce();
+  expect(add.mock.calls[0]?.[0]).not.toContain("auth3.ts");
 });

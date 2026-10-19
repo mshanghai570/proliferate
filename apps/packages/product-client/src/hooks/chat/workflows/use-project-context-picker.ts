@@ -20,6 +20,6 @@ export function useProjectContextPicker(workspace: string, onAdd: (text: string)
   };
   return { access, query, selected, excerpts, busy, error, index, clear, search, add,
     editQuery: (text: string) => { reset(); setQuery(text); },
-    toggle: (index: number) => setSelected((current) => current.includes(index) ? current.filter((value) => value !== index) : [...current, index]),
+    toggle: (index: number) => { setError(null); setSelected((current) => current.includes(index) ? current.filter((value) => value !== index) : [...current, index]); },
   };
 }
