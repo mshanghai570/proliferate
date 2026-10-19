@@ -1,6 +1,6 @@
 # Local project retrieval
 
-Status: runtime API under verification; composer UI is not yet available.
+Status: runtime and composer controls authored; cloud qualification pending.
 
 Project retrieval is an explicit, local source index scoped to one materialized
 workspace. It uses SQLite FTS5 keyword ranking (BM25), not vector embeddings.
@@ -23,6 +23,21 @@ SQL syntax. Refresh hashes current files, replaces changed chunks, and removes
 sources that were deleted, ignored, excluded, unreadable, or became non-text.
 An unchanged hash skips database replacement. Failed refreshes do not return
 stale search results. A fresh manager can reopen the persisted index.
+
+## Composer integration
+
+The local chat composer’s Project context picker reads status without enabling
+an index. It remains available when agent setup blocks sending a prompt. Index,
+refresh, and clear require explicit actions. Search results
+show source and citations; the person selects excerpts before adding them to
+the current draft. At most eight excerpts and 32 KiB of formatted context are
+admitted. Source lines are quoted as reference data, not instructions. Sending
+the prompt shares the selected text with the chosen provider. No model call
+occurs during retrieval.
+
+The picker remounts on runtime, actor, or workspace changes, suppresses telemetry
+capture, and clears selections when the query changes. Busy operations block
+additional writes. Queued-prompt editing does not expose this control.
 
 ## File and resource boundaries
 

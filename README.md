@@ -70,10 +70,30 @@ Current qualification status:
 | --- | --- |
 | Local agent login | In-app provider login and refresh available without a product account; client workflow checks pass. Live provider login still needs hands-on qualification. |
 | Proliferate account | Client connection and callback checks pass; hosted service returned `503 DEPLOYMENT_PAUSED` during the audit. |
-| Project RAG | Local keyword-index and cited-search runtime APIs are under verification; no composer UI yet. |
+| Project RAG | Local keyword indexing, cited search, and an explicit composer picker are authored; cloud qualification is pending. |
 | Per-agent rules | Private Markdown storage, repository replacements, launch delivery, and Settings → Agents → Rules are authored; cloud qualification is pending. |
 | Marketplace, MCP, skills | Implemented scopes are described below; executable extension hosting is unavailable. |
 | Distribution | GitHub builds produce verified DMG artifacts; no versioned daily-driver release has been published. |
+
+### Agent rules and project context
+
+Settings → Agents → Rules edits Markdown instructions for any runtime agent,
+including custom ACP agents. Import `.md` or `.txt` files, save a user default,
+or replace that default for a repository and its worktrees. An empty repository
+file suppresses the default; “Use user default” removes the override. Rules
+apply on the next agent process start, including resume. Existing repository
+instruction files remain independent. Rules are limited to 64 KiB of UTF-8 text.
+
+The local chat composer’s **Project context** control explicitly indexes a Git
+workspace and searches source using SQLite FTS5 keyword ranking. Review results
+with file and line citations, select excerpts, then add them to the existing
+draft. Nothing is sent to a model until you send the prompt. Indexing uses Git
+ignores, source-file limits, credential exclusions, and symlink rejection;
+source may still contain private data. Search refreshes changed and deleted
+files. The picker exposes partial-index limits and can clear the local cache.
+This version has no vector embeddings or automatic context injection.
+
+These additions are under cloud qualification.
 
 ### Current macOS customization scope
 
@@ -107,7 +127,7 @@ Theme files must use six-digit hex color values without comments or trailing
 commas. In the macOS app, enter
 installed font family names for interface and code text under **Settings →
 Appearance**. The Mac font list offers suggestions; an unavailable manually
-entered family falls back to the built-in font. Project RAG is not yet available.
+entered family falls back to the built-in font. Project context retrieval and agent rules are described below; their cloud qualification is pending.
 
 A minimal file for **Settings → Appearance → Imported app colors**:
 

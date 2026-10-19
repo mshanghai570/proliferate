@@ -43,6 +43,9 @@ jobs:
       - name: Build desktop web bundle from checked-in contracts
         working-directory: apps/desktop
         run: pnpm build
+      - name: Check runtime SDK settings operations
+        working-directory: anyharness/sdk
+        run: pnpm exec vitest run src/client/agent-auth.test.ts src/client/extensions.test.ts src/client/agent-rules.test.ts src/client/project-retrieval.test.ts --maxWorkers=1 --fileParallelism=false
       - name: Check desktop auth callback
         working-directory: apps/desktop
         run: pnpm exec vitest run src/lib/integrations/auth/proliferate-auth-redirect.test.ts src/lib/integrations/auth/orchestration-callback.test.ts src/lib/integrations/auth/orchestration-password-flow.test.ts --maxWorkers=1 --fileParallelism=false
@@ -61,6 +64,10 @@ jobs:
             src/components/settings/panes/agents/skills/SkillsSection.test.tsx \
             src/components/settings/panes/agents/rules/AgentRulesPane.test.tsx \
             src/lib/domain/settings/agent-rule-files.test.ts \
+            src/components/workspace/chat/input/ProjectContextButton.test.tsx \
+            src/components/workspace/chat/input/ChatInput.test.tsx \
+            src/lib/domain/chat/project-context.test.ts \
+            src/stores/chat/chat-input-store.test.ts \
             src/lib/domain/settings/custom-provider-draft.test.ts \
             src/lib/domain/settings/navigation-presentation.test.ts \
             src/lib/domain/settings/navigation.test.ts \
@@ -180,6 +187,10 @@ jobs:
             src/components/settings/panes/agents/skills/SkillsSection.test.tsx \
             src/components/settings/panes/agents/rules/AgentRulesPane.test.tsx \
             src/lib/domain/settings/agent-rule-files.test.ts \
+            src/components/workspace/chat/input/ProjectContextButton.test.tsx \
+            src/components/workspace/chat/input/ChatInput.test.tsx \
+            src/lib/domain/chat/project-context.test.ts \
+            src/stores/chat/chat-input-store.test.ts \
             src/lib/domain/settings/custom-provider-draft.test.ts \
             src/lib/domain/settings/navigation-presentation.test.ts \
             src/lib/domain/settings/navigation.test.ts \
@@ -207,7 +218,7 @@ jobs:
         run: cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util extensions -- --test-threads=1
       - name: Check runtime SDK provider operations
         working-directory: anyharness/sdk
-        run: pnpm exec vitest run src/client/agent-auth.test.ts src/client/extensions.test.ts src/client/agent-rules.test.ts --maxWorkers=1 --fileParallelism=false
+        run: pnpm exec vitest run src/client/agent-auth.test.ts src/client/extensions.test.ts src/client/agent-rules.test.ts src/client/project-retrieval.test.ts --maxWorkers=1 --fileParallelism=false
       - name: Build bundled agents
         run: |
           command -v zstd >/dev/null || brew install zstd

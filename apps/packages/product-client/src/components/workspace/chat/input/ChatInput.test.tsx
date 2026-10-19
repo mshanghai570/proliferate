@@ -8,6 +8,9 @@ import type { PromptAttachmentController } from "#product/hooks/chat/ui/use-chat
 
 const chatInputMocks = vi.hoisted(() => ({
   clearSelectedResponseContexts: vi.fn(),
+  appendDraftText: vi.fn(),
+  workspaceId: null as string | null,
+  blocked: false,
   getSelectedResponseContexts: vi.fn(() => [{
     id: "excerpt-1",
     text: "full selected excerpt",
@@ -43,21 +46,22 @@ vi.mock("#product/hooks/chat/derived/use-active-session-identity", () => ({
 }));
 vi.mock("#product/hooks/chat/derived/use-chat-availability-state", () => ({
   useChatAvailabilityState: () => ({
-    isDisabled: false,
+    isDisabled: chatInputMocks.blocked,
     sendBlockedReason: null,
-    areRuntimeControlsDisabled: false,
+    areRuntimeControlsDisabled: chatInputMocks.blocked,
   }),
 }));
 vi.mock("#product/hooks/chat/derived/use-composer-blocked-state", () => ({
-  useComposerBlockedState: () => null,
+  useComposerBlockedState: () => chatInputMocks.blocked ? { icon: "alert", tone: "neutral", message: "Agent setup needed", actions: [] } : null,
 }));
 vi.mock("#product/hooks/chat/ui/use-chat-composer-keyboard", () => ({
   useChatComposerKeyboard: () => ({ handleKeyDown: vi.fn() }),
 }));
 vi.mock("#product/hooks/chat/ui/use-chat-draft-state", () => ({
   useChatDraftControls: () => ({
-    workspaceUiKey: null,
-    materializedWorkspaceId: null,
+    workspaceUiKey: chatInputMocks.workspaceId,
+    materializedWorkspaceId: chatInputMocks.workspaceId,
+    appendDraftText: chatInputMocks.appendDraftText,
     getDraft: () => ({ nodes: [] }),
     getSelectedResponseContexts: chatInputMocks.getSelectedResponseContexts,
     setDraft: vi.fn(),
@@ -118,6 +122,10 @@ vi.mock("#product/hooks/ui/debug/use-debug-render-count", () => ({
 vi.mock("#product/components/diagnostics/DebugProfiler", () => ({
   DebugProfiler: ({ children }: { children: ReactNode }) => children,
 }));
+vi.mock("#product/components/workspace/chat/input/ProjectContextButton", () => ({
+  ProjectContextButton: ({ disabled, onAdd }: { disabled: boolean; onAdd: (text: string) => void }) => <button type="button" disabled={disabled} onClick={() => onAdd("Reviewed source context")}>Project context</button>,
+}));
+vi.mock("#product/components/workspace/chat/input/ComposerBlockedControlRow", () => ({ ComposerBlockedControlRow: () => null }));
 vi.mock("#product/components/workspace/chat/input/ChatInputControlRow", () => ({
   ChatInputControlRow: () => null,
 }));
@@ -145,6 +153,8 @@ vi.mock("#product/components/workspace/chat/input/ChatInputDraftArea", () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  chatInputMocks.workspaceId = null;
+  chatInputMocks.blocked = false;
   chatInputMocks.handleSubmit.mockImplementation(async (input) => {
     input.onSubmitted?.();
     return true;
@@ -273,3 +283,15 @@ function pasteEvent(text: string, files: File[]): ClipboardEvent {
   });
   return event;
 }
+
+it("keeps project context available while agent setup blocks sending", () => {
+  chatInputMocks.workspaceId = "workspace";
+  chatInputMocks.blocked = true;
+  render(<ChatInput attachments={createAttachments(false).controller} suppressActiveSessionState suppressAutoFocus />);
+  expect(screen.getByText("Agent setup needed")).toBeTruthy();
+  const context = screen.getByRole("button", { name: "Project context" }) as HTMLButtonElement;
+  expect(context.disabled).toBe(false);
+  fireEvent.click(context);
+  expect(chatInputMocks.appendDraftText).toHaveBeenCalledWith("Reviewed source context");
+  expect(chatInputMocks.handleSubmit).not.toHaveBeenCalled();
+});
