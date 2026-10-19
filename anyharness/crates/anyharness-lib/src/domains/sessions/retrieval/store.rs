@@ -103,7 +103,7 @@ pub fn status(connection: Option<&Connection>) -> anyhow::Result<ProjectRetrieva
             |row| {
                 Ok((
                     row.get::<_, String>(0)?,
-                    row.get::<_, usize>(1)?,
+                    row.get::<_, i64>(1)?,
                     row.get::<_, bool>(2)?,
                 ))
             },
@@ -114,12 +114,17 @@ pub fn status(connection: Option<&Connection>) -> anyhow::Result<ProjectRetrieva
     };
     Ok(ProjectRetrievalStatus {
         enabled: true,
-        indexed_files: connection
-            .query_row("SELECT count(*) FROM retrieval_files", [], |row| row.get(0))?,
-        chunks: connection.query_row("SELECT count(*) FROM retrieval_chunks", [], |row| {
-            row.get(0)
-        })?,
-        skipped_files,
+        indexed_files: usize::try_from(connection.query_row(
+            "SELECT count(*) FROM retrieval_files",
+            [],
+            |row| row.get::<_, i64>(0),
+        )?)?,
+        chunks: usize::try_from(connection.query_row(
+            "SELECT count(*) FROM retrieval_chunks",
+            [],
+            |row| row.get::<_, i64>(0),
+        )?)?,
+        skipped_files: usize::try_from(skipped_files)?,
         truncated,
         indexed_at: Some(indexed_at),
     })
@@ -179,14 +184,14 @@ pub fn refresh(
         transaction.execute("DELETE FROM retrieval_chunks WHERE path=?1", [path])?;
         transaction.execute("INSERT INTO retrieval_files(path, hash) VALUES(?1,?2) ON CONFLICT(path) DO UPDATE SET hash=excluded.hash", params![path, hash])?;
         for chunk in chunks {
-            transaction.execute("INSERT INTO retrieval_chunks(path,start_line,end_line,hash,text) VALUES(?1,?2,?3,?4,?5)", params![path,chunk.start_line,chunk.end_line,hash,chunk.text])?;
+            transaction.execute("INSERT INTO retrieval_chunks(path,start_line,end_line,hash,text) VALUES(?1,?2,?3,?4,?5)", params![path,i64::try_from(chunk.start_line)?,i64::try_from(chunk.end_line)?,hash,chunk.text])?;
         }
     }
     for path in previous.keys().filter(|path| !seen.contains(*path)) {
         transaction.execute("DELETE FROM retrieval_chunks WHERE path=?1", [path])?;
         transaction.execute("DELETE FROM retrieval_files WHERE path=?1", [path])?;
     }
-    transaction.execute("INSERT INTO retrieval_meta(id,indexed_at,skipped,truncated) VALUES(1,?1,?2,?3) ON CONFLICT(id) DO UPDATE SET indexed_at=excluded.indexed_at, skipped=excluded.skipped, truncated=excluded.truncated", params![chrono::Utc::now().to_rfc3339(), skipped, truncated])?;
+    transaction.execute("INSERT INTO retrieval_meta(id,indexed_at,skipped,truncated) VALUES(1,?1,?2,?3) ON CONFLICT(id) DO UPDATE SET indexed_at=excluded.indexed_at, skipped=excluded.skipped, truncated=excluded.truncated", params![chrono::Utc::now().to_rfc3339(), i64::try_from(skipped)?, truncated])?;
     transaction.commit()?;
     status(Some(connection))
 }
@@ -195,15 +200,26 @@ pub fn search(connection: &Connection, query: &str) -> anyhow::Result<Vec<Projec
     let query = chunks::query(query)?;
     let mut statement = connection.prepare("SELECT path,start_line,end_line,hash,text FROM retrieval_chunks WHERE retrieval_chunks MATCH ?1 ORDER BY bm25(retrieval_chunks), path, start_line LIMIT 8")?;
     let rows = statement.query_map([query], |row| {
-        Ok(ProjectContextExcerpt {
-            path: row.get(0)?,
-            start_line: row.get(1)?,
-            end_line: row.get(2)?,
-            content_hash: row.get(3)?,
-            text: row.get(4)?,
-        })
+        Ok((
+            row.get::<_, String>(0)?,
+            row.get::<_, i64>(1)?,
+            row.get::<_, i64>(2)?,
+            row.get::<_, String>(3)?,
+            row.get::<_, String>(4)?,
+        ))
     })?;
-    Ok(rows.collect::<Result<Vec<_>, _>>()?)
+    rows.collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .map(|(path, start, end, content_hash, text)| {
+            Ok(ProjectContextExcerpt {
+                path,
+                start_line: usize::try_from(start)?,
+                end_line: usize::try_from(end)?,
+                content_hash,
+                text,
+            })
+        })
+        .collect()
 }
 
 pub fn clear(home: &Path, workspace: &str) -> anyhow::Result<()> {

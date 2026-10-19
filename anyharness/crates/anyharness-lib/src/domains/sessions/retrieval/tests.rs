@@ -300,3 +300,13 @@ async fn lease(
         .acquire_shared(workspace, WorkspaceOperationKind::MaterializationRead)
         .await
 }
+
+#[test]
+fn project_retrieval_rejects_negative_cached_counts() {
+    let fixture = Fixture::new();
+    let connection = store::open(&fixture.home, "workspace", true)
+        .unwrap()
+        .unwrap();
+    connection.execute("INSERT INTO retrieval_meta(id,indexed_at,skipped,truncated) VALUES(1,'2026-10-19T00:00:00Z',-1,0)", []).unwrap();
+    assert!(store::status(Some(&connection)).is_err());
+}
