@@ -153,6 +153,8 @@ async fn project_retrieval_honors_tracked_and_untracked_ignores_and_sensitive_ex
         "ignored.rs",
         "untracked.rs",
         "credentials.json",
+        ".mcp.json",
+        "auth.json",
         ".env.local",
     ] {
         fs::write(fixture.project.join(name), "retrieval_marker").unwrap();
@@ -219,6 +221,10 @@ fn project_retrieval_path_policy_is_bounded_and_source_only() {
         "a/.env",
         "a/.env.production",
         "a/credentials.json",
+        ".claude/settings.json",
+        ".cursor/mcp.json",
+        ".mcp.json",
+        "config/auth.json",
         "a/secret.pem",
         "a/id_rsa",
         "a.bin",

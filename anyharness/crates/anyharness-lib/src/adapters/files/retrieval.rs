@@ -40,6 +40,10 @@ pub fn eligible_path(path: &str) -> bool {
         ".aws",
         ".ssh",
         ".codex",
+        ".claude",
+        ".cursor",
+        ".gemini",
+        ".opencode",
         ".proliferate-skills",
     ];
     if lower.split('/').any(|part| {
@@ -56,6 +60,9 @@ pub fn eligible_path(path: &str) -> bool {
                 ".git-credentials",
                 "id_rsa",
                 "id_ed25519",
+                ".mcp.json",
+                "mcp.json",
+                "auth.json",
             ]
             .contains(&part)
     }) {
