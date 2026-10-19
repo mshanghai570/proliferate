@@ -59,7 +59,7 @@ impl WorkspaceRuntime {
         GitService::prune_stale_worktrees_if_possible(Path::new(repo_root_path));
 
         if self.store.find_by_id(workspace_id)?.is_some() {
-            self.delete_workflow.delete_workspace_record(workspace_id)?;
+            self.delete_workspace_record(workspace_id)?;
         }
 
         Ok(())
@@ -97,8 +97,7 @@ impl WorkspaceRuntime {
             )
         })?;
 
-        self.delete_workflow
-            .delete_workspace_record(&workspace.id)?;
+        self.delete_workspace_record(&workspace.id)?;
         Ok(())
     }
 }

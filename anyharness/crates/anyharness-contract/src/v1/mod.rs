@@ -24,6 +24,7 @@ pub mod plans;
 pub mod processes;
 pub mod replay;
 pub mod repo_roots;
+pub mod retrieval;
 pub mod reviews;
 pub mod session_config;
 pub mod sessions;

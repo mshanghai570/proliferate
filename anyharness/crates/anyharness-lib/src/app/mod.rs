@@ -175,6 +175,8 @@ pub struct AppState {
     pub mobility_runtime: Arc<MobilityRuntime>,
     pub materialization_runtime: Arc<MaterializationRuntime>,
     pub plan_service: Arc<PlanService>,
+    pub project_retrieval_manager:
+        Arc<crate::domains::sessions::retrieval::ProjectRetrievalManager>,
     pub agent_rules_manager: Arc<crate::domains::sessions::agent_rules::AgentRulesManager>,
     pub skill_manager: Arc<crate::domains::skills::SkillManager>,
     pub extension_manager: Arc<ExtensionManager>,
@@ -300,6 +302,9 @@ impl AppState {
             runtime_home.clone(),
         ));
         let plan_service = Arc::new(PlanService::new(PlanStore::new(db.clone())));
+        let project_retrieval_manager = Arc::new(
+            crate::domains::sessions::retrieval::ProjectRetrievalManager::new(runtime_home.clone()),
+        );
         let agent_rules_manager = Arc::new(
             crate::domains::sessions::agent_rules::AgentRulesManager::new(runtime_home.clone()),
         );
@@ -651,6 +656,7 @@ impl AppState {
             plan_service,
             skill_manager,
             agent_rules_manager,
+            project_retrieval_manager,
             extension_manager,
             project_mcp_manager,
             extension_registry_base_url: OPEN_VSX_BASE_URL.to_string(),

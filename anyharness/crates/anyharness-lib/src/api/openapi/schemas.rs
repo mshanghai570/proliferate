@@ -9,6 +9,10 @@ use anyharness_contract::v1::local_providers::{
     CreateLocalProviderRequest, LocalProviderSummary, LocalProvidersResponse,
     SetLocalProviderEnabledRequest,
 };
+use anyharness_contract::v1::retrieval::{
+    ProjectContextExcerpt, ProjectContextSearchResponse, ProjectRetrievalStatus,
+    SearchProjectContextRequest,
+};
 use anyharness_contract::v1::skills::{
     ImportSkillRequest, ListSkillsResponse, SetSkillEnabledRequest, SkillFile, SkillSummary,
 };
@@ -137,6 +141,10 @@ use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(components(schemas(
+    ProjectContextExcerpt,
+    ProjectContextSearchResponse,
+    ProjectRetrievalStatus,
+    SearchProjectContextRequest,
     SkillFile,
     AgentRules,
     SetAgentRulesRequest,

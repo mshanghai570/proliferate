@@ -34,6 +34,7 @@ pub mod plans;
 pub mod processes;
 pub mod product_mcp;
 pub mod project_mcp;
+pub mod project_retrieval;
 pub mod replay;
 pub mod repo_roots;
 pub mod reviews;

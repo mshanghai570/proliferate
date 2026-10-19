@@ -3,6 +3,7 @@ pub mod executor;
 pub mod file_search;
 pub mod operations;
 pub mod parse_status;
+pub mod project_sources;
 pub mod service;
 pub mod types;
 

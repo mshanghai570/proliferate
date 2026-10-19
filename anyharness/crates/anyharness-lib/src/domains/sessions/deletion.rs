@@ -87,6 +87,8 @@ impl SessionDeleteWorkflow {
             )?;
         }
 
+        super::retrieval::clear_workspace_cache(runtime_home, workspace_id)?;
+
         // Class 2: the session graph rows themselves (participants, links,
         // the session row) — split OUT of the old
         // `purge_workspace_with_sessions`, deliberately WITHOUT the

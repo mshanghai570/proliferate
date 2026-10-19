@@ -39,6 +39,10 @@ User-authored per-agent Markdown rules live under the runtime home's
 selection, bounded file storage, and launch delivery. These files are independent
 of optional skill packages and repository-owned instruction files.
 
+The [local project retrieval reference](project-retrieval.md) owns the explicit
+workspace source cache, keyword search, citations, and index lifecycle. The
+runtime API does not automatically send retrieved material to agents.
+
 Control plane (※ new): the **session registry row** — id, subject, environment binding, status, external bindings (`{kind: "slack", team_id, channel_id, thread_ts}` and later Linear/GitHub/ email), and the queued-prompt content the seam's outbox delivers — plus the **checkpointed record**: the shipped event log, with retention tiers.
 
 > [!decision] PABLO DECIDES: session identity across planes.

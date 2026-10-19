@@ -66,6 +66,11 @@ In-process surface for sibling domains (the only legal way in — see Fences): `
 - `process_kill` (crate root) — the `PlaneKills` census every destructive step
   awaits.
 
+Local project retrieval holds the materialization read lease through discovery
+and index work. Purge and registration removal clear its disposable cache before
+workspace row deletion; [Sessions](../sessions/project-retrieval.md) owns cache
+contents and retrieval behavior.
+
 ## 5. Laws
 
 **One workspace, one repo root, one stable path.** `WorkspaceRecord.repo_root_id` is mandatory and `path` is reserved for the row's lifetime; creation refuses any path an archived row still claims for every kind ([store/lookups.rs](../../../anyharness/crates/anyharness-lib/src/domains/workspaces/store/lookups.rs)). Without it native chat resume — keyed on the absolute worktree path — silently attaches to the wrong checkout.
