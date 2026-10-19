@@ -327,6 +327,7 @@ vi.mock("#product/hooks/agents/workflows/use-agent-login-terminal-workflow", () 
     openAuthTerminal,
     closeAuthTerminal,
     handleTerminalExit,
+    refreshAgentReadiness: vi.fn(async () => {}),
   }),
 }));
 
@@ -1032,27 +1033,19 @@ describe("HarnessPane authentication", () => {
     );
   });
 
-  // The Authentication section is gated on the auth plane (editor.authReady),
-  // not on cloud compute (agent-auth.md, HarnessAuthSection): an anonymous
-  // local user gets the sign-in prompt instead of the method cards, so no
-  // "Authenticate" affordance (native's own) is reachable until they sign in.
-  it("shows the sign-in prompt (not Authenticate) for an anonymous local user with a login_required claude agent", () => {
+  it("offers native authentication without a hosted account", () => {
     state.authStatus = "anonymous";
     state.cloudActive = false;
     state.agentSurface = "local";
-    state.agentsByKind = new Map([[
-      "claude",
-      {
-        kind: "claude",
-        displayName: "Claude Code",
-        readiness: "login_required",
-        supportsLogin: true,
-      },
-    ]]);
+    state.agentsByKind = new Map([["claude", {
+      kind: "claude", displayName: "Claude Code", readiness: "login_required", supportsLogin: true,
+    }]]);
     renderPane("claude");
-
-    expect(screen.queryByRole("button", { name: "Authenticate" })).toBeNull();
-    expect(screen.queryAllByText(/Sign in to Proliferate Cloud/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/A Proliferate account is not required for local agents/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Authenticate" }));
+    expect(openAuthTerminal).toHaveBeenCalledWith(expect.objectContaining({ kind: "claude" }), { restart: false });
+    expect(putMutate).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Proliferate gateway" })).toBeNull();
   });
 
   // P1-a regression: `localAgent?.supportsLogin ?? canRunLogin` let `??`
@@ -1081,12 +1074,13 @@ describe("HarnessPane authentication", () => {
     expect(screen.queryByRole("button", { name: "Authenticate" })).toBeNull();
   });
 
-  it("asks the user to sign in when signed out", () => {
+  it("shows local sign-in rather than a hosted-account blocker when signed out", () => {
     state.authStatus = "anonymous";
     state.cloudActive = false;
     renderPane("claude");
 
-    expect(screen.queryAllByText(/Sign in to Proliferate Cloud/).length).toBeGreaterThan(0);
+    expect(screen.queryAllByText(/Sign in to Proliferate Cloud/).length).toBe(0);
+    expect(screen.getByText(/A Proliferate account is not required for local agents/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Proliferate gateway" })).toBeNull();
   });
 

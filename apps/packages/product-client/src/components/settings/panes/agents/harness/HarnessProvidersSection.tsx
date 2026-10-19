@@ -19,6 +19,7 @@ import {
   HarnessAuthEvidenceSummary,
 } from "#product/components/settings/panes/agents/harness/HarnessAuthEvidenceBadge";
 import { isFeatureEnabled } from "#product/config/feature-flags";
+import { LocalHarnessAuthentication } from "#product/components/settings/panes/agents/harness/LocalHarnessAuthentication";
 import { CustomProvidersSection } from "#product/components/settings/panes/agents/harness/CustomProvidersSection";
 
 // Lazy: the modal pulls in the vendored provider-logo asset map (170+ marks),
@@ -42,6 +43,16 @@ export function HarnessProvidersSection({
 }: {
   editor: HarnessAuthEditorApi;
 }) {
+  if (editor.surface === "local" && !editor.authReady) {
+    return <>
+      <LocalHarnessAuthentication displayName={editor.localAgent?.displayName ?? "OpenCode"} editor={editor} />
+      <p className="text-ui-sm text-muted-foreground">For API keys and local model servers, open Settings → Agents → LLM providers.</p>
+    </>;
+  }
+  return <ManagedHarnessProvidersSection editor={editor} />;
+}
+
+function ManagedHarnessProvidersSection({ editor }: { editor: HarnessAuthEditorApi }) {
   const [modalOpen, setModalOpen] = useState(false);
   // The Configure trigger, not the modal, is the Class B loading treatment
   // (UX Latency + Transitions ADR §4.3, Rung 3): the modal chunk carries the

@@ -13,7 +13,57 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  frontend:
+    if: github.repository == 'mshanghai570/proliferate'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
+      VITE_PROLIFERATE_API_BASE_URL: http://127.0.0.1:8000
+      VITE_PROLIFERATE_ENVIRONMENT: development
+      VITE_REQUIRE_AUTH: "false"
+      VITE_PROLIFERATE_DISABLE_CLOUD_COMPUTE: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.11.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: pnpm
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build desktop web bundle from checked-in contracts
+        working-directory: apps/desktop
+        run: pnpm build
+      - name: Check provider settings
+        working-directory: apps/packages/product-client
+        run: |
+          pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
+            src/components/settings/panes/agents/harness/LocalHarnessAuthentication.test.tsx \
+            src/components/settings/panes/agents/harness/HarnessPane.test.tsx \
+            src/components/settings/panes/agents/harness/HarnessProvidersSection.test.tsx \
+            src/lib/access/extensions/open-vsx-registry.test.ts \
+            src/hooks/skills/workflows/import-skill-files.test.ts \
+            src/components/settings/panes/agents/skills/SkillsSection.test.tsx \
+            src/lib/domain/settings/custom-provider-draft.test.ts \
+            src/lib/domain/settings/navigation-presentation.test.ts \
+            src/lib/domain/settings/navigation.test.ts \
+            src/hooks/agents/workflows/use-custom-providers.test.tsx \
+            src/hooks/agents/workflows/use-local-provider-editor.test.tsx \
+            src/components/settings/panes/agents/harness/CustomProviderModal.test.tsx \
+            src/components/settings/panes/agents/harness/CustomProvidersSection.test.tsx \
+            src/components/settings/panes/agents/providers/LlmProvidersPane.test.tsx \
+            src/components/extensions/marketplace/ExtensionMarketplaceScreen.test.tsx \
+            src/components/extensions/marketplace/InstalledExtensions.test.tsx \
+            src/components/extensions/marketplace/InstalledExtensionColors.test.tsx \
+            src/components/extensions/marketplace/InstalledExtensionSyntax.test.tsx \
+            src/lib/domain/preferences/imported-syntax-theme.test.ts \
+            src/lib/infra/editor/highlighting.test.ts \
+            src/hooks/ui/highlighting/use-syntax-highlight-theme.test.tsx
   package:
+    needs: frontend
     if: github.repository == 'mshanghai570/proliferate'
     runs-on: macos-15-intel
     timeout-minutes: 120
@@ -101,6 +151,9 @@ jobs:
         working-directory: apps/packages/product-client
         run: |
           pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
+            src/components/settings/panes/agents/harness/LocalHarnessAuthentication.test.tsx \
+            src/components/settings/panes/agents/harness/HarnessPane.test.tsx \
+            src/components/settings/panes/agents/harness/HarnessProvidersSection.test.tsx \
             src/lib/access/extensions/open-vsx-registry.test.ts \
             src/hooks/skills/workflows/import-skill-files.test.ts \
             src/components/settings/panes/agents/skills/SkillsSection.test.tsx \

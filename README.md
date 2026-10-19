@@ -274,6 +274,20 @@ An agent must advertise model choices through ACP to appear in the model picker.
 Removing a registration leaves running sessions alone, but sessions using it
 cannot launch again without that registration.
 
+## Sign in to local agents
+
+Local ACP agents do not require a Proliferate account. Open **Settings → Agents**,
+choose the agent, then use **Agent sign-in → Authenticate** to open its supported
+login flow on this Mac. Complete the provider's login in the terminal/browser;
+**Refresh agent sign-in** checks credentials already saved by the provider CLI.
+Agents without an in-app login command use their documented CLI login. For
+OpenCode API connections, use **Settings → Agents → LLM providers**.
+
+Proliferate account sign-in is separate: it needs a reachable, configured control
+plane. The development preview targets `http://127.0.0.1:8000` and does not include
+a hosted account service. Local agent login, API providers, skills, and project
+MCP settings use the bundled runtime and remain available without that service.
+
 ## Use agent skills
 
 Open **Settings → Agents → Skills**. To import one instructions file, enter a

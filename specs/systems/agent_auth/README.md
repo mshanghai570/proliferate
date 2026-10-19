@@ -10,6 +10,14 @@ The desktop also supports an independent [local provider vault](local-providers.
 for OpenCode when no matching managed document is applied. Its encrypted local
 choices never replace managed selections or travel through the courier.
 
+Desktop Settings keeps local provider-CLI login and readiness refresh available
+without a product account or reachable control plane. Single-source harnesses
+show **Agent sign-in** instead of a hosted sign-in blocker; OpenCode also points
+to the independent local LLM provider vault. These controls use the runtime's
+existing login-terminal and readiness APIs, never write managed selections, and
+never replace an applied managed profile. Managed vault, gateway, and seat
+configuration still require the auth plane.
+
 ## 0 · Scope
 
 **The folder census** — the code inside this system's boundary:

@@ -110,3 +110,16 @@ describe("HarnessProvidersSection", () => {
     expect(screen.getByRole("alert")).not.toBeNull();
   });
 });
+
+it("offers local agent login without mounting managed provider configuration", () => {
+  const openAuthTerminal = vi.fn();
+  const value = makeEditor({ authReady: false, surface: "local", localAgent: {
+    kind: "opencode", displayName: "OpenCode", readiness: "login_required", supportsLogin: true,
+  } as never, loginWorkflow: { openAuthTerminal, refreshAgentReadiness: vi.fn() } as never });
+  render(<HarnessProvidersSection editor={value} />);
+  fireEvent.click(screen.getByRole("button", { name: "Authenticate" }));
+  expect(openAuthTerminal).toHaveBeenCalledWith(value.localAgent, { restart: false });
+  expect(screen.getByText(/Settings → Agents → LLM providers/)).toBeTruthy();
+  expect(screen.queryByRole("button", { name: /configure/i })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Add OpenAI-compatible provider" })).toBeNull();
+});

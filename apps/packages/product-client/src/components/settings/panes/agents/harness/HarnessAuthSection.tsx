@@ -24,6 +24,7 @@ import {
   HarnessAuthEvidenceBadge,
   HarnessAuthEvidenceSummary,
 } from "#product/components/settings/panes/agents/harness/HarnessAuthEvidenceBadge";
+import { LocalHarnessAuthentication } from "#product/components/settings/panes/agents/harness/LocalHarnessAuthentication";
 import { isFeatureEnabled } from "#product/config/feature-flags";
 
 export type { AuthMethod };
@@ -61,18 +62,8 @@ export function HarnessAuthSection({
   editor,
   children,
 }: HarnessAuthSectionProps) {
-  // Cloud surface gating is handled at the pane level by CloudGuard. The local
-  // surface keeps its lighter inline sign-in prompt — gated on the auth plane
-  // (signed in), NOT on cloud compute, so a local-only / self-hosted user with
-  // no E2B still gets the route cards to store a key or pick a route.
   if (surface === "local" && !editor.authReady) {
-    return (
-      <SettingsSection title={HARNESS_PANE_COPY.signInTitle} titleWeight="emphasized" surface="plain">
-        <p className="text-ui-sm text-muted-foreground">
-          {HARNESS_PANE_COPY.signInDescription(displayName)}
-        </p>
-      </SettingsSection>
-    );
+    return <LocalHarnessAuthentication displayName={displayName} editor={editor} />;
   }
 
   return (
