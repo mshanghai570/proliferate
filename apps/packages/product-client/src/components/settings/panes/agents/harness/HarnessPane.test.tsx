@@ -120,6 +120,7 @@ vi.mock("@proliferate/cloud-sdk-react", () => ({
   useAgentAuthState: () => ({ data: undefined, isLoading: false }),
   useOrgAgentPolicy: () => ({ data: undefined, isLoading: false }),
   usePutAuthSelections: () => ({ mutate: putMutate, isPending: false }),
+  useCreateAgentProviderConfig: () => ({ mutate: vi.fn(), isPending: false }),
   useCreateAgentApiKey: () => ({ mutate: createKeyMutate, isPending: false }),
   useMintAgentSeat: () => ({ mutateAsync: mintSeatMutate, isPending: false }),
   useRevokeAgentApiKey: () => ({ mutate: revokeKeyMutate, isPending: false }),
