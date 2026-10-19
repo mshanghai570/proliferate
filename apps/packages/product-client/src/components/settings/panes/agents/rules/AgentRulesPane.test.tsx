@@ -6,7 +6,7 @@ const state = vi.hoisted(() => ({ save: vi.fn(), scope: "actor-a", url: "http://
 vi.mock("@anyharness/sdk-react", () => ({
   useAnyHarnessRuntimeContext: () => ({ runtimeUrl: state.url }),
   resolveRuntimeCacheScopeKey: () => state.scope,
-  useAgentsQuery: () => ({ data: [{ kind: "codex" }, { kind: "custom-agent" }] }),
+  useAgentsQuery: () => ({ data: [{ kind: "codex", displayName: "Codex" }, { kind: "custom-agent", displayName: "My reviewer" }] }),
   useRepoRootsQuery: () => ({ data: [{ id: "repo", path: "/project" }] }),
 }));
 vi.mock("#product/stores/ui/agent-surface-store", () => ({
@@ -41,6 +41,7 @@ it("preserves edits after failed save and isolates drafts across actors", async 
 });
 it("allows empty overrides and custom agent selection", async () => {
   render(<AgentRulesPane />);
+  expect(screen.getByRole("option", { name: "My reviewer" })).toBeTruthy();
   fireEvent.change(screen.getByRole("combobox", { name: "Agent" }), { target: { value: "custom-agent" } });
   fireEvent.change(screen.getByRole("combobox", { name: "Scope" }), { target: { value: "repo" } });
   fireEvent.change(screen.getByRole("textbox"), { target: { value: "" } });

@@ -41,7 +41,7 @@ function RuleEditor({ kind, repositoryId, agents, repositories, catalogError, se
     <label className="block space-y-2"><span className="text-ui-sm">Agent</span>
       <Select value={kind} disabled={locked || !agents.length} onChange={(event) => selectAgent(event.currentTarget.value)}>
         {!agents.length ? <option value="">Connect a runtime to load agents</option> : null}
-        {agents.map((agent) => <option key={agent.kind} value={agent.kind}>{agent.kind}</option>)}
+        {agents.map((agent) => <option key={agent.kind} value={agent.kind}>{agent.displayName || agent.kind}</option>)}
       </Select>
     </label>
     <label className="block space-y-2"><span className="text-ui-sm">Scope</span>
