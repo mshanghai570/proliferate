@@ -286,6 +286,82 @@
         }
       }
     },
+    "/v1/agent-rules/{agent_kind}": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "operationId": "get_agent_rules",
+        "parameters": [
+          {
+            "name": "agent_kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repositoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRules"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "agents"
+        ],
+        "operationId": "set_agent_rules",
+        "parameters": [
+          {
+            "name": "agent_kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAgentRulesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRules"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agents": {
       "get": {
         "tags": [
@@ -9448,6 +9524,31 @@
           },
           "status": {
             "$ref": "#/components/schemas/ReconcileJobStatus"
+          }
+        }
+      },
+      "AgentRules": {
+        "type": "object",
+        "required": [
+          "agentKind",
+          "text",
+          "inherited"
+        ],
+        "properties": {
+          "agentKind": {
+            "type": "string"
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "repositoryId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
           }
         }
       },
@@ -20290,6 +20391,28 @@
             "$ref": "#/components/schemas/AgentOperationsAgent"
           }
         }
+      },
+      "SetAgentRulesRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "repositoryId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null removes the scope's file. An empty string explicitly disables rules."
+          }
+        },
+        "additionalProperties": false
       },
       "SetLocalProviderEnabledRequest": {
         "type": "object",

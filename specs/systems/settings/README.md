@@ -46,6 +46,13 @@ rejects malformed endpoints, URL credentials, substitutions, and invalid model
 lists before submission; the runtime remains authoritative. Managed provider
 configuration remains available through the OpenCode settings link.
 
+## Agent rules
+
+Settings → Agents → Rules is a local, account-independent editor over the
+[Sessions agent rules contract](../sessions/agent-rules.md). It selects catalog
+agents and repository overrides, imports Markdown/text files, and preserves
+dirty drafts until saved or discarded. The runtime owns storage and delivery.
+
 ## Public surface
 
 - [`SettingsPage`](../../../apps/packages/product-client/src/pages/SettingsPage.tsx)

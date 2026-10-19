@@ -5,6 +5,7 @@ export type SettingsNavIconId =
   | "agent-api-keys"
   | "agent-providers"
   | "agent-custom"
+  | "agent-rules"
   | "agent-skills"
   | "agent-claude"
   | "agent-codex"
@@ -138,6 +139,7 @@ export const SETTINGS_SCOPES: SettingsScopeNav[] = [
           { kind: "section", id: "agent-cursor", label: "Cursor", iconId: "agent-cursor" },
           { kind: "section", id: "agent-api-keys", label: "API keys", iconId: "agent-api-keys" },
           { kind: "section", id: "agent-custom", label: "Custom ACP agents", iconId: "agent-custom" },
+          { kind: "section", id: "agent-rules", label: "Rules", iconId: "agent-rules" },
           { kind: "section", id: "agent-skills", label: "Skills", iconId: "agent-skills" },
         ],
       },

@@ -5,6 +5,7 @@ import { AgentsClient } from "./agents.js";
 import { CoworkClient } from "./cowork.js";
 import { FilesClient } from "./files.js";
 import { ExtensionsClient } from "./extensions.js";
+import { AgentRulesClient } from "./agent-rules.js";
 import { SkillsClient } from "./skills.js";
 import { GitClient } from "./git.js";
 import { MobilityClient } from "./mobility.js";
@@ -542,6 +543,7 @@ export class AnyHarnessClient {
   readonly files: FilesClient;
   readonly extensions: ExtensionsClient;
   readonly skills: SkillsClient;
+  readonly agentRules: AgentRulesClient;
   readonly sessions: SessionsClient;
   readonly git: GitClient;
   readonly pullRequests: PullRequestsClient;
@@ -565,6 +567,7 @@ export class AnyHarnessClient {
     this.files = new FilesClient(transport);
     this.extensions = new ExtensionsClient(transport);
     this.skills = new SkillsClient(transport);
+    this.agentRules = new AgentRulesClient(transport);
     this.sessions = new SessionsClient(transport);
     this.git = new GitClient(transport);
     this.pullRequests = new PullRequestsClient(transport);

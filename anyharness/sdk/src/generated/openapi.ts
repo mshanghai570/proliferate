@@ -105,6 +105,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agent-rules/{agent_kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_agent_rules"];
+        put: operations["set_agent_rules"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/agents": {
         parameters: {
             query?: never;
@@ -2619,6 +2635,12 @@ export interface components {
             /** Format: int32 */
             skipped: number;
             status: components["schemas"]["ReconcileJobStatus"];
+        };
+        AgentRules: {
+            agentKind: string;
+            inherited: boolean;
+            repositoryId?: string | null;
+            text: string;
         };
         /** @enum {string} */
         AgentSeedFailureKind: "missing_archive" | "invalid_checksum" | "invalid_manifest" | "invalid_archive" | "io" | "unsupported_target" | "verification_failed";
@@ -5288,6 +5310,11 @@ export interface components {
             children: components["schemas"]["SubagentRosterEntry"][];
             parent: components["schemas"]["AgentOperationsAgent"];
         };
+        SetAgentRulesRequest: {
+            repositoryId?: string | null;
+            /** @description Null removes the scope's file. An empty string explicitly disables rules. */
+            text: string | null;
+        };
         SetLocalProviderEnabledRequest: {
             enabled: boolean;
         };
@@ -6296,6 +6323,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_agent_rules: {
+        parameters: {
+            query?: {
+                repositoryId?: string;
+            };
+            header?: never;
+            path: {
+                agent_kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRules"];
+                };
+            };
+        };
+    };
+    set_agent_rules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAgentRulesRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRules"];
                 };
             };
         };

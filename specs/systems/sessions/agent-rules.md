@@ -1,6 +1,6 @@
 # Agent rules
 
-Status: current runtime surface; Settings editor is not yet available.
+Status: runtime and Settings editor authored; cloud qualification pending.
 
 User-authored Markdown instructions select one agent kind, including a custom ACP
 registration id. The runtime user default applies across repositories. An
@@ -25,6 +25,15 @@ directories hold at most 128 files. New directories are private and files use
 mode 0600 on Unix. Writes use an exclusive temporary file, sync, atomic rename,
 and parent sync. Symlink sources and directory components are rejected. Reads
 are bounded, require regular files, and use `O_NOFOLLOW` on Unix.
+
+## Settings editor
+
+Settings → Agents → Rules selects an actual catalog agent and optional repository.
+The editor imports bounded UTF-8 Markdown/text files, saves exact text (including
+an explicit empty override), and removes repository overrides with “Use user
+default.” Dirty drafts lock the selectors until saved or discarded; refetches
+preserve edits. Runtime or actor changes remount the editor and drop its draft.
+Failed saves retain edits and offer retry. The form blocks telemetry capture.
 
 ## Delivery
 

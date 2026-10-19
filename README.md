@@ -71,7 +71,7 @@ Current qualification status:
 | Local agent login | In-app provider login and refresh available without a product account; client workflow checks pass. Live provider login still needs hands-on qualification. |
 | Proliferate account | Client connection and callback checks pass; hosted service returned `503 DEPLOYMENT_PAUSED` during the audit. |
 | Project RAG | Local keyword-index and cited-search runtime APIs are under verification; no composer UI yet. |
-| Per-agent rules | Runtime Markdown storage, repository replacements, and launch delivery are under verification; no Settings editor yet. |
+| Per-agent rules | Private Markdown storage, repository replacements, launch delivery, and Settings → Agents → Rules are authored; cloud qualification is pending. |
 | Marketplace, MCP, skills | Implemented scopes are described below; executable extension hosting is unavailable. |
 | Distribution | GitHub builds produce verified DMG artifacts; no versioned daily-driver release has been published. |
 

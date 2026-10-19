@@ -4,6 +4,11 @@ on:
   push:
     branches: [build/intel-dmg, codex/macos-extensions-fonts]
   workflow_dispatch:
+    inputs:
+      frontend_only:
+        description: Check the web bundle and client flows without packaging
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -54,6 +59,8 @@ jobs:
             src/lib/access/extensions/open-vsx-registry.test.ts \
             src/hooks/skills/workflows/import-skill-files.test.ts \
             src/components/settings/panes/agents/skills/SkillsSection.test.tsx \
+            src/components/settings/panes/agents/rules/AgentRulesPane.test.tsx \
+            src/lib/domain/settings/agent-rule-files.test.ts \
             src/lib/domain/settings/custom-provider-draft.test.ts \
             src/lib/domain/settings/navigation-presentation.test.ts \
             src/lib/domain/settings/navigation.test.ts \
@@ -71,7 +78,7 @@ jobs:
             src/hooks/ui/highlighting/use-syntax-highlight-theme.test.tsx
   package:
     needs: frontend
-    if: github.repository == 'mshanghai570/proliferate'
+    if: github.repository == 'mshanghai570/proliferate' && !inputs.frontend_only
     runs-on: macos-15-intel
     timeout-minutes: 120
     env:
@@ -171,6 +178,8 @@ jobs:
             src/lib/access/extensions/open-vsx-registry.test.ts \
             src/hooks/skills/workflows/import-skill-files.test.ts \
             src/components/settings/panes/agents/skills/SkillsSection.test.tsx \
+            src/components/settings/panes/agents/rules/AgentRulesPane.test.tsx \
+            src/lib/domain/settings/agent-rule-files.test.ts \
             src/lib/domain/settings/custom-provider-draft.test.ts \
             src/lib/domain/settings/navigation-presentation.test.ts \
             src/lib/domain/settings/navigation.test.ts \
@@ -198,7 +207,7 @@ jobs:
         run: cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util extensions -- --test-threads=1
       - name: Check runtime SDK provider operations
         working-directory: anyharness/sdk
-        run: pnpm exec vitest run src/client/agent-auth.test.ts src/client/extensions.test.ts --maxWorkers=1 --fileParallelism=false
+        run: pnpm exec vitest run src/client/agent-auth.test.ts src/client/extensions.test.ts src/client/agent-rules.test.ts --maxWorkers=1 --fileParallelism=false
       - name: Build bundled agents
         run: |
           command -v zstd >/dev/null || brew install zstd
