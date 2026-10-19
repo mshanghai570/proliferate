@@ -34,6 +34,11 @@ Local project MCP settings use the dedicated store under
 They are repository-scoped launch inputs, rather than session snapshots. The
 [project MCP reference](project-mcp.md) describes management and launch behavior.
 
+User-authored per-agent Markdown rules live under the runtime home's
+`agent-rules/` directory. The [agent rules reference](agent-rules.md) owns scope
+selection, bounded file storage, and launch delivery. These files are independent
+of optional skill packages and repository-owned instruction files.
+
 Control plane (※ new): the **session registry row** — id, subject, environment binding, status, external bindings (`{kind: "slack", team_id, channel_id, thread_ts}` and later Linear/GitHub/ email), and the queued-prompt content the seam's outbox delivers — plus the **checkpointed record**: the shipped event log, with retention tiers.
 
 > [!decision] PABLO DECIDES: session identity across planes.

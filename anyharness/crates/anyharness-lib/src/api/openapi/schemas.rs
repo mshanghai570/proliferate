@@ -1,3 +1,4 @@
+use anyharness_contract::v1::agent_rules::{AgentRules, SetAgentRulesRequest};
 use anyharness_contract::v1::extensions::{
     ExtensionColorTheme, ExtensionInstallationState, ExtensionPackageErrorCode,
     ExtensionSyntaxRule, ExtensionSyntaxTheme, InstallRegistryExtensionRequest,
@@ -137,6 +138,8 @@ use utoipa::OpenApi;
 #[derive(OpenApi)]
 #[openapi(components(schemas(
     SkillFile,
+    AgentRules,
+    SetAgentRulesRequest,
     SkillSummary,
     ImportSkillRequest,
     SetSkillEnabledRequest,

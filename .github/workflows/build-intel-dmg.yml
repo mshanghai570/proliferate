@@ -190,6 +190,8 @@ jobs:
         run: |
           cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util local_provider -- --test-threads=1
           cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util mcp_bindings -- --test-threads=1
+      - name: Check agent rules
+        run: cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util agent_rules -- --test-threads=1
       - name: Check installed extension themes
         run: cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util extensions -- --test-threads=1
       - name: Check runtime SDK provider operations

@@ -3,6 +3,7 @@ pub mod active_goals;
 pub mod active_loops;
 pub mod adapter_migration;
 pub mod admission;
+pub mod agent_rules;
 pub mod attachment_storage;
 pub mod delegation;
 pub mod deletion;

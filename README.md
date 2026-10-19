@@ -60,6 +60,21 @@ macOS 15+, is ad-hoc signed without notarization. Account features connect to
 `https://app.proliferate.com/api` by default. Account sign-in is optional; local
 agents, API providers, and project MCP settings use the bundled runtime.
 
+### Daily-driver release audit
+
+The release target is a versioned, ad-hoc-signed DMG published on GitHub, with
+checksums and release notes. Apple notarization is unavailable for this build.
+Current qualification status:
+
+| Area | Current state |
+| --- | --- |
+| Local agent login | In-app provider login and refresh available without a product account; client workflow checks pass. Live provider login still needs hands-on qualification. |
+| Proliferate account | Client connection and callback checks pass; hosted service returned `503 DEPLOYMENT_PAUSED` during the audit. |
+| Project RAG | Not implemented. |
+| Per-agent rules | Runtime Markdown storage, repository replacements, and launch delivery are under verification; no Settings editor yet. |
+| Marketplace, MCP, skills | Implemented scopes are described below; executable extension hosting is unavailable. |
+| Distribution | GitHub builds produce verified DMG artifacts; no versioned daily-driver release has been published. |
+
 ### Current macOS customization scope
 
 The Extensions destination is visible by default in the macOS app. It provides

@@ -1,5 +1,6 @@
 pub mod activity;
 pub mod agent_auth;
+pub mod agent_rules;
 pub mod agents;
 pub mod auth;
 pub mod catalogs;

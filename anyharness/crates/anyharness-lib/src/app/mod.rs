@@ -175,6 +175,7 @@ pub struct AppState {
     pub mobility_runtime: Arc<MobilityRuntime>,
     pub materialization_runtime: Arc<MaterializationRuntime>,
     pub plan_service: Arc<PlanService>,
+    pub agent_rules_manager: Arc<crate::domains::sessions::agent_rules::AgentRulesManager>,
     pub skill_manager: Arc<crate::domains::skills::SkillManager>,
     pub extension_manager: Arc<ExtensionManager>,
     pub project_mcp_manager:
@@ -299,6 +300,9 @@ impl AppState {
             runtime_home.clone(),
         ));
         let plan_service = Arc::new(PlanService::new(PlanStore::new(db.clone())));
+        let agent_rules_manager = Arc::new(
+            crate::domains::sessions::agent_rules::AgentRulesManager::new(runtime_home.clone()),
+        );
         let skill_manager = Arc::new(crate::domains::skills::SkillManager::new(
             runtime_home.clone(),
         ));
@@ -456,6 +460,7 @@ impl AppState {
             activity_session_hooks,
             workflow_session_extension.clone(),
             skill_manager.clone(),
+            agent_rules_manager.clone(),
         ];
         // Checkpoints precede SessionRuntime; workspace lifecycle wraps it later.
         let workspace_checkpoint_service =
@@ -645,6 +650,7 @@ impl AppState {
             materialization_runtime,
             plan_service,
             skill_manager,
+            agent_rules_manager,
             extension_manager,
             project_mcp_manager,
             extension_registry_base_url: OPEN_VSX_BASE_URL.to_string(),

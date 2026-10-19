@@ -1,4 +1,6 @@
-use crate::api::http::{custom_agents, extensions, local_providers, project_mcp, skills};
+use crate::api::http::{
+    agent_rules, custom_agents, extensions, local_providers, project_mcp, skills,
+};
 use crate::app::AppState;
 use axum::{
     routing::{delete, get, post, put},
@@ -7,6 +9,10 @@ use axum::{
 
 pub(super) fn routes() -> Router<AppState> {
     Router::new()
+        .route(
+            "/agent-rules/{agent_kind}",
+            get(agent_rules::get).put(agent_rules::put),
+        )
         .route(
             "/skills",
             get(skills::list_skills).post(skills::import_skill),

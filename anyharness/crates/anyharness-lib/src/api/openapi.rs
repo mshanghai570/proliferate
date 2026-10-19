@@ -9,6 +9,8 @@ mod support_windows;
         description = "Local sidecar runtime for managing coding agent installations, credentials, and ACP sessions."
     ),
     paths(
+        super::http::agent_rules::get,
+        super::http::agent_rules::put,
         super::http::skills::list_skills,
         super::http::skills::import_skill,
         super::http::skills::set_skill_enabled,
