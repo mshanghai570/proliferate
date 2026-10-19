@@ -172,3 +172,20 @@ apps/web/src/browser/auth/** · apps/mobile/src/components/auth/**
 - Service subjects (agents acting as clients under an org) are an
   `organizations` decision, not an accounts one; accounts will only need to
   mint tokens for them.
+
+## Desktop account entry
+
+Settings → Account exposes the connected server's supported GitHub and password
+sign-in methods without requiring an account to enter Settings. Authentication
+uses the existing audited host workflows. If the service is unavailable, the
+pane keeps a retry action and local agents remain available; retry first checks
+health, then refreshes the public method and GitHub-availability probes.
+
+The Account server section exposes the existing server validation and trust
+confirmation dialog independently of invitations. Switching persists the native
+runtime override and restarts Desktop. It also offers the hosted endpoint for
+installs currently pointed at a custom or loopback server. The personal preview
+build defaults to `https://app.proliferate.com/api`; explicit runtime overrides
+retain precedence. It uses the already accepted `proliferate-local` callback
+scheme, registered in the preview bundle. Server callback validation, OAuth
+state and PKCE checks remain unchanged.

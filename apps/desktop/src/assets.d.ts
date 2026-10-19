@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  readonly VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME?: "proliferate" | "proliferate-local";
   readonly VITE_PROLIFERATE_API_BASE_URL?: string;
   readonly VITE_PROLIFERATE_WEB_BASE_URL?: string;
   readonly VITE_PROLIFERATE_ANONYMOUS_TELEMETRY_ENDPOINT?: string;

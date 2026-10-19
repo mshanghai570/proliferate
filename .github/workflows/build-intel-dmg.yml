@@ -19,7 +19,8 @@ jobs:
     timeout-minutes: 20
     env:
       NODE_OPTIONS: --max-old-space-size=8192
-      VITE_PROLIFERATE_API_BASE_URL: http://127.0.0.1:8000
+      VITE_PROLIFERATE_API_BASE_URL: https://app.proliferate.com/api
+      VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME: proliferate-local
       VITE_PROLIFERATE_ENVIRONMENT: development
       VITE_REQUIRE_AUTH: "false"
       VITE_PROLIFERATE_DISABLE_CLOUD_COMPUTE: "1"
@@ -37,10 +38,16 @@ jobs:
       - name: Build desktop web bundle from checked-in contracts
         working-directory: apps/desktop
         run: pnpm build
+      - name: Check desktop auth callback
+        working-directory: apps/desktop
+        run: pnpm exec vitest run src/lib/integrations/auth/proliferate-auth-redirect.test.ts src/lib/integrations/auth/orchestration-callback.test.ts src/lib/integrations/auth/orchestration-password-flow.test.ts --maxWorkers=1 --fileParallelism=false
       - name: Check provider settings
         working-directory: apps/packages/product-client
         run: |
           pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
+            src/components/settings/panes/account/AccountSignInSection.test.tsx \
+            src/components/settings/panes/account/AccountServerSection.test.tsx \
+            src/hooks/auth/workflows/use-connect-server.test.tsx \
             src/components/settings/panes/agents/harness/LocalHarnessAuthentication.test.tsx \
             src/components/settings/panes/agents/harness/HarnessPane.test.tsx \
             src/components/settings/panes/agents/harness/HarnessProvidersSection.test.tsx \
@@ -71,7 +78,8 @@ jobs:
       TARGET: x86_64-apple-darwin
       CARGO_BUILD_JOBS: "2"
       NODE_OPTIONS: --max-old-space-size=8192
-      VITE_PROLIFERATE_API_BASE_URL: http://127.0.0.1:8000
+      VITE_PROLIFERATE_API_BASE_URL: https://app.proliferate.com/api
+      VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME: proliferate-local
       VITE_PROLIFERATE_ENVIRONMENT: development
       VITE_REQUIRE_AUTH: "false"
       VITE_PROLIFERATE_DISABLE_CLOUD_COMPUTE: "1"
@@ -147,10 +155,16 @@ jobs:
       - name: Build desktop web bundle
         working-directory: apps/desktop
         run: pnpm build
+      - name: Check desktop auth callback
+        working-directory: apps/desktop
+        run: pnpm exec vitest run src/lib/integrations/auth/proliferate-auth-redirect.test.ts src/lib/integrations/auth/orchestration-callback.test.ts src/lib/integrations/auth/orchestration-password-flow.test.ts --maxWorkers=1 --fileParallelism=false
       - name: Check provider settings
         working-directory: apps/packages/product-client
         run: |
           pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
+            src/components/settings/panes/account/AccountSignInSection.test.tsx \
+            src/components/settings/panes/account/AccountServerSection.test.tsx \
+            src/hooks/auth/workflows/use-connect-server.test.tsx \
             src/components/settings/panes/agents/harness/LocalHarnessAuthentication.test.tsx \
             src/components/settings/panes/agents/harness/HarnessPane.test.tsx \
             src/components/settings/panes/agents/harness/HarnessProvidersSection.test.tsx \
@@ -197,13 +211,14 @@ jobs:
           node --input-type=module <<'JS'
           import fs from 'node:fs';
           const base = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
+          if (process.env.VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME !== 'proliferate-local') throw new Error('Preview auth callback scheme must match the registered desktop scheme');
           fs.writeFileSync('preview.config.json', JSON.stringify({
             build: { beforeBuildCommand: '' },
             productName: 'Proliferate Preview',
             identifier: 'com.mshanghai570.proliferate.preview',
             app: { windows: base.app.windows.map(window => ({ ...window, title: 'Proliferate Preview' })) },
             bundle: { createUpdaterArtifacts: false, macOS: { minimumSystemVersion: '15.0' } },
-            plugins: { updater: { endpoints: [] }, 'deep-link': { desktop: { schemes: ['proliferate-preview'] } } },
+            plugins: { updater: { endpoints: [] }, 'deep-link': { desktop: { schemes: ['proliferate-preview', process.env.VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME] } } },
           }));
           const cargo = fs.readFileSync('../../anyharness/crates/anyharness/Cargo.toml', 'utf8');
           const version = cargo.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
@@ -217,6 +232,17 @@ jobs:
           test -d "$app"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = com.mshanghai570.proliferate.preview
           test "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$app/Contents/Info.plist")" = 15.0
+          python3 - <<'PY_AUTH'
+          import os
+          import plistlib
+          from pathlib import Path
+          path = Path('target') / os.environ['TARGET'] / 'release/bundle/macos/Proliferate Preview.app/Contents/Info.plist'
+          with path.open('rb') as file:
+              metadata = plistlib.load(file)
+          schemes = {scheme for entry in metadata.get('CFBundleURLTypes', []) for scheme in entry.get('CFBundleURLSchemes', [])}
+          assert {'proliferate-preview', 'proliferate-local'} <= schemes, schemes
+          assert 'proliferate' not in schemes, 'Preview must not register the production callback scheme'
+          PY_AUTH
           for binary in proliferate anyharness proliferate-worker proliferate-debug proliferate-diagnostics-collector; do
             test -x "$app/Contents/MacOS/$binary"
             lipo "$app/Contents/MacOS/$binary" -verify_arch x86_64
@@ -242,7 +268,7 @@ jobs:
           {
             echo 'Intel preview DMG: macOS 15+, ad-hoc signed, not notarized.'
             echo "Source: $GITHUB_SHA"
-            echo 'Managed API: http://127.0.0.1:8000. Local API providers and project MCP settings use the bundled runtime.'
+            echo 'Managed API: https://app.proliferate.com/api. Local API providers and project MCP settings use the bundled runtime.'
           } > artifacts/BUILD-INFO.txt
       - name: Upload Intel DMG
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

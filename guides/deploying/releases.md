@@ -136,7 +136,12 @@ SHA-256 checksum, and source metadata as a 14-day Actions artifact.
 
 The preview uses `com.mshanghai570.proliferate.preview`, requires macOS 15+,
 is ad-hoc signed without notarization, disables updater artifacts and automatic
-updates, and defaults to the local API on port 8000. Its token has only
+updates, and defaults to `https://app.proliferate.com/api` for optional account
+sign-in. The preview registers `proliferate-local` and compiles its auth callback
+with the same scheme; the separate `proliferate-preview` scheme remains registered.
+Runtime config overrides still win. Account settings exposes server connection
+and supported sign-in methods, including a retry state when the service is
+unavailable. Local agents stay available without an account. Its token has only
 `contents: read`; it has no release, tag, updater, or deployment step. The
 production release matrix and signing requirements remain the authority for
 published releases.

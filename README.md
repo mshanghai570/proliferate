@@ -56,9 +56,9 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 Personal Intel preview builds run in GitHub Actions through
 **Build Intel preview DMG**. Feature branches can be built by manually starting
 that workflow with the desired branch. Download the DMG from that run's artifacts. The separate Preview app requires
-macOS 15+, is ad-hoc signed without notarization. Managed features use the local API on
-port 8000; a successful build does not provision that control plane. Local API
-providers and project MCP settings use the bundled runtime.
+macOS 15+, is ad-hoc signed without notarization. Account features connect to
+`https://app.proliferate.com/api` by default. Account sign-in is optional; local
+agents, API providers, and project MCP settings use the bundled runtime.
 
 ### Current macOS customization scope
 
@@ -284,9 +284,19 @@ Agents without an in-app login command use their documented CLI login. For
 OpenCode API connections, use **Settings → Agents → LLM providers**.
 
 Proliferate account sign-in is separate: it needs a reachable, configured control
-plane. The development preview targets `http://127.0.0.1:8000` and does not include
-a hosted account service. Local agent login, API providers, skills, and project
-MCP settings use the bundled runtime and remain available without that service.
+plane. The personal preview targets Proliferate's hosted service at
+`https://app.proliferate.com/api`. Open **Settings → Account** for the sign-in
+methods supported by that service. If the service is unavailable, retry the
+account connection from the same screen; local agent login, API providers,
+skills, and project MCP settings remain available.
+
+**Account server → Connect to a server** opens server validation and confirmation
+before changing the saved endpoint and restarting the app. Existing local or
+self-hosted overrides can choose **Use Proliferate hosted service**. Overrides in
+`~/.proliferate/config.json` take precedence over the packaged default. The
+preview registers `proliferate-local://auth/callback` for browser login, separate
+from the production app's `proliferate` scheme. The service must accept this
+callback and be online for hosted sign-in to complete.
 
 ## Use agent skills
 
