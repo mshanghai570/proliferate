@@ -9,17 +9,31 @@ on:
         description: Check the web bundle and client flows without packaging
         default: false
         type: boolean
+      app_version:
+        description: Fork macOS application version
+        default: "0.1.0"
+        required: true
+        type: string
+
+      publish_build_run_id:
+        description: Publish an already successful run instead of building (optional)
+        default: ""
+        type: string
+      release_tag:
+        description: New macos-vMAJOR.MINOR.PATCH tag for publication
+        default: ""
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
   group: intel-preview-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ inputs.publish_build_run_id == '' }}
 
 jobs:
   frontend:
-    if: github.repository == 'mshanghai570/proliferate'
+    if: github.repository == 'mshanghai570/proliferate' && inputs.publish_build_run_id == ''
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -85,10 +99,11 @@ jobs:
             src/hooks/ui/highlighting/use-syntax-highlight-theme.test.tsx
   package:
     needs: frontend
-    if: github.repository == 'mshanghai570/proliferate' && !inputs.frontend_only
+    if: github.repository == 'mshanghai570/proliferate' && inputs.publish_build_run_id == '' && !inputs.frontend_only
     runs-on: macos-15-intel
     timeout-minutes: 120
     env:
+      RELEASE_VERSION: ${{ inputs.app_version || '0.1.0' }}
       TARGET: x86_64-apple-darwin
       CARGO_BUILD_JOBS: "2"
       NODE_OPTIONS: --max-old-space-size=8192
@@ -120,21 +135,12 @@ jobs:
         run: python3 scripts/check_anyharness_boundaries.py
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build native runtime and helpers
+      - name: Build native runtime
         run: |
-          cargo build --locked --release --target "$TARGET" \
-            -p anyharness -p proliferate-worker -p proliferate-debug \
-            -p proliferate-diagnostics-collector
-          for binary in anyharness proliferate-worker proliferate-debug proliferate-diagnostics-collector; do
-            test -x "target/$TARGET/release/$binary"
-            lipo "target/$TARGET/release/$binary" -verify_arch x86_64
-          done
-          {
-            echo "ANYHARNESS_BIN=$PWD/target/$TARGET/release/anyharness"
-            echo "PROLIFERATE_WORKER_BIN=$PWD/target/$TARGET/release/proliferate-worker"
-            echo "PROLIFERATE_DEBUG_BIN=$PWD/target/$TARGET/release/proliferate-debug"
-            echo "PROLIFERATE_DIAGNOSTICS_COLLECTOR_BIN=$PWD/target/$TARGET/release/proliferate-diagnostics-collector"
-          } >> "$GITHUB_ENV"
+          cargo build --locked --release --target "$TARGET" -p anyharness
+          test -x "target/$TARGET/release/anyharness"
+          lipo "target/$TARGET/release/anyharness" -verify_arch x86_64
+          echo "ANYHARNESS_BIN=$PWD/target/$TARGET/release/anyharness" >> "$GITHUB_ENV"
       - name: Generate runtime SDK
         env:
           SKIP_RUST: "1"
@@ -206,6 +212,19 @@ jobs:
             src/lib/domain/preferences/imported-syntax-theme.test.ts \
             src/lib/infra/editor/highlighting.test.ts \
             src/hooks/ui/highlighting/use-syntax-highlight-theme.test.tsx
+      - name: Build native helpers
+        run: |
+          cargo build --locked --release --target "$TARGET" \
+            -p proliferate-worker -p proliferate-debug -p proliferate-diagnostics-collector
+          for binary in proliferate-worker proliferate-debug proliferate-diagnostics-collector; do
+            test -x "target/$TARGET/release/$binary"
+            lipo "target/$TARGET/release/$binary" -verify_arch x86_64
+          done
+          {
+            echo "PROLIFERATE_WORKER_BIN=$PWD/target/$TARGET/release/proliferate-worker"
+            echo "PROLIFERATE_DEBUG_BIN=$PWD/target/$TARGET/release/proliferate-debug"
+            echo "PROLIFERATE_DIAGNOSTICS_COLLECTOR_BIN=$PWD/target/$TARGET/release/proliferate-diagnostics-collector"
+          } >> "$GITHUB_ENV"
       - name: Check native provider and encryption behavior
         run: |
           cargo test --locked --release --target "$TARGET" -p anyharness-lib --lib --features tokio/test-util local_provider -- --test-threads=1
@@ -236,7 +255,9 @@ jobs:
           import fs from 'node:fs';
           const base = JSON.parse(fs.readFileSync('src-tauri/tauri.conf.json', 'utf8'));
           if (process.env.VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME !== 'proliferate-local') throw new Error('Preview auth callback scheme must match the registered desktop scheme');
+          if (!/^\d+\.\d+\.\d+$/.test(process.env.RELEASE_VERSION ?? '')) throw new Error('Use a numeric major.minor.patch version');
           fs.writeFileSync('preview.config.json', JSON.stringify({
+            version: process.env.RELEASE_VERSION,
             build: { beforeBuildCommand: '' },
             productName: 'Proliferate Preview',
             identifier: 'com.mshanghai570.proliferate.preview',
@@ -254,6 +275,7 @@ jobs:
         run: |
           app="target/$TARGET/release/bundle/macos/Proliferate Preview.app"
           test -d "$app"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")" = "$RELEASE_VERSION"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = com.mshanghai570.proliferate.preview
           test "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$app/Contents/Info.plist")" = 15.0
           python3 - <<'PY_AUTH'
@@ -292,6 +314,7 @@ jobs:
           {
             echo 'Intel preview DMG: macOS 15+, ad-hoc signed, not notarized.'
             echo "Source: $GITHUB_SHA"
+            echo "App version: $RELEASE_VERSION"
             echo 'Managed API: https://app.proliferate.com/api. Local API providers and project MCP settings use the bundled runtime.'
           } > artifacts/BUILD-INFO.txt
       - name: Upload Intel DMG
@@ -302,3 +325,12 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+  publish:
+    if: github.repository == 'mshanghai570/proliferate' && inputs.publish_build_run_id != ''
+    permissions:
+      actions: read
+      contents: write
+    uses: ./.github/workflows/publish-fork-macos.yml
+    with:
+      build_run_id: ${{ inputs.publish_build_run_id }}
+      tag: ${{ inputs.release_tag }}

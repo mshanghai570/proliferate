@@ -1,0 +1,108 @@
+name: Publish fork macOS release
+
+on:
+  workflow_call:
+    inputs:
+      build_run_id:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Successful Build Intel preview DMG run id
+        required: true
+        type: string
+      tag:
+        description: New macos-vMAJOR.MINOR.PATCH tag matching the built app
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-fork-macos
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'mshanghai570/proliferate'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_RUN_ID: ${{ inputs.build_run_id }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Verify successful fork build and unused version tag
+        run: |
+          python3 - <<'PY_CHECK'
+          import json, os, re, subprocess
+          run_id, tag = os.environ['BUILD_RUN_ID'], os.environ['RELEASE_TAG']
+          assert re.fullmatch(r'[0-9]+', run_id), 'Invalid build run id'
+          assert re.fullmatch(r'macos-v[0-9]+\.[0-9]+\.[0-9]+', tag), 'Invalid release tag'
+          repo = os.environ['GH_REPO']
+          def api(path):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{path}']))
+          run = api(f'actions/runs/{run_id}')
+          assert run['status'] == 'completed' and run['conclusion'] == 'success', 'Build must succeed completely'
+          assert run['path'] == '.github/workflows/build-intel-dmg.yml', 'Unexpected build workflow'
+          assert run['head_repository']['full_name'] == repo, 'Build must originate in this fork'
+          assert run['head_branch'].startswith('codex/'), 'Expected fork qualification branch'
+          assert re.fullmatch(r'[0-9a-f]{40}', run['head_sha']), 'Invalid source commit'
+          # Refuse reuse even when a previous publication stopped after creating its tag.
+          tags = api(f'git/matching-refs/tags/{tag}')
+          assert not any(ref['ref'] == f'refs/tags/{tag}' for ref in tags), 'Release tag already exists'
+          artifacts = api(f'actions/runs/{run_id}/artifacts')['artifacts']
+          selected = [a for a in artifacts if a['name'] == 'proliferate-preview-intel-dmg' and not a['expired']]
+          assert len(selected) == 1, 'Expected one unexpired DMG artifact'
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write(f"BUILD_SOURCE_SHA={run['head_sha']}\n")
+          PY_CHECK
+      - name: Download and verify qualified artifact
+        run: |
+          gh run download "$BUILD_RUN_ID" --name proliferate-preview-intel-dmg --dir release-assets
+          python3 - <<'PY_VERIFY'
+          import hashlib, os, pathlib, re
+          root = pathlib.Path('release-assets')
+          expected = {'Proliferate-Preview-intel.dmg', 'SHA256SUMS', 'BUILD-INFO.txt'}
+          assert {p.name for p in root.iterdir()} == expected, 'Unexpected artifact contents'
+          assert all(p.is_file() and not p.is_symlink() for p in root.iterdir()), 'Invalid artifact entry'
+          info = (root / 'BUILD-INFO.txt').read_text()
+          assert f"Source: {os.environ['BUILD_SOURCE_SHA']}" in info.splitlines(), 'Artifact source mismatch'
+          version = os.environ['RELEASE_TAG'].removeprefix('macos-v')
+          assert f'App version: {version}' in info.splitlines(), 'Artifact version mismatch'
+          checksum = (root / 'SHA256SUMS').read_text().strip()
+          assert re.fullmatch(r'[0-9a-f]{64}  Proliferate-Preview-intel\.dmg', checksum), 'Unexpected checksum format'
+          with (root / 'Proliferate-Preview-intel.dmg').open('rb') as dmg:
+              actual = hashlib.file_digest(dmg, 'sha256').hexdigest()
+          assert checksum.split()[0] == actual, 'DMG checksum mismatch'
+          PY_VERIFY
+      - name: Publish versioned DMG and qualification details
+        run: |
+          cat > release-notes.md <<'NOTES'
+          Native macOS application for Intel Macs running macOS 15 or newer.
+
+          Download the DMG and drag Proliferate Preview into Applications. The application keeps the preview bundle identity so existing local settings remain available.
+
+          This build is ad-hoc signed and is not Apple notarized. macOS may require approval in System Settings > Privacy & Security after the first launch attempt.
+
+          Proliferate account access depends on the hosted service. Local agent login, local LLM providers, and project MCP settings use the bundled runtime. Live provider authentication must be completed with your own provider account.
+
+          The marketplace supports admitted declarative packages; executable extension hosting is unavailable. Project context uses local keyword retrieval, with reviewed excerpts added explicitly to a draft. It does not use vector embeddings.
+
+          Verify the download with `shasum -a 256 -c SHA256SUMS`. BUILD-INFO.txt identifies the exact source and app version. This prerelease is intended for daily use feedback; keep copies of important projects.
+          NOTES
+          printf '\nBuild qualification: https://github.com/%s/actions/runs/%s\nSource commit: %s\n' "$GH_REPO" "$BUILD_RUN_ID" "$BUILD_SOURCE_SHA" >> release-notes.md
+          gh release create "$RELEASE_TAG" \
+            --repo "$GH_REPO" --target "$BUILD_SOURCE_SHA" \
+            --title "Proliferate for macOS ${RELEASE_TAG#macos-v}" \
+            --notes-file release-notes.md --prerelease \
+            release-assets/Proliferate-Preview-intel.dmg release-assets/SHA256SUMS release-assets/BUILD-INFO.txt

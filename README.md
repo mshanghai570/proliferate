@@ -93,7 +93,9 @@ source may still contain private data. Search refreshes changed and deleted
 files. The picker exposes partial-index limits and can clear the local cache.
 This version has no vector embeddings or automatic context injection.
 
-These additions are under cloud qualification.
+These additions are under cloud qualification. The
+[macOS fork release procedure](guides/deploying/fork-macos.md) describes native
+DMG builds and versioned GitHub publication without Apple credentials.
 
 ### Current macOS customization scope
 
