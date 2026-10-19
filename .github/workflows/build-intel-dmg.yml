@@ -101,6 +101,9 @@ jobs:
         working-directory: apps/packages/product-client
         run: |
           pnpm exec vitest run --maxWorkers=1 --fileParallelism=false --testTimeout=20000 \
+            src/lib/access/extensions/open-vsx-registry.test.ts \
+            src/hooks/skills/workflows/import-skill-files.test.ts \
+            src/components/settings/panes/agents/skills/SkillsSection.test.tsx \
             src/lib/domain/settings/custom-provider-draft.test.ts \
             src/lib/domain/settings/navigation-presentation.test.ts \
             src/lib/domain/settings/navigation.test.ts \

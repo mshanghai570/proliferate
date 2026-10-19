@@ -63,7 +63,9 @@ providers and project MCP settings use the bundled runtime.
 ### Current macOS customization scope
 
 The Extensions destination is visible by default in the macOS app. It provides
-Open VSX discovery, package installation, inventory, and removal. Open **Details
+Open VSX discovery, package installation, inventory, and removal. Registry
+requests use browser-managed caching without custom headers, allowing the
+macOS webview to access the public registry under its CORS policy. Open **Details
 and versions** from an installed package to inspect its registry listing and
 version history, then return to Installed. In **Installed →
 App color themes**, copy readable core colors from a declared standalone JSON or JSONC
@@ -274,9 +276,11 @@ cannot launch again without that registration.
 
 ## Use agent skills
 
-Open **Settings → Agents → Skills** and import a directory with a root
-`SKILL.md`. Include any relative resources referenced by the instructions in
-the same directory. Imports are disabled initially; enable a package for all
+Open **Settings → Agents → Skills**. To import one instructions file, enter a
+skill name and choose **Import SKILL.md file**; lowercase `skill.md` is also
+accepted and stored as `SKILL.md`. Instructions must contain 1–65,536 bytes of
+UTF-8 text. Use **Import skill folder** for a directory with a root `SKILL.md`
+and any relative resources referenced by the instructions. Imports are disabled initially; enable a package for all
 repositories or choose a repository override. A repository override can also
 disable a globally enabled skill.
 

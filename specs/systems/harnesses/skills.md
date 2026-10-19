@@ -2,8 +2,8 @@
 
 Status: current
 
-Skills are runtime-local instruction packages imported from a folder containing
-`SKILL.md` and optional resources. Settings → Agents → Skills manages the selected
+Skills are runtime-local instruction packages imported from a standalone
+`SKILL.md` file or a folder containing `SKILL.md` and optional resources. Settings → Agents → Skills manages the selected
 runtime's packages. Importing preserves file bytes and starts the package disabled.
 An imported package is immutable; import a new copy to update it.
 
@@ -23,7 +23,10 @@ Resource scripts run only when the agent invokes them under its existing policy.
 ## Import boundary
 
 `POST /v1/skills` accepts named files with relative paths and base64 content.
-The browser imports one selected directory; the server never follows a source
+The browser imports one selected directory or one named instructions file;
+standalone imports accept case-insensitive `skill.md` and canonicalize its path
+to `SKILL.md`. The user supplies the package name. Both use the same admission
+boundary; the server never follows a source
 filesystem path or unpacks archive links. Admission requires a root `SKILL.md`
 containing 1–65,536 bytes of UTF-8 instructions. Packages are bounded to 128 files
 and 1 MiB total decoded bytes. Absolute paths, traversal, backslashes, colons,
