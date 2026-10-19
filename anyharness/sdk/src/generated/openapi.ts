@@ -457,6 +457,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/extensions/{namespace}/{name}/{version}/syntax-themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_extension_syntax_themes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/replay/recordings": {
         parameters: {
             query?: never;
@@ -3265,6 +3281,19 @@ export interface components {
         ExtensionInstallationState: "installing" | "installed" | "removing" | "error";
         /** @enum {string} */
         ExtensionPackageErrorCode: "interrupted_install" | "package_missing" | "package_invalid";
+        ExtensionSyntaxRule: {
+            foreground: string;
+            scopes: string[];
+        };
+        ExtensionSyntaxTheme: {
+            available: boolean;
+            colorMode?: string | null;
+            colors: {
+                [key: string]: string;
+            };
+            label: string;
+            rules: components["schemas"]["ExtensionSyntaxRule"][];
+        };
         /** @enum {string} */
         FeedKind: "terminal_bytes" | "transcript";
         /**
@@ -3710,6 +3739,10 @@ export interface components {
         };
         ListExtensionColorThemesResponse: {
             themes: components["schemas"]["ExtensionColorTheme"][];
+            truncated: boolean;
+        };
+        ListExtensionSyntaxThemesResponse: {
+            themes: components["schemas"]["ExtensionSyntaxTheme"][];
             truncated: boolean;
         };
         ListInstalledExtensionsResponse: {
@@ -7219,6 +7252,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_extension_syntax_themes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                namespace: string;
+                name: string;
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListExtensionSyntaxThemesResponse"];
                 };
             };
         };

@@ -1449,6 +1449,52 @@
         }
       }
     },
+    "/v1/extensions/{namespace}/{name}/{version}/syntax-themes": {
+      "get": {
+        "tags": [
+          "extensions"
+        ],
+        "operationId": "list_extension_syntax_themes",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListExtensionSyntaxThemesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/replay/recordings": {
       "get": {
         "tags": [
@@ -12128,6 +12174,62 @@
           "package_invalid"
         ]
       },
+      "ExtensionSyntaxRule": {
+        "type": "object",
+        "required": [
+          "scopes",
+          "foreground"
+        ],
+        "properties": {
+          "foreground": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExtensionSyntaxTheme": {
+        "type": "object",
+        "required": [
+          "label",
+          "colors",
+          "available",
+          "rules"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "colorMode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "colors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "label": {
+            "type": "string"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtensionSyntaxRule"
+            }
+          }
+        }
+      },
       "FeedKind": {
         "type": "string",
         "enum": [
@@ -13834,6 +13936,24 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ExtensionColorTheme"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ListExtensionSyntaxThemesResponse": {
+        "type": "object",
+        "required": [
+          "themes",
+          "truncated"
+        ],
+        "properties": {
+          "themes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtensionSyntaxTheme"
             }
           },
           "truncated": {
