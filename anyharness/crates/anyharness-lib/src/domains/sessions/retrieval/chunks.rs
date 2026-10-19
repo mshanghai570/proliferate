@@ -15,8 +15,12 @@ pub fn split(text: &str) -> Vec<Chunk> {
     while start < lines.len() {
         let mut end = start;
         let mut bytes = 0;
-        while end < lines.len() && end - start < 64 && bytes + lines[end].len() + 1 <= 8192 {
-            bytes += lines[end].len() + 1;
+        while end < lines.len() && end - start < 64 {
+            let additional = lines[end].len() + usize::from(end > start);
+            if bytes + additional > 8192 {
+                break;
+            }
+            bytes += additional;
             end += 1;
         }
         if end == start {
@@ -76,6 +80,10 @@ mod tests {
         assert_eq!((result[1].start_line, result[1].end_line), (57, 100));
         assert!(result[1].text.starts_with("Line 57:"));
         assert!(split(&"x".repeat(8193)).is_empty());
+        let boundary = split(&"é".repeat(4096));
+        assert_eq!(boundary.len(), 1);
+        assert_eq!(boundary[0].text.len(), 8192);
+        assert_eq!((boundary[0].start_line, boundary[0].end_line), (1, 1));
     }
     #[test]
     fn retrieval_query_is_quoted_data_not_fts_syntax() {
