@@ -49,7 +49,7 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 - 🔀 **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
 - 🪆 **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
 - 🧩 **[Integrations](https://proliferate.com/docs/product/integrations)** - connect MCP servers and supported services, then make their tools available to agent sessions through Proliferate's integration gateway
-- 🧱 **Extensions marketplace (preview)** - browse Open VSX extensions and install supported declarative packages when the preview is enabled; installed packages remain inactive and do not execute
+- 🧱 **Extensions marketplace (preview)** - browse Open VSX extensions and install supported declarative packages when the preview is enabled (enabled in the Intel DMG build below); installed packages remain inactive and do not execute
 - ⏰ **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
 
 ### Current customization scope
@@ -63,7 +63,9 @@ The Extensions page is an opt-in preview, enabled in a build with
 `VITE_EXTENSION_MARKETPLACE=1`. It provides Open VSX discovery and installation
 of a limited set of declarative package contributions. Installed extensions are
 registered but inactive: Proliferate does not load extension code or activate
-themes, icon themes, grammars, snippets, or language declarations.
+themes, icon themes, grammars, snippets, or language declarations. The fork's
+Intel DMG build enables it; any other build leaves it off unless you set the
+flag.
 
 Appearance settings cover the built-in color modes and text sizing, plus an
 imported theme: **Settings → Appearance** accepts a VSCode-compatible theme
@@ -116,7 +118,8 @@ usable, activate installed extensions safely, then add project knowledge.
 
 | Area | Where we are | Next |
 | --- | --- | --- |
-| Marketplace | Open VSX discovery and install are available in the opt-in preview. Installed packages are registered but inactive. | PR2: build the extension activation host and enable supported contributions. |
+| Intel desktop build | `build/intel-dmg` builds the full macOS app — `Proliferate.app`, `com.proliferate.app`, `proliferate` deep link — with sign-in required and the Extensions marketplace enabled. Ad-hoc signed, no notarization, updates off. Sign-in needs a control plane at `http://127.0.0.1:8000`. | Developer signing and an update channel remain outside this fork's workflow. |
+| Marketplace | Open VSX discovery and install are enabled in the Intel desktop build. Installed packages are registered but inactive. | PR2: build the extension activation host and enable supported contributions. |
 | MCP | Product MCP integrations already provide Proliferate tools. User-managed stdio and HTTP servers are implemented in Settings, the runtime API, and future session launches; generated OpenAPI/SDK artifacts and focused runtime/client checks are complete. | Pass the product acceptance gate before calling PR1 complete. |
 | Project knowledge | Project RAG and semantic indexing are not shipped. | PR3: add codebase indexing and retrieval with user-visible control over indexed and supplied context. |
 | Skills | Runtime-local `SKILL.md` packages can be imported and enabled by default or repository override. | Continue improving this shipped capability as needed; it is not blocked on the MCP campaign. |
@@ -331,27 +334,40 @@ See [running locally](./guides/local/README.md) for database prerequisites and
 Tauri config, and app labels. A downloaded release does not contain uncommitted
 changes from this checkout; build from source to try these changes.
 
-## Intel preview DMG from GitHub
+## Intel DMG from GitHub
 
-The fork's **Build Intel preview DMG** workflow builds branch `build/intel-dmg`
-on a GitHub-hosted Intel Mac. Find the run under **Actions**, then download
-`proliferate-preview-intel-dmg` from its artifacts. The download contains
-`Proliferate-Preview-intel.dmg`, `SHA256SUMS`, and build information identifying
-the source commit. Verify the checksum before installing:
+The fork's **Build Intel DMG** workflow builds branch `build/intel-dmg` on a
+GitHub-hosted Intel Mac. Find the run under **Actions**, then download
+`proliferate-intel-dmg` from its artifacts. The download contains
+`Proliferate-intel.dmg`, `SHA256SUMS`, and build information identifying the
+source commit. Verify the checksum before installing:
 
 ```bash
 shasum -a 256 -c SHA256SUMS
 ```
 
-The preview requires macOS 15 or newer. It has its own app identifier, is
-ad-hoc signed without Apple notarization, and has automatic updates disabled.
-macOS may require manual approval to open it. Ad-hoc signatures can also cause
+This is the full macOS app rather than a separate preview identity: it ships as
+`Proliferate.app` with the `com.proliferate.app` bundle identifier and the
+`proliferate` deep-link scheme, and it requires macOS 15 or newer. It is ad-hoc
+signed without Apple notarization and has automatic updates disabled, so macOS
+may require manual approval to open it. Ad-hoc signatures can also cause
 Keychain permission prompts or require signing in again after a rebuild.
 
-The default control-plane URL is `http://127.0.0.1:8000`. Keep the local API
-running and sign in to use the custom-provider vault; the DMG bundles the
-runtime and agent seed, not PostgreSQL, Redis, or the API server. This workflow
-only uploads a test artifact; it does not publish a GitHub Release or an updater.
+Two inputs differ from a release build on purpose: `VITE_REQUIRE_AUTH=true`, so
+the app opens on sign-in instead of running unauthenticated, and
+`VITE_EXTENSION_MARKETPLACE=1`, so the Extensions destination and its `/extensions`
+page exist. Everything else follows
+[`release-desktop.yml`](./.github/workflows/release-desktop.yml).
+
+The app signs in against a control plane at `http://127.0.0.1:8000` and bundles
+no PostgreSQL, Redis, or API server. Start that control plane first and claim
+`http://127.0.0.1:8000/setup` once to create the owner account, as described in
+[Try the app from source](#try-the-app-from-source). Without a reachable control
+plane the login screen reports the control plane as unavailable, and there is no
+account to sign in with until the instance is claimed.
+
+This workflow uploads an artifact only; it does not publish a GitHub Release or
+an updater.
 
 ## Community
 
