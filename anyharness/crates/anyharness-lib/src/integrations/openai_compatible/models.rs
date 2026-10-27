@@ -261,7 +261,7 @@ mod tests {
         });
 
         let should_cancel = cancel.is_some();
-        let token = cancel.unwrap_or_else(CancellationToken::new);
+        let token = cancel.unwrap_or_default();
         let request_endpoint = endpoint.clone();
         let request_token = token.clone();
         let request = tokio::spawn(async move {

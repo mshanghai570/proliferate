@@ -1,6 +1,5 @@
 import type {
   DesktopBridge,
-  DesktopAiProviderDiscovery,
   DesktopSupportSnapshotBridge,
   LocalRuntimeSnapshot,
   ProductCommand,

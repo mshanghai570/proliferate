@@ -78,7 +78,7 @@ impl McpServerStore {
                 rusqlite::params![id],
             )?;
             if changed != 1 {
-                return Err(rusqlite::Error::QueryReturnedNoRows.into());
+                return Err(rusqlite::Error::QueryReturnedNoRows);
             }
             Ok(())
         })
@@ -92,7 +92,7 @@ impl McpServerStore {
                 rusqlite::params![id, enabled as i64],
             )?;
             if changed != 1 {
-                return Err(rusqlite::Error::QueryReturnedNoRows.into());
+                return Err(rusqlite::Error::QueryReturnedNoRows);
             }
             Ok(())
         })
@@ -110,7 +110,7 @@ impl McpServerStore {
                 rusqlite::params![id, overrides_json],
             )?;
             if changed != 1 {
-                return Err(rusqlite::Error::QueryReturnedNoRows.into());
+                return Err(rusqlite::Error::QueryReturnedNoRows);
             }
             Ok(())
         })
