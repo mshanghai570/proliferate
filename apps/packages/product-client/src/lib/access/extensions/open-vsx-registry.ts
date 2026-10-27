@@ -6,12 +6,12 @@
  * the extension surface: no React, no query client, no product state — fetch in,
  * domain models out, failures as `ExtensionRegistryError`.
  *
- * Three behaviors here are deliberate, not incidental:
+ * Two behaviors here are deliberate, not incidental:
  *
- * - **Conditional requests.** The registry answers with an `ETag` and
- *   `cache-control: no-cache`, which asks clients to revalidate rather than
- *   re-download. We store the ETag and body per URL and send `If-None-Match`;
- *   a 304 returns the cached body, so a repeated search costs no payload.
+ * - **Browser-compatible requests.** Requests use only the safelisted Accept
+ *   header. Open VSX does not allow `If-None-Match` in its CORS preflight, so
+ *   conditional requests would fail in a browser/WebView even when reachable.
+ *   TanStack Query owns response caching above this transport adapter.
  * - **Rate-limit backoff.** Responses carry `X-RateLimit-*`, and a 429 carries
  *   `Retry-After`. A 429 is retried a bounded number of times after the
  *   registry's own delay; exhausting the budget raises `rate-limited` with the
@@ -50,11 +50,6 @@ export const DEFAULT_RETRY_AFTER_SECONDS = 1;
 
 type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
-interface CachedResponse {
-  etag: string;
-  body: string;
-}
-
 interface TextResponse {
   status: number;
   text: string;
@@ -65,17 +60,11 @@ export interface OpenVsxRegistryOptions {
   baseUrl?: string;
   /** Inject for tests; defaults to the global `fetch`. */
   fetchImpl?: FetchLike;
-  /** Descriptive client identity sent as `User-Agent`. */
-  clientUserAgent?: string;
   /** Extra attempts after a 429. Defaults to 2 (three tries total). */
   maxRetryAttempts?: number;
-  /** Maximum ETag responses held by this adapter. Defaults to 32. */
-  maxCacheEntries?: number;
   /** Inject for tests; defaults to a `setTimeout`-backed sleep. */
   sleep?: (milliseconds: number, signal?: AbortSignal) => Promise<void>;
 }
-
-export const DEFAULT_OPEN_VSX_CLIENT_USER_AGENT = "proliferate-extension-marketplace";
 
 /**
  * Parse a `Retry-After` header, which may be a delay in seconds or an HTTP
@@ -111,20 +100,14 @@ function defaultSleep(milliseconds: number, signal?: AbortSignal): Promise<void>
 export class OpenVsxRegistry implements ExtensionRegistry {
   private readonly baseUrl: string;
   private readonly fetchImpl: FetchLike;
-  private readonly userAgent: string;
   private readonly maxRetryAttempts: number;
   private readonly sleep: (milliseconds: number, signal?: AbortSignal) => Promise<void>;
-  private readonly maxCacheEntries: number;
-  /** Per-URL ETag cache. Owned here; never exported. */
-  private readonly etagCache = new Map<string, CachedResponse>();
 
   constructor(options: OpenVsxRegistryOptions = {}) {
     this.baseUrl = (options.baseUrl ?? DEFAULT_OPEN_VSX_BASE_URL).replace(/\/+$/, "");
     this.fetchImpl = options.fetchImpl ?? ((input, init) => globalThis.fetch(input, init));
-    this.userAgent = options.clientUserAgent ?? DEFAULT_OPEN_VSX_CLIENT_USER_AGENT;
     this.maxRetryAttempts = options.maxRetryAttempts ?? 2;
     this.sleep = options.sleep ?? defaultSleep;
-    this.maxCacheEntries = Math.max(0, options.maxCacheEntries ?? 32);
   }
 
   async search(query: ExtensionSearchQuery, options: ExtensionRequestOptions = {}): Promise<ExtensionSearchResult> {
@@ -197,12 +180,7 @@ export class OpenVsxRegistry implements ExtensionRegistry {
   private async requestText(url: string, signal?: AbortSignal): Promise<TextResponse> {
     for (let attempt = 0; ; attempt += 1) {
       signal?.throwIfAborted();
-      const cached = this.etagCache.get(url);
-      const headers: Record<string, string> = {
-        accept: "application/json",
-        "user-agent": this.userAgent,
-      };
-      if (cached) headers["if-none-match"] = cached.etag;
+      const headers: Record<string, string> = { accept: "application/json" };
 
       let response: Response;
       try {
@@ -212,24 +190,7 @@ export class OpenVsxRegistry implements ExtensionRegistry {
         throw new ExtensionRegistryError("network-error", `Could not reach the registry at ${url}`);
       }
 
-      if (response.status === 304 && cached) {
-        return { status: 200, text: cached.body };
-      }
-
       const text = await readBoundedExtensionText(response, 2 * 1024 * 1024, signal);
-
-      if (response.status === 200) {
-        const etag = response.headers.get("etag");
-        if (etag && this.maxCacheEntries > 0) {
-          this.etagCache.delete(url);
-          this.etagCache.set(url, { etag, body: text });
-          while (this.etagCache.size > this.maxCacheEntries) {
-            this.etagCache.delete(this.etagCache.keys().next().value!);
-          }
-        } else {
-          this.etagCache.delete(url);
-        }
-      }
 
       if (response.status === 429) {
         const retryAfterSeconds =

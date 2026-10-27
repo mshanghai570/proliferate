@@ -152,7 +152,7 @@ pub fn has_ai_provider_key(profile_id: String) -> Result<bool, String> {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct DiscoverProviderModelsRequest {
     endpoint: String,
@@ -171,7 +171,10 @@ pub async fn discover_ai_provider_models(
     #[cfg(not(target_os = "macos"))]
     let mut credential: Option<String> = None;
 
-    if credential.as_ref().is_some_and(|value| value.len() > MAX_PROVIDER_KEY_BYTES) {
+    if credential
+        .as_ref()
+        .is_some_and(|value| value.len() > MAX_PROVIDER_KEY_BYTES)
+    {
         if let Some(value) = credential.as_mut() {
             value.zeroize();
         }
@@ -185,13 +188,22 @@ pub async fn discover_ai_provider_models(
         }
         return Err("The local runtime is not ready.".to_string());
     }
-    let url = format!("{}/v1/ai-providers/models", runtime.url.trim_end_matches('/'));
+    let url = format!(
+        "{}/v1/ai-providers/models",
+        runtime.url.trim_end_matches('/')
+    );
     let response = tokio::time::timeout(PROVIDER_DISCOVERY_TIMEOUT, async {
         let client = reqwest::Client::builder()
             .timeout(PROVIDER_DISCOVERY_TIMEOUT)
             .redirect(reqwest::redirect::Policy::none())
-            .resolve("localhost", SocketAddr::from(([127, 0, 0, 1], runtime.port)))
-            .resolve("127.0.0.1", SocketAddr::from(([127, 0, 0, 1], runtime.port)))
+            .resolve(
+                "localhost",
+                SocketAddr::from(([127, 0, 0, 1], runtime.port)),
+            )
+            .resolve(
+                "127.0.0.1",
+                SocketAddr::from(([127, 0, 0, 1], runtime.port)),
+            )
             .build()
             .map_err(|_| "Could not prepare local provider discovery.".to_string())?;
         let mut request = client
@@ -232,19 +244,21 @@ fn validate_provider_endpoint(endpoint: &str) -> Result<(), String> {
             .is_some_and(|authority| authority.contains('@'))
         || parsed.fragment().is_some()
     {
-        return Err("Provider endpoints must be HTTP(S), contain no credentials, and have no fragment.".to_string());
+        return Err(
+            "Provider endpoints must be HTTP(S), contain no credentials, and have no fragment."
+                .to_string(),
+        );
     }
     Ok(())
 }
 
-fn map_discovery_status(status: reqwest::StatusCode) -> String {
-    let code = status.as_u16();
-    match code {
-        400 => "The provider endpoint is invalid.".to_string(),
-        401 => "The provider rejected its key.".to_string(),
-        502 => "The provider returned an unusable model list.".to_string(),
-        503 => "The provider could not be reached.".to_string(),
-        504 => "Provider model discovery timed out.".to_string(),
+fn map_discovery_status(status: Option<reqwest::StatusCode>) -> String {
+    match status.map(|status| status.as_u16()) {
+        Some(400) => "The provider endpoint is invalid.".to_string(),
+        Some(401) => "The provider rejected its key.".to_string(),
+        Some(502) => "The provider returned an unusable model list.".to_string(),
+        Some(503) => "The provider could not be reached.".to_string(),
+        Some(504) => "Provider model discovery timed out.".to_string(),
         _ => "Provider model discovery failed.".to_string(),
     }
 }
@@ -295,6 +309,27 @@ mod tests {
             let error = validate_provider_endpoint(endpoint).unwrap_err();
             assert!(!error.contains("secret"));
         }
+    }
+
+    #[test]
+    fn provider_discovery_request_serializes_the_endpoint_as_camel_case_json() {
+        let body = serde_json::to_value(DiscoverProviderModelsRequest {
+            endpoint: "https://provider.example/v1".to_string(),
+        })
+        .expect("discovery request should serialize");
+
+        assert_eq!(
+            body,
+            serde_json::json!({ "endpoint": "https://provider.example/v1" })
+        );
+    }
+
+    #[test]
+    fn provider_discovery_status_without_http_code_uses_generic_message() {
+        assert_eq!(
+            map_discovery_status(None),
+            "Provider model discovery failed."
+        );
     }
 
     #[test]

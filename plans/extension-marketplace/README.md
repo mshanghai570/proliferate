@@ -414,14 +414,16 @@ file URLs.
 - **Compatibility targeting**: resolve the registry's target-platform variants
   (universal vs platform-specific, e.g. darwin-arm64) and pick the best match
   for the host; record the choice.
-- **Caching**: HTTP `ETag`/`If-None-Match` where supported; cache search and
-  metadata in the query cache; never re-fetch unchanged metadata.
+- **Caching**: cache search and metadata in the query cache; never re-fetch
+  unchanged metadata. Conditional `ETag` requests are not usable cross-origin
+  because the registry's CORS preflight does not allow `If-None-Match`.
 - **Rate limits**: honor `X-RateLimit-*` headers and `429` `Retry-After`;
   back off with jitter; surface a non-alarming state in the UI.
 - **Updates**: background check of installed extensions against registry
   metadata; never block the editor.
-- **Politeness**: identify the client with a descriptive `User-Agent`; no
-  crawling; no scraping of webpages.
+- **Politeness**: no crawling; no scraping of webpages. A browser/WebView
+  cannot set `User-Agent`, and custom headers would trigger the denied
+  preflight, so requests carry only the safelisted `Accept` header.
 
 ### 6.4 Current adapter behavior and remaining integration
 
@@ -431,13 +433,13 @@ file URLs.
   must therefore be made from metadata, never from a search result.
 - **`allVersions` includes a `latest` alias** that is not a real version and
   must be dropped when rendering a version list.
-- **The registry sends `ETag` with `cache-control: no-cache`**, which asks
-  clients to revalidate rather than re-download — hence conditional requests in
-  the adapter rather than a naive cache.
+- **The registry sends `ETag` with `cache-control: no-cache`**, but its CORS
+  preflight does not allow `If-None-Match`, so a WebView cannot use conditional
+  requests against it. TanStack Query owns response caching above the transport.
 - **`Retry-After` may be seconds or an HTTP date**; both forms are parsed.
 
-- The cache is an in-memory `Map` per scoped adapter instance, limited to 32
-  ETag responses. Requests accept query cancellation; cache persistence and
+- The transport adapter is stateless; TanStack Query holds search and metadata
+  responses. Requests accept query cancellation; cache persistence and
   background extension update checks remain absent.
 - Retries are bounded by attempt count and honor `Retry-After` up to 30
   seconds per attempt. Longer delays return a rate-limit error for later retry;
@@ -564,12 +566,12 @@ Present under `apps/packages/product-client/src/`:
 | `lib/domain/extensions/extension-registry-error.ts` | Typed failure codes (`not-found`, `rate-limited`, `http-error`, `malformed-response`, `network-error`) |
 | `lib/domain/extensions/open-vsx-wire.ts` | Raw registry JSON shapes (permissive, wire-only) |
 | `lib/domain/extensions/open-vsx-mapping.ts` | Pure wire→domain mapping; the one place that decides what a response means |
-| `lib/access/extensions/open-vsx-registry.ts` | The adapter: URL building, ETag revalidation, 429 backoff, JSON + error mapping |
+| `lib/access/extensions/open-vsx-registry.ts` | The adapter: URL building, CORS-safe requests, 429 backoff, JSON + error mapping |
 
 - Test files present: `open-vsx-mapping.test.ts` and
-  `open-vsx-registry.test.ts`. They cover mapping, search/pagination, conditional
-  requests, retry behavior, typed failures, and package URL resolution. Passing
-  results are not established by this source inspection.
+  `open-vsx-registry.test.ts`. They cover mapping, search/pagination, CORS-safe
+  request headers, retry behavior, typed failures, and package URL resolution.
+  Passing results are not established by this source inspection.
 - Stage 3 now connects the adapter through scoped React Query access hooks
   and the opt-in discovery surface. No VSIX bytes are downloaded by the client.
 - **Platform targeting remains partially implemented:** compatibility helpers
@@ -683,9 +685,8 @@ Version *ordering* is not re-implemented: it reuses `compareSemver` from
 
 ### Stage 7 — Updates, caching, performance · Partial (registry cache/retries)
 
-- Present: bounded per-instance ETag revalidation, 429 retries with bounded
-  waiting, query cancellation, lazy route loading, and lazy selected-extension
-  documents.
+- Present: CORS-safe request headers, 429 retries with bounded waiting, query
+  cancellation, lazy route loading, and lazy selected-extension documents.
 - Pending: background update checks, update-all, persistent cache policy, lazy
   contribution loading, and startup performance measurement.
 - Exit criterion: measured — startup is unaffected by installed extensions and
@@ -769,7 +770,7 @@ TanStack Query access hooks; no client-side installation records are invented.
 Existing Button/Input/Select primitives and design tokens supply the controls.
 Registry content is treated as untrusted; executable extensions remain blocked.
 
-- [x] Registry access: add abort-aware requests, bounded ETag storage, bounded
+- [x] Registry access: add abort-aware requests, CORS-safe headers, bounded
   retries, and safe bounded README/changelog/manifest fetching in
   `lib/access/extensions/`; keep pure content URL rules in `lib/domain/extensions/`.
 - [x] Surface: add `providers/ExtensionRegistryProvider.tsx`,

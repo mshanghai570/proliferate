@@ -97,8 +97,11 @@ def _reject_rolling_or_unsafe_version(version: str) -> None:
 
 
 def worker_cloud_base_url() -> str:
-    """Base URL workers use to reach Cloud; empty when unconfigured."""
-    return (settings.cloud_worker_base_url or settings.api_base_url or "").strip().rstrip("/")
+    """Base URL workers use to reach Cloud, with a local-development fallback."""
+    base = settings.cloud_worker_base_url or settings.api_base_url
+    if not base and settings.telemetry_mode == "local_dev":
+        base = "http://127.0.0.1:8000"
+    return (base or "").strip().rstrip("/")
 
 
 def integration_gateway_config(token: str) -> IntegrationGatewayConfig:

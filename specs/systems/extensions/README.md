@@ -22,7 +22,7 @@ The [marketplace hook](../../../apps/packages/product-client/src/hooks/extension
 holds search/filter/page/selection state for its mounted screen. TanStack Query
 owns remote search, metadata, manifest, and document caches. The scoped
 [registry provider](../../../apps/packages/product-client/src/providers/ExtensionRegistryProvider.tsx)
-owns an adapter with at most 32 cached ETag responses. The runtime installer
+owns the stateless transport adapter; TanStack Query owns response caching. The runtime installer
 writes immutable version directories and a `.proliferate-package.json` receipt
 under the selected runtime home's `extensions/packages` directory. A receipt
 records schema version 1, requested identity, and verified SHA-256. It establishes
