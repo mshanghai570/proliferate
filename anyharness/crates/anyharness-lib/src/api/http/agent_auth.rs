@@ -7,10 +7,10 @@
 
 use anyharness_contract::v1::{ApplyAgentAuthStateResponse, NativeBridgeResponse};
 use axum::{
+    Json,
     body::Bytes,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
 
 use super::error::ApiError;
@@ -18,8 +18,8 @@ use crate::app::AppState;
 use crate::domains::agents::launch_probe::{LaunchProbeService, PokeReason};
 use crate::domains::agents::model::AgentKind;
 use crate::domains::agents::route_auth::{
-    apply_state_file, clear_native_bridge_flag, clear_native_bridge_flags_for_document,
-    clear_state_file, native_bridge, AgentAuthState, RouteAuthError,
+    AgentAuthState, RouteAuthError, apply_state_file, clear_native_bridge_flag,
+    clear_native_bridge_flags_for_document, clear_state_file, native_bridge,
 };
 
 #[utoipa::path(

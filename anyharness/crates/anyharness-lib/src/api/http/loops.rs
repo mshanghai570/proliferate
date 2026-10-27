@@ -4,8 +4,8 @@ use anyharness_contract::v1::{
     ClearSessionLoopsResponse, SessionLoopResponse, SessionLoopsResponse, SetSessionLoopRequest,
 };
 use axum::{
-    extract::{Path, State},
     Extension, Json,
+    extract::{Path, State},
 };
 
 use super::access::assert_session_auth_scope;

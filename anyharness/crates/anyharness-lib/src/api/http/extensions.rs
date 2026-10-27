@@ -3,15 +3,15 @@ use anyharness_contract::v1::extensions::{
     InstalledExtensionSummary, ListInstalledExtensionsResponse,
 };
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
 
 use super::blocking::run_blocking;
 use super::error::ApiError;
-use crate::adapters::extensions::package::{PackageError, MAX_PACKAGE_BYTES};
-use crate::adapters::extensions::registry::{fetch_registry_package, RegistryFetchError};
+use crate::adapters::extensions::package::{MAX_PACKAGE_BYTES, PackageError};
+use crate::adapters::extensions::registry::{RegistryFetchError, fetch_registry_package};
 use crate::app::AppState;
 use crate::domains::extensions::manager::ManagementError;
 use crate::domains::extensions::manifest::ExtensionPackageIdentity;

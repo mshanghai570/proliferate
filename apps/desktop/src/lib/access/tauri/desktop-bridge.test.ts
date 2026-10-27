@@ -527,3 +527,10 @@ describe("diagnostics", () => {
     expect(desktopBridge.diagnostics.supportSnapshot).toBeNull();
   });
 });
+
+describe("native AI provider bridge", () => {
+  it("is added through the desktop capability contract", async () => {
+    const { desktopBridge: bridge } = await import("@/lib/access/tauri/desktop-bridge");
+    expect(bridge.aiProviders.isSupported()).toBe(true);
+  });
+});

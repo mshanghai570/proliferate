@@ -5,10 +5,10 @@
 //! the socket drops. The client never learns the transport — only the opaque
 //! `feed_id` it received on the `FeedRef`.
 
+use axum::Extension;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
-use axum::Extension;
 use base64::Engine;
 use futures::{SinkExt, StreamExt};
 

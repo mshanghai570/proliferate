@@ -10,21 +10,21 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::time::Duration;
 
-use axum::body::{to_bytes, Body};
-use axum::http::{header, Method, Request, StatusCode};
-use serde_json::{json, Value};
+use axum::body::{Body, to_bytes};
+use axum::http::{Method, Request, StatusCode, header};
+use serde_json::{Value, json};
 use tower::util::ServiceExt;
 
 use super::router::build_router;
-use crate::app::{test_support, AppState};
+use crate::app::{AppState, test_support};
 use crate::domains::repo_roots::model::CreateRepoRootInput;
 use crate::domains::sessions::runtime::prompt_message_actor_tests::{
-    build_state, install_scripted_agent_env, temp_runtime_home, write_scripted_agent, EnvVarGuard,
-    ScriptedAgent,
+    EnvVarGuard, ScriptedAgent, build_state, install_scripted_agent_env, temp_runtime_home,
+    write_scripted_agent,
 };
 use crate::domains::workflows::model::WorkflowRunStatus;
 use crate::domains::workspaces::managed_root::{
-    canonical_managed_worktrees_root, ANYHARNESS_WORKTREES_ROOT_ENV,
+    ANYHARNESS_WORKTREES_ROOT_ENV, canonical_managed_worktrees_root,
 };
 use crate::persistence::Db;
 

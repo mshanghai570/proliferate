@@ -1,9 +1,11 @@
+pub mod ai_providers;
 pub mod anonymous_telemetry;
 pub mod cloud_worker;
 pub mod config;
 pub mod desktop_identity;
 pub mod diagnostics;
 pub mod drag_drop;
+pub mod fonts;
 pub mod google_workspace_mcp;
 pub mod keychain;
 pub mod process;

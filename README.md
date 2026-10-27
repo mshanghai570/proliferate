@@ -48,8 +48,91 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 - 🌳 **[Worktree workspaces](https://proliferate.com/docs/product/workspaces)** - an isolated branch and working directory for every task
 - 🔀 **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
 - 🪆 **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
-- 🧩 **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
+- 🧩 **[Integrations](https://proliferate.com/docs/product/integrations)** - connect MCP servers and supported services, then make their tools available to agent sessions through Proliferate's integration gateway
+- 🧱 **Extensions marketplace (preview)** - browse Open VSX extensions and install supported declarative packages when the preview is enabled; installed packages remain inactive and do not execute
 - ⏰ **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
+
+### Current customization scope
+
+Custom AI providers are currently configured for local OpenCode sessions; they
+do not create general-purpose agents that can be selected across every harness.
+Custom ACP agents are a separate option: they must be installed locally and
+implement Agent Client Protocol. See the setup sections below.
+
+The Extensions page is an opt-in preview, enabled in a build with
+`VITE_EXTENSION_MARKETPLACE=1`. It provides Open VSX discovery and installation
+of a limited set of declarative package contributions. Installed extensions are
+registered but inactive: Proliferate does not load extension code or activate
+themes, icon themes, grammars, snippets, or language declarations.
+
+Appearance settings cover the built-in color modes and text sizing, plus an
+imported theme: **Settings → Appearance** accepts a VSCode-compatible theme
+JSON file, and its background, surface, foreground, accent, selection, and
+terminal palette apply while the matching color mode is active. Roles the
+theme does not define keep the built-in Mono palette, and editor syntax
+colors are not yet themed. Proliferate does not currently support selecting
+custom fonts from macOS, theming editor grammars from `tokenColors`, or
+project RAG and semantic indexing.
+
+### macOS product direction
+
+The product direction is a complete coding workspace in the macOS app. The
+capabilities below are goals, not claims about what is available today. Current
+behavior is described in the sections above and in the linked product docs.
+
+- **A first-class extension marketplace:** discover, install, update, enable,
+  disable, and remove editor extensions from one in-app catalog. Extensions
+  should integrate with the running editor, including themes, language support,
+  snippets, and other supported contributions, with clear compatibility and
+  permission information.
+- **Built-in multi-agent orchestration:** create dual-agent setups and larger
+  agent swarms from the app, assign work on the same project, review results,
+  and coordinate changes. Each agent should have its own harness, provider,
+  model, and instructions. For example, one agent could use a model configured
+  through OpenCode while another uses Codex, in the same setup. This should be
+  a native product workflow, not something users have to assemble from agent
+  skills.
+- **First-class provider and model configuration:** configure compatible model
+  providers and select them per agent, alongside native harnesses and ACP
+  agents. Provider choice should not be tied to one harness or one global
+  setting.
+- **Project knowledge with RAG:** index project content, retrieve relevant
+  context for an agent's task, and let users inspect and control what is
+  indexed and sent to a model.
+- **Built-in MCP management:** add and manage MCP servers, inspect available
+  tools, and control which agents or projects can use them.
+- **Personalized editor appearance:** additionally theme editor syntax
+  colors (beyond the shell-color import already shipped), choose custom fonts
+  installed on macOS, and adjust editor appearance from the app.
+
+These capabilities can ship in stages. README capability claims should be
+updated as each part becomes usable in the macOS app.
+
+### Daily-driver guide
+
+This is the working order for making Proliferate a complete local coding
+workspace. The accepted campaign is deliberately staged: make external tools
+usable, activate installed extensions safely, then add project knowledge.
+
+| Area | Where we are | Next |
+| --- | --- | --- |
+| Marketplace | Open VSX discovery and install are available in the opt-in preview. Installed packages are registered but inactive. | PR2: build the extension activation host and enable supported contributions. |
+| MCP | Product MCP integrations already provide Proliferate tools. User-managed stdio and HTTP servers are implemented in Settings, the runtime API, and future session launches; generated OpenAPI/SDK artifacts and focused runtime/client checks are complete. | Pass the product acceptance gate before calling PR1 complete. |
+| Project knowledge | Project RAG and semantic indexing are not shipped. | PR3: add codebase indexing and retrieval with user-visible control over indexed and supplied context. |
+| Skills | Runtime-local `SKILL.md` packages can be imported and enabled by default or repository override. | Continue improving this shipped capability as needed; it is not blocked on the MCP campaign. |
+| ACP agents | Local custom ACP registrations can be added and launched when the agent supports model discovery. | Broader distribution and per-agent configuration are not part of PR1–PR3. |
+| Model providers | Custom OpenAI-compatible providers work for local OpenCode sessions. | General provider/model selection across harnesses remains a separate design decision. |
+
+PR1's implementation checklist is in
+[`docs/superpowers/plans/2026-10-26-user-mcp-servers.md`](./docs/superpowers/plans/2026-10-26-user-mcp-servers.md);
+its frozen scope and acceptance gate are in
+[`delivery/daily-driver/delivery-spec-daily-driver-pr1-user-mcp-servers.md`](./delivery/daily-driver/delivery-spec-daily-driver-pr1-user-mcp-servers.md).
+The system owners are [harnesses](./specs/systems/harnesses/README.md),
+[extensions](./specs/systems/extensions/README.md), and
+[settings](./specs/systems/settings/README.md). As of 2026-10-26, the
+implementation, generated contracts, and focused Rust, SDK, and Settings
+checks are complete in the worktree. The manual product acceptance gate is
+still pending; do not treat PR1 as complete until it passes.
 
 ## Supported agents
 
@@ -107,8 +190,10 @@ them through OpenCode; saving a connection does not verify that its endpoint is
 reachable or that every model supports coding tools. Existing provider logins
 remain available.
 
-This configuration currently applies to local OpenCode sessions. Other harnesses
-retain their own authentication and provider settings.
+This configuration currently applies to local OpenCode sessions. It adds model
+choices to OpenCode; it does not create a standalone agent or configure model
+access for other harnesses. Other harnesses retain their own authentication and
+provider settings.
 
 ## Connect an ACP agent
 

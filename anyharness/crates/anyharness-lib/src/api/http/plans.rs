@@ -6,8 +6,8 @@ use anyharness_contract::v1::{
     PlanDecisionResponse, ProposedPlanDetail, ProposedPlanDocumentResponse,
 };
 use axum::{
-    extract::{Path, Query, State},
     Json,
+    extract::{Path, Query, State},
 };
 use serde::Deserialize;
 
@@ -19,7 +19,7 @@ use crate::domains::plans::model::{
     PlanHandoffPromptOutcome,
 };
 use crate::domains::plans::runtime::{GetPlanError, HandoffPlanError};
-use crate::domains::plans::service::{plan_to_summary, PlanDecisionError};
+use crate::domains::plans::service::{PlanDecisionError, plan_to_summary};
 use crate::domains::workspaces::operation_gate::WorkspaceOperationKind;
 use crate::origin::OriginContext;
 

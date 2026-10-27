@@ -8,10 +8,10 @@ use anyharness_contract::v1::{
     SessionRawNotificationEnvelope,
 };
 use axum::{
-    extract::{Path, RawQuery, State},
-    http::{header, HeaderValue},
-    response::{IntoResponse, Response},
     Extension,
+    extract::{Path, RawQuery, State},
+    http::{HeaderValue, header},
+    response::{IntoResponse, Response},
 };
 use chrono::{DateTime, Duration, SecondsFormat, Utc};
 
@@ -23,11 +23,11 @@ use crate::domains::sessions::model::{
     SessionEventRecord, SessionRawNotificationRecord, SessionRecord,
 };
 use crate::domains::sessions::service::support_windows::{
-    SupportEvidenceWindowRequest, SupportSessionWindowMode, SupportSessionWindowRequest,
-    SupportWindowCompleteness, SupportWindowPresentationOrder, SupportWindowResult,
     SUPPORT_EVENT_MAX_ITEMS, SUPPORT_EVENT_MAX_RESPONSE_BYTES, SUPPORT_RAW_NOTIFICATION_MAX_ITEMS,
     SUPPORT_RAW_NOTIFICATION_MAX_RESPONSE_BYTES, SUPPORT_SESSION_MAX_ITEMS,
     SUPPORT_SESSION_MAX_RESPONSE_BYTES, SUPPORT_WINDOW_MIN_RESPONSE_BYTES,
+    SupportEvidenceWindowRequest, SupportSessionWindowMode, SupportSessionWindowRequest,
+    SupportWindowCompleteness, SupportWindowPresentationOrder, SupportWindowResult,
 };
 
 const SUPPORT_WINDOW_QUERY_BYTES: usize = 4_096;

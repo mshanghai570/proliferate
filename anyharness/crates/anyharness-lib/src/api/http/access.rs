@@ -1,4 +1,4 @@
-use crate::api::auth::{require_workspace_scope, AuthContext, AuthError};
+use crate::api::auth::{AuthContext, AuthError, require_workspace_scope};
 use crate::api::http::error::ApiError;
 use crate::app::AppState;
 use crate::domains::workspaces::access_gate::WorkspaceAccessError;

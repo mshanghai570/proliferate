@@ -10,6 +10,8 @@ pub mod ws;
 #[cfg(test)]
 mod extensions_tests;
 #[cfg(test)]
+mod mcp_servers_tests;
+#[cfg(test)]
 mod openapi_tests;
 #[cfg(test)]
 mod review_admission_tests;

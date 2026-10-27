@@ -9,15 +9,15 @@ use anyharness_contract::v1::{
     WorkspaceMaterializationOutcome,
 };
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::HeaderMap,
-    Json,
 };
 
 use super::access::map_access_error;
 use super::blocking::run_blocking;
 use super::error::ApiError;
-use super::files::{map_service_error, read_response_to_contract, run_files_task, FilePathQuery};
+use super::files::{FilePathQuery, map_service_error, read_response_to_contract, run_files_task};
 use super::workspaces_contract::{detection_result_to_contract, workspace_to_contract};
 use crate::adapters::files::service::WorkspaceFilesService;
 use crate::adapters::git::GitService;

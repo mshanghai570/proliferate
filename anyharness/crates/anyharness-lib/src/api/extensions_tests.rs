@@ -1,15 +1,15 @@
 use axum::{
-    body::{to_bytes, Body},
+    body::{Body, to_bytes},
     http::{Request, StatusCode},
 };
 use serde_json::Value;
 use tower::util::ServiceExt;
 
 use super::router::build_router;
-use crate::adapters::extensions::registry_tests::{hex_sha256, serve, standard_routes, Route};
-use crate::app::{test_support, AppState};
+use crate::adapters::extensions::registry_tests::{Route, hex_sha256, serve, standard_routes};
+use crate::app::{AppState, test_support};
 use crate::domains::agents::installer::seed::AgentSeedStore;
-use crate::domains::extensions::installer_tests::{archive, identity, manifest, TestDirectory};
+use crate::domains::extensions::installer_tests::{TestDirectory, archive, identity, manifest};
 use crate::domains::extensions::manager::ExtensionManager;
 use crate::persistence::Db;
 
@@ -126,10 +126,11 @@ async fn extensions_routes_require_authentication_and_sanitize_errors() {
     let text = String::from_utf8(bytes.to_vec()).unwrap();
     assert!(!text.contains(home.0.to_str().unwrap()));
     assert!(text.contains("EXTENSION_PACKAGE_INVALID"));
-    assert!(home
-        .0
-        .join("extensions/packages/example.demo-1.0.0")
-        .exists());
+    assert!(
+        home.0
+            .join("extensions/packages/example.demo-1.0.0")
+            .exists()
+    );
 }
 
 fn install_request(body: Value) -> Request<Body> {
@@ -209,7 +210,7 @@ fn extensions_openapi_declares_routes_and_typed_inactive_state() {
 
 #[test]
 fn extensions_global_management_remains_denied_to_workspace_claims() {
-    use super::auth::{user_route_allowed, AuthError, ClaimPermissions, UserClaimAuth};
+    use super::auth::{AuthError, ClaimPermissions, UserClaimAuth, user_route_allowed};
     use axum::http::Method;
     let claim = UserClaimAuth {
         user_id: "user".into(),

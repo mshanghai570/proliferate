@@ -23,8 +23,10 @@ import type {
  */
 export interface DesktopBridge {
   runtime: DesktopRuntimeBridge;
+  aiProviders: DesktopAiProvidersBridge;
   files: DesktopFilesBridge;
   nativeUi: DesktopNativeUiBridge;
+  fonts: DesktopFontsBridge;
   updater: DesktopUpdaterBridge;
   worker: DesktopWorkerBridge;
   scratch: DesktopScratchBridge;
@@ -56,6 +58,25 @@ export interface LocalRuntimeSnapshot {
 export interface DesktopRuntimeBridge {
   getConnection(): Promise<LocalRuntimeSnapshot>;
   restart(): Promise<LocalRuntimeSnapshot>;
+}
+
+export interface DesktopAiProviderModel {
+  id: string;
+  displayName?: string;
+}
+
+export interface DesktopAiProviderDiscovery {
+  models: DesktopAiProviderModel[];
+  refreshedAt: string;
+}
+
+/** Native-only provider profile credential and model-discovery operations. */
+export interface DesktopAiProvidersBridge {
+  isSupported(): boolean;
+  promptForKey(profileId: string): Promise<"saved" | "cancelled">;
+  hasKey(profileId: string): Promise<boolean>;
+  deleteKey(profileId: string): Promise<void>;
+  discoverModels(profileId: string, endpoint: string): Promise<DesktopAiProviderDiscovery>;
 }
 
 // --- Local files and repositories -----------------------------------------
@@ -141,6 +162,26 @@ export interface DesktopFilesBridge {
 
   reveal(path: string): Promise<void>;
   openTerminal(path: string): Promise<void>;
+}
+
+// --- System fonts -----------------------------------------------------------
+
+/** One installed system font family, as the host enumerates it. */
+export interface SystemFontInfo {
+  /** The CSS family name the webview resolves with `font-family`. */
+  familyName: string;
+  /** Human-readable label for pickers. May differ from `familyName`. */
+  displayName: string;
+}
+
+/**
+ * An enumeration of locally installed font families. Availability is
+ * host-dependent (the desktop shell enumerates macOS CoreText; other hosts
+ * resolve to an empty list), so appearance UI must degrade to the built-in
+ * fonts rather than require this to succeed.
+ */
+export interface DesktopFontsBridge {
+  listSystemFonts(): Promise<SystemFontInfo[]>;
 }
 
 // --- Native UI --------------------------------------------------------------

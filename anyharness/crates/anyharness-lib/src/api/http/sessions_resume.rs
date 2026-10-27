@@ -2,10 +2,10 @@ use crate::api::http::access::admit_session_mutation;
 use crate::domains::sessions::admission::SessionMutationKind;
 use anyharness_contract::v1::{ResumeSessionRequest, Session};
 use axum::{
+    Extension, Json,
     body::Bytes,
     extract::{Path, State},
     http::HeaderMap,
-    Extension, Json,
 };
 
 use super::access::assert_session_auth_scope;

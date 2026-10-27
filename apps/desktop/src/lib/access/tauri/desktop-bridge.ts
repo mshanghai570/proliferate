@@ -1,5 +1,6 @@
 import type {
   DesktopBridge,
+  DesktopAiProviderDiscovery,
   DesktopSupportSnapshotBridge,
   LocalRuntimeSnapshot,
   ProductCommand,
@@ -15,6 +16,7 @@ import type {
 } from "@proliferate/product-client/host/desktop-updater-bridge";
 
 import { getRuntimeInfo, restartRuntime } from "./runtime";
+import { deleteAiProviderKey, discoverAiProviderModels, hasAiProviderKey, promptAiProviderKey } from "./ai-providers";
 import {
   getHomeDir,
   inspectPath,
@@ -59,6 +61,7 @@ import {
   readWorkspaceScratchPad,
   writeWorkspaceScratchPad,
 } from "./workspace-scratch";
+import { listSystemFonts } from "./fonts";
 import { saveDiagnosticJson } from "./diagnostics";
 import {
   beginSupportSnapshotPreparation,
@@ -95,6 +98,14 @@ const desktopSupportSnapshotBridge: DesktopSupportSnapshotBridge = {
  * fallbacks beyond what the underlying functions already provide.
  */
 export const desktopBridge: DesktopBridge = {
+  aiProviders: {
+    isSupported: isTauriRuntimeAvailable,
+    promptForKey: promptAiProviderKey,
+    hasKey: hasAiProviderKey,
+    deleteKey: deleteAiProviderKey,
+    discoverModels: discoverAiProviderModels,
+  },
+
   runtime: {
     async getConnection(): Promise<LocalRuntimeSnapshot> {
       const info = await getRuntimeInfo();
@@ -174,6 +185,15 @@ export const desktopBridge: DesktopBridge = {
     applyMacosWindowChrome: applyMacWindowChrome,
     isMainWebviewAvailable: isMainTauriWebviewAvailable,
     revealCurrentWindow,
+  },
+
+  fonts: {
+    async listSystemFonts() {
+      if (!isTauriRuntimeAvailable()) {
+        return [];
+      }
+      return listSystemFonts();
+    },
   },
 
   updater: {

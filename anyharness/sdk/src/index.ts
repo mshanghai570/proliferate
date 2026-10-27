@@ -607,3 +607,13 @@ export type {
 } from "./streams/feeds.js";
 
 export type { SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse } from "./types/skills.js";
+export type {
+  CreateMcpServerRequest,
+  ListMcpServersResponse,
+  McpServerConfig,
+  McpServerCredential,
+  McpServerRepositoryOverride,
+  McpServerSummary,
+  McpServerTransport,
+  SetMcpServerEnabledRequest,
+} from "./types/mcp-servers.js";

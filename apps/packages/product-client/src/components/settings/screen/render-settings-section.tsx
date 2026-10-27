@@ -3,9 +3,11 @@ import { type SettingsSection } from "#product/config/settings";
 import { AccountPane } from "#product/components/settings/panes/AccountPane";
 import { ArchivedWorkspacesPane } from "#product/components/settings/panes/archived/ArchivedWorkspacesPane";
 import { ApiKeysPane } from "#product/components/settings/panes/agents/api-keys/ApiKeysPane";
+import { NativeProviderProfilesPane } from "#product/components/settings/panes/agents/native-providers/NativeProviderProfilesPane";
 import { HarnessPane } from "#product/components/settings/panes/agents/harness/HarnessPane";
 import { CustomAgentsPane } from "#product/components/settings/panes/agents/custom/CustomAgentsPane";
 import { SkillsSection } from "#product/components/settings/panes/agents/skills/SkillsSection";
+import { McpServersPane } from "#product/components/settings/panes/agents/mcp/McpServersPane";
 import { SettingsPageBody } from "#product/primitives/patterns/settings/SettingsPageBody";
 import { AppearancePane } from "#product/components/settings/panes/AppearancePane";
 import { CloudGuard, type CloudGateFlags } from "#product/components/cloud/CloudGuard";
@@ -71,11 +73,17 @@ export function renderSettingsSection(
   if (activeSection === "agent-api-keys") {
     return renderCloudGatedPane(authGate, () => <ApiKeysPane />);
   }
+  if (activeSection === "agent-native-providers") {
+    return <NativeProviderProfilesPane />;
+  }
   if (activeSection === "agent-custom") {
     return <CustomAgentsPane />;
   }
   if (activeSection === "agent-skills") {
     return <SettingsPageBody><SkillsSection /></SettingsPageBody>;
+  }
+  if (activeSection === "agent-mcp-servers") {
+    return <SettingsPageBody><McpServersPane /></SettingsPageBody>;
   }
   if (activeSection === "general") {
     return <GeneralPane />;

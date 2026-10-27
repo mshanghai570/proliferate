@@ -176,6 +176,7 @@ pub struct AppState {
     pub materialization_runtime: Arc<MaterializationRuntime>,
     pub plan_service: Arc<PlanService>,
     pub skill_manager: Arc<crate::domains::skills::SkillManager>,
+    pub mcp_servers_manager: Arc<crate::domains::mcp_servers::UserMcpServerManager>,
     pub extension_manager: Arc<ExtensionManager>,
     /// Origin the registry install route fetches from. Production uses Open VSX;
     /// tests point it at a local stub.
@@ -292,6 +293,10 @@ impl AppState {
         ));
         let plan_service = Arc::new(PlanService::new(PlanStore::new(db.clone())));
         let skill_manager = Arc::new(crate::domains::skills::SkillManager::new(runtime_home.clone()));
+        let mcp_servers_manager = Arc::new(crate::domains::mcp_servers::UserMcpServerManager::new(
+            db.clone(),
+            session_data_cipher.clone(),
+        ));
         let extension_manager = Arc::new(ExtensionManager::new(db.clone(), runtime_home.clone()));
         let goal_service = Arc::new(GoalService::new(GoalStore::new(db.clone())));
         let loop_service = Arc::new(LoopService::new(LoopStore::new(db.clone())));
@@ -440,6 +445,12 @@ impl AppState {
             subagent_session_hooks.clone(),
             review_session_hooks.clone(),
             integration_gateway_session_launch_extension.clone(),
+            Arc::new(
+                crate::domains::mcp_servers::extension::UserMcpServersLaunchExtension::new(
+                db.clone(),
+                session_data_cipher.clone(),
+                ),
+            ),
             goal_session_hooks,
             loop_session_hooks,
             activity_session_hooks,
@@ -634,6 +645,7 @@ impl AppState {
             materialization_runtime,
             plan_service,
             skill_manager,
+            mcp_servers_manager,
             extension_manager,
             extension_registry_base_url: OPEN_VSX_BASE_URL.to_string(),
             plan_runtime,

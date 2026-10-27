@@ -10,6 +10,10 @@ fn openapi_registers_workspace_and_session_paths() {
         .expect("OpenAPI paths should be an object");
 
     for path in [
+        "/v1/ai-providers/models",
+        "/v1/mcp-servers",
+        "/v1/mcp-servers/{id}",
+        "/v1/mcp-servers/{id}/enabled",
         "/v1/workspaces/resolve",
         "/v1/workspaces",
         "/v1/workspaces/worktrees",
@@ -89,6 +93,21 @@ fn openapi_registers_workspace_and_session_paths() {
 }
 
 #[test]
+fn provider_model_discovery_openapi_omits_the_native_credential_header() {
+    let spec = openapi_json();
+    assert!(
+        spec.contains(r#""/v1/ai-providers/models""#),
+        "the runtime model-discovery route should be published"
+    );
+    assert!(
+        !spec
+            .to_ascii_lowercase()
+            .contains("x-anyharness-native-provider-credential"),
+        "the native-only provider credential must not be part of OpenAPI"
+    );
+}
+
+#[test]
 fn openapi_registers_workspace_session_and_event_schemas() {
     let spec: Value = serde_json::from_str(&openapi_json()).expect("parse OpenAPI JSON");
     let schemas = spec["components"]["schemas"]
@@ -130,6 +149,14 @@ fn openapi_registers_workspace_session_and_event_schemas() {
         "SessionActionCapabilities",
         "SessionLinkSummary",
         "SessionMcpEnvVar",
+        "McpServerCredential",
+        "McpServerConfig",
+        "McpServerTransport",
+        "McpServerSummary",
+        "ListMcpServersResponse",
+        "CreateMcpServerRequest",
+        "McpServerRepositoryOverride",
+        "SetMcpServerEnabledRequest",
         "SessionMcpHeader",
         "SessionMcpHttpServer",
         "SessionMcpStdioServer",
@@ -315,6 +342,87 @@ fn openapi_registers_workspace_session_and_event_schemas() {
             "removed public wake/legacy roster schema remains: {removed}"
         );
     }
+}
+
+#[test]
+fn mcp_server_openapi_publishes_all_management_operations_and_exact_enablement_union() {
+    let spec: Value = serde_json::from_str(&openapi_json()).expect("parse OpenAPI JSON");
+    let paths = &spec["paths"];
+
+    for (path, method) in [
+        ("/v1/mcp-servers", "get"),
+        ("/v1/mcp-servers", "post"),
+        ("/v1/mcp-servers/{id}", "delete"),
+        ("/v1/mcp-servers/{id}/enabled", "put"),
+    ] {
+        assert!(
+            paths[path][method].is_object(),
+            "missing MCP management operation {method} {path}"
+        );
+    }
+
+    let response_schema = |path: &str, method: &str, status: &str| {
+        paths[path][method]["responses"][status]["content"]["application/json"]["schema"]["$ref"]
+            .as_str()
+            .expect("documented JSON response schema")
+    };
+    assert_eq!(
+        response_schema("/v1/mcp-servers", "get", "200"),
+        "#/components/schemas/ListMcpServersResponse"
+    );
+    assert_eq!(
+        response_schema("/v1/mcp-servers", "post", "201"),
+        "#/components/schemas/McpServerSummary"
+    );
+    assert_eq!(
+        response_schema("/v1/mcp-servers/{id}/enabled", "put", "200"),
+        "#/components/schemas/McpServerSummary"
+    );
+    assert!(
+        paths["/v1/mcp-servers/{id}"]["delete"]["responses"]
+            .get("204")
+            .is_some()
+    );
+    assert_eq!(
+        paths["/v1/mcp-servers"]["post"]["requestBody"]["content"]["application/json"]["schema"]["$ref"],
+        "#/components/schemas/CreateMcpServerRequest"
+    );
+    assert_eq!(
+        paths["/v1/mcp-servers/{id}/enabled"]["put"]["requestBody"]["content"]["application/json"]
+            ["schema"]["$ref"],
+        "#/components/schemas/SetMcpServerEnabledRequest"
+    );
+
+    let enablement = &spec["components"]["schemas"]["SetMcpServerEnabledRequest"];
+    let variants = enablement["oneOf"]
+        .as_array()
+        .expect("enablement request is a raw-boolean or repository-object union");
+    assert!(variants.iter().any(|variant| variant["type"] == "boolean"));
+    assert!(
+        variants.iter().any(|variant| {
+            variant["$ref"] == "#/components/schemas/McpServerRepositoryOverride"
+        })
+    );
+
+    let repository_override = &spec["components"]["schemas"]["McpServerRepositoryOverride"];
+    assert_eq!(
+        repository_override["properties"]["repoRootId"]["type"],
+        "string"
+    );
+    let enabled_type = &repository_override["properties"]["enabled"]["type"];
+    assert!(
+        enabled_type == "boolean"
+            || enabled_type
+                .as_array()
+                .is_some_and(|types| types.iter().any(|kind| kind == "boolean")
+                    && types.iter().any(|kind| kind == "null")),
+        "repository override enabled must be a nullable boolean"
+    );
+    let required = repository_override["required"]
+        .as_array()
+        .expect("repository override required fields");
+    assert!(required.iter().any(|field| field == "repoRootId"));
+    assert!(required.iter().any(|field| field == "enabled"));
 }
 
 #[test]

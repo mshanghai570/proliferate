@@ -25,7 +25,7 @@ use crate::domains::workflows::definition::{
     InvocationPlacement, InvocationSnapshot, PlacementMode, WorkflowDefinition,
 };
 use crate::domains::workflows::materialize::{materialize_planned_context, plan_context_docs};
-use crate::domains::workflows::projection::{run_view, RunProjection, RunView};
+use crate::domains::workflows::projection::{RunProjection, RunView, run_view};
 use crate::domains::workflows::store::{NewRunParams, WorkspaceOccupied};
 use crate::domains::workspaces::creator_context::WorkspaceCreatorContext;
 use crate::domains::workspaces::model::WorkspaceRecord;

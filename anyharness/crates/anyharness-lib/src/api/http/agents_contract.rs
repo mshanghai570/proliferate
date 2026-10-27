@@ -23,6 +23,7 @@ use crate::domains::agents::auth::login_terminal::{
     AgentLoginTerminalStatus as InternalAgentLoginTerminalStatus,
     MintCaptureStatus as InternalMintCaptureStatus,
 };
+use crate::domains::agents::installer::InstalledArtifactResult;
 use crate::domains::agents::installer::progress::InstallProgressPhase;
 use crate::domains::agents::installer::reconcile::execution::{
     AgentInstallComponentProgress, AgentReconcileJobSnapshot, AgentReconcileJobStatus,
@@ -30,7 +31,6 @@ use crate::domains::agents::installer::reconcile::execution::{
 use crate::domains::agents::installer::reconcile::{
     AgentReconcileOutcome, AgentReconcileResult as InternalAgentReconcileResult,
 };
-use crate::domains::agents::installer::InstalledArtifactResult;
 use crate::domains::agents::model::*;
 use crate::domains::agents::readiness::service::has_user_path_copy;
 use crate::domains::agents::runtime::AgentInstallRequest as DomainInstallAgentRequest;

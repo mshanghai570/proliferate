@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 use axum::http::Method;
-use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
@@ -237,27 +237,41 @@ pub fn user_route_allowed(
         ["workspaces", workspace_id, "files", "file"] if method == Method::PUT => {
             require_workspace_permission(claim, workspace_id, Permission::Write)
         }
-        ["workspaces", workspace_id, "git", "status" | "diff" | "branches"]
-            if method == Method::GET =>
-        {
+        [
+            "workspaces",
+            workspace_id,
+            "git",
+            "status" | "diff" | "branches",
+        ] if method == Method::GET => {
             require_workspace_permission(claim, workspace_id, Permission::Read)
         }
-        ["workspaces", workspace_id, "git", "diff", "branch-files" | "base-worktree-files"]
-            if method == Method::GET =>
-        {
+        [
+            "workspaces",
+            workspace_id,
+            "git",
+            "diff",
+            "branch-files" | "base-worktree-files",
+        ] if method == Method::GET => {
             require_workspace_permission(claim, workspace_id, Permission::Read)
         }
-        ["workspaces", workspace_id, "git", "rename-branch" | "stage" | "unstage" | "revert-patches" | "commit"]
-            if method == Method::POST =>
-        {
+        [
+            "workspaces",
+            workspace_id,
+            "git",
+            "rename-branch" | "stage" | "unstage" | "revert-patches" | "commit",
+        ] if method == Method::POST => {
             require_workspace_permission(claim, workspace_id, Permission::Write)
         }
         ["workspaces", workspace_id, "git", "push"] if method == Method::POST => {
             require_workspace_permission(claim, workspace_id, Permission::Control)
         }
-        ["workspaces", workspace_id, "hosting", "pull-requests", "current"]
-            if method == Method::GET =>
-        {
+        [
+            "workspaces",
+            workspace_id,
+            "hosting",
+            "pull-requests",
+            "current",
+        ] if method == Method::GET => {
             require_workspace_permission(claim, workspace_id, Permission::Read)
         }
         ["workspaces", workspace_id, "terminals"] if method == Method::GET => {
@@ -331,9 +345,13 @@ pub fn user_route_allowed(
         ["sessions", session_id, "subagents"] if method == Method::GET => {
             require_session_permission(claim, session_id, Permission::Read)
         }
-        ["sessions", session_id, "subagents", _, "close" | "open" | "promote"]
-            if method == Method::POST =>
-        {
+        [
+            "sessions",
+            session_id,
+            "subagents",
+            _,
+            "close" | "open" | "promote",
+        ] if method == Method::POST => {
             require_session_permission(claim, session_id, Permission::Control)
         }
         ["sessions", session_id, "reviews"] if method == Method::GET => {

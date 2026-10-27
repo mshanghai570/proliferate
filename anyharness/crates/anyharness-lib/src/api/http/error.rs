@@ -1,7 +1,7 @@
 use anyharness_contract::v1::ProblemDetails;
+use axum::Json;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::Json;
 
 #[derive(Debug)]
 pub struct ApiError(StatusCode, ProblemDetails);

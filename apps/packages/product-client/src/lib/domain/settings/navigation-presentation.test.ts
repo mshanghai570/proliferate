@@ -7,6 +7,16 @@ import {
   SETTINGS_SCOPE_ORDER,
 } from "#product/lib/domain/settings/navigation-presentation";
 
+describe("native provider settings section", () => {
+  it("registers native providers in the Agents scope as a distinct settings page", () => {
+    const agentsNav = getSettingsScopeNav("agents");
+    const sectionIds = agentsNav.groups.flatMap((group) =>
+      group.items.flatMap((item) => (item.kind === "section" ? [item.id] : []))
+    );
+    expect(sectionIds).toContain("agent-native-providers");
+  });
+});
+
 describe("isSettingsAdminOnlyScope", () => {
   it("flags the org scope as admin-only, since every one of its sections is", () => {
     expect(isSettingsAdminOnlyScope("org")).toBe(true);

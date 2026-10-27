@@ -2,8 +2,8 @@ use anyharness_contract::v1::{
     DetectProjectSetupResponse, GetSetupStatusResponse, StartWorkspaceSetupRequest,
 };
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 
 use super::access::{assert_workspace_active, assert_workspace_exists, map_access_error};

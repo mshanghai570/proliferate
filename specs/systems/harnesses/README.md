@@ -4,6 +4,8 @@ Status: current (grade B). System spec in the Organization Standard anatomy. The
 
 Today the code lives in `domains/agents/` and the docs call it "agents". The Organization Standard names the system **harnesses** (a harness is the thing you run; an agent is the thing a user talks to), and the target tree renames the folder. Depth references: [agents.md](agents-domain.md), [agent-distribution.md](distribution.md), [harnesses.md](harness-integrations.md) and the per-provider docs under [harnesses/](claude.md), [acp.md](../../areas/anyharness.md), [agent-mode-matrix.md](agent-mode-matrix.md), [MODELS.md](launch-options.md).
 
+User-configured external MCP servers are owned here: [mcp-servers.md](mcp-servers.md).
+
 ## 1. Purpose
 
 Make "is Claude ready on this machine, and with which exact model and controls may I launch it?" a pure, side-effect-free question with one answer, and make "get it ready" a fenced, sha-verified, idempotent operation. The product outcome: a user installs the app and every supported harness converges to the catalog pin without a manual step; a cloud task environment does the same from a seed; session create can only ever launch an executable surface the target has actually observed.
@@ -37,6 +39,7 @@ HTTP ([agents.rs](../../../anyharness/crates/anyharness-lib/src/api/http/agents.
 | `GET /v1/agents/{kind}/launch-options`, `POST …/launch-options/refresh` | target-observed launch options; refresh pokes the probe |
 | `GET /v1/catalogs/agents/version` | the compiled catalog version — binary convergence *is* catalog convergence |
 | `GET|POST /v1/skills`, `PUT /v1/skills/{id}/enabled`, `DELETE /v1/skills/{id}` | runtime-local skill import, scope enablement and removal |
+| `GET|POST /v1/mcp-servers`, `PUT /v1/mcp-servers/{id}/enabled`, `DELETE /v1/mcp-servers/{id}` | runtime-local user MCP definitions, selection, and launch resolution ([mcp-servers.md](mcp-servers.md)) |
 
 Wire shapes: [agents.rs](../../../anyharness/crates/anyharness-contract/src/v1/agents.rs), [launch_options.rs](../../../anyharness/crates/anyharness-contract/src/v1/launch_options.rs), [catalogs.rs](../../../anyharness/crates/anyharness-contract/src/v1/catalogs.rs).
 
@@ -140,6 +143,7 @@ anyharness/crates/anyharness-lib/src/domains/agents/    → target: systems/harn
 anyharness/crates/anyharness-lib/src/integrations/agent_cli/   provider CLI mechanics (consumed)
 anyharness/crates/anyharness-lib/src/integrations/acp/         shared ACP helpers (consumed)
 anyharness/crates/anyharness-lib/src/domains/skills/           skill packages, enablement and launch extension
+anyharness/crates/anyharness-lib/src/domains/mcp_servers/      user MCP catalog, credential sealing, and launch extension ([mcp-servers.md](mcp-servers.md))
 anyharness/crates/anyharness-lib/src/adapters/skills/          file admission and workspace resource staging
 anyharness/crates/anyharness-lib/src/api/http/skills.rs        skills transport
 anyharness/crates/anyharness-contract/src/v1/skills.rs         skills wire shapes

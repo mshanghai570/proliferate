@@ -265,6 +265,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/ai-providers/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["discover_provider_models"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/revoked-jtis": {
         parameters: {
             query?: never;
@@ -404,6 +420,54 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["uninstall_extension"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/mcp-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_mcp_servers"];
+        put?: never;
+        post: operations["create_mcp_server"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/mcp-servers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_mcp_server"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/mcp-servers/{id}/enabled": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["set_mcp_server_enabled"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2974,6 +3038,11 @@ export interface components {
             thread: components["schemas"]["CoworkThread"];
             workspace: components["schemas"]["Workspace"];
         };
+        CreateMcpServerRequest: {
+            config: components["schemas"]["McpServerConfig"];
+            description?: string | null;
+            serverName: string;
+        };
         CreatePullRequestRequest: {
             baseBranch: string;
             body?: string | null;
@@ -3106,6 +3175,13 @@ export interface components {
         };
         DetectProjectSetupResponse: {
             hints: components["schemas"]["SetupHint"][];
+        };
+        DiscoverProviderModelsRequest: {
+            endpoint: string;
+        };
+        DiscoverProviderModelsResponse: {
+            models: components["schemas"]["ProviderModel"][];
+            refreshedAt: string;
         };
         DocTemplate: {
             body: string;
@@ -3614,6 +3690,9 @@ export interface components {
         ListInstalledExtensionsResponse: {
             extensions: components["schemas"]["InstalledExtensionSummary"][];
         };
+        ListMcpServersResponse: {
+            servers: components["schemas"]["McpServerSummary"][];
+        };
         ListProposedPlansResponse: {
             plans: components["schemas"]["ProposedPlanSummary"][];
         };
@@ -3822,6 +3901,51 @@ export interface components {
         McpElicitationUrlRevealResponse: {
             url: string;
         };
+        McpServerConfig: {
+            args?: string[];
+            command: string;
+            env?: components["schemas"]["McpServerCredential"][];
+            /** @enum {string} */
+            transport: "stdio";
+        } | {
+            headers?: components["schemas"]["McpServerCredential"][];
+            /** @enum {string} */
+            transport: "http";
+            url: string;
+        };
+        /**
+         * @description One env variable or header the user attaches to a server. The value is a
+         *     secret at rest; it never appears in summaries, logs, or listings.
+         */
+        McpServerCredential: {
+            name: string;
+            value: string;
+        };
+        McpServerRepositoryOverride: {
+            /** @description Required, but nullable: null removes only this repository override. */
+            enabled: boolean | null;
+            repoRootId: string;
+        };
+        McpServerSummary: {
+            args?: string[] | null;
+            command?: string | null;
+            createdAt: string;
+            description?: string | null;
+            envNames: string[];
+            headerNames: string[];
+            id: string;
+            repositoryOverrides: {
+                [key: string]: boolean;
+            };
+            serverName: string;
+            transport: components["schemas"]["McpServerTransport"];
+            updatedAt: string;
+            url?: string | null;
+            /** @description Null means inherited off. */
+            userEnabled?: boolean | null;
+        };
+        /** @enum {string} */
+        McpServerTransport: "stdio" | "http";
         MobilityPendingConfigChangeRecord: {
             configId: string;
             queuedAt: string;
@@ -4351,6 +4475,10 @@ export interface components {
             title: string;
             updatedAt: string;
             workspaceId: string;
+        };
+        ProviderModel: {
+            displayName?: string | null;
+            id: string;
         };
         PruneOrphanWorktreeRequest: {
             path: string;
@@ -5133,6 +5261,7 @@ export interface components {
             children: components["schemas"]["SubagentRosterEntry"][];
             parent: components["schemas"]["AgentOperationsAgent"];
         };
+        SetMcpServerEnabledRequest: boolean | components["schemas"]["McpServerRepositoryOverride"];
         /** @description Request payload for changing a single live session config option. */
         SetSessionConfigOptionRequest: {
             /** @description Raw ACP config option identifier to mutate. */
@@ -6588,6 +6717,75 @@ export interface operations {
             };
         };
     };
+    discover_provider_models: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DiscoverProviderModelsRequest"];
+            };
+        };
+        responses: {
+            /** @description Discovered provider models */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiscoverProviderModelsResponse"];
+                };
+            };
+            /** @description The endpoint or credential header is invalid */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description The provider rejected its credential */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description The provider returned an unusable model list */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description The provider is unreachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description The provider request timed out */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     push_revoked_jtis: {
         parameters: {
             query?: never;
@@ -6936,6 +7134,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_mcp_servers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListMcpServersResponse"];
+                };
+            };
+        };
+    };
+    create_mcp_server: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMcpServerRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["McpServerSummary"];
+                };
+            };
+        };
+    };
+    remove_mcp_server: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_mcp_server_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMcpServerEnabledRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["McpServerSummary"];
                 };
             };
         };

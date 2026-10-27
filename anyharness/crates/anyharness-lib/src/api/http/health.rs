@@ -8,8 +8,8 @@ use super::agents_contract::reconcile_summary_to_contract;
 use crate::app::AppState;
 use crate::domains::workspaces::managed_root::managed_worktrees_root;
 use crate::observability::resource_pressure::{
-    collect_resource_pressure, RuntimePressureLevel as InternalRuntimePressureLevel,
-    RuntimeResourcePressure as InternalRuntimeResourcePressure,
+    RuntimePressureLevel as InternalRuntimePressureLevel,
+    RuntimeResourcePressure as InternalRuntimeResourcePressure, collect_resource_pressure,
 };
 
 #[utoipa::path(

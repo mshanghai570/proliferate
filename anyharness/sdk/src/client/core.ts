@@ -6,6 +6,7 @@ import { CoworkClient } from "./cowork.js";
 import { FilesClient } from "./files.js";
 import { ExtensionsClient } from "./extensions.js";
 import { SkillsClient } from "./skills.js";
+import { McpServersClient } from "./mcp_servers.js";
 import { GitClient } from "./git.js";
 import { MobilityClient } from "./mobility.js";
 import { PlansClient } from "./plans.js";
@@ -542,6 +543,7 @@ export class AnyHarnessClient {
   readonly files: FilesClient;
   readonly extensions: ExtensionsClient;
   readonly skills: SkillsClient;
+  readonly mcpServers: McpServersClient;
   readonly sessions: SessionsClient;
   readonly git: GitClient;
   readonly pullRequests: PullRequestsClient;
@@ -565,6 +567,7 @@ export class AnyHarnessClient {
     this.files = new FilesClient(transport);
     this.extensions = new ExtensionsClient(transport);
     this.skills = new SkillsClient(transport);
+    this.mcpServers = new McpServersClient(transport);
     this.sessions = new SessionsClient(transport);
     this.git = new GitClient(transport);
     this.pullRequests = new PullRequestsClient(transport);

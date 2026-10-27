@@ -4,8 +4,8 @@ use crate::api::http::access::admit_session_mutation;
 use crate::domains::sessions::admission::{SessionMutationKind, SessionMutationPermit};
 use anyharness_contract::v1::{WorkspacePurgeOutcome, WorkspacePurgeResponse};
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 
 use super::error::ApiError;
@@ -273,10 +273,12 @@ mod tests {
 
         assert_eq!(response.outcome, WorkspacePurgeOutcome::Deleted);
         assert!(!response.already_deleted);
-        assert!(store
-            .find_by_id(&workspace.id)
-            .expect("find workspace")
-            .is_none());
+        assert!(
+            store
+                .find_by_id(&workspace.id)
+                .expect("find workspace")
+                .is_none()
+        );
         assert!(
             !workspace_path.exists(),
             "the worktree checkout must be removed"
@@ -319,10 +321,12 @@ mod tests {
 
         assert_eq!(response.outcome, WorkspacePurgeOutcome::Deleted);
         assert!(!response.already_deleted);
-        assert!(store
-            .find_by_id(&workspace.id)
-            .expect("find workspace")
-            .is_none());
+        assert!(
+            store
+                .find_by_id(&workspace.id)
+                .expect("find workspace")
+                .is_none()
+        );
     }
 
     #[tokio::test(flavor = "current_thread")]

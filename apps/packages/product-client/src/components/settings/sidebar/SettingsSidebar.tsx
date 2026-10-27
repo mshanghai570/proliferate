@@ -81,8 +81,10 @@ function harnessNavIcon(kind: string) {
 const SETTINGS_NAV_ICONS = {
   account: CircleUser,
   "agent-api-keys": KeyRound,
+  "agent-native-providers": KeyRound,
   "agent-custom": Blocks,
   "agent-skills": Brain,
+  "agent-mcp-servers": Blocks,
   "agent-claude": harnessNavIcon("claude"),
   "agent-codex": harnessNavIcon("codex"),
   "agent-cursor": harnessNavIcon("cursor"),

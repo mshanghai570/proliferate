@@ -1,9 +1,9 @@
 //! Runtime-local ACP command registration transport.
 use anyharness_contract::v1::{CustomAcpAgent, ProblemDetails, RegisterCustomAcpAgentRequest};
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
 
 use super::error::ApiError;

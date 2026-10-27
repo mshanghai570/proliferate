@@ -18,8 +18,8 @@ use anyharness_contract::v1::{
     ArchiveWorkspaceRequest, ArchiveWorkspaceResponse, UnarchiveWorkspaceRequest,
     UnarchiveWorkspaceResponse,
 };
-use axum::extract::{Path, State};
 use axum::Json;
+use axum::extract::{Path, State};
 
 use super::error::ApiError;
 use super::workspaces_lifecycle_contract::{

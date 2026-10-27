@@ -1,6 +1,6 @@
 use anyharness_contract::v1::{RestoreWorktreeWorkspaceOutcome, RestoreWorktreeWorkspaceResponse};
-use axum::extract::{Path, State};
 use axum::Json;
+use axum::extract::{Path, State};
 
 use super::access::map_access_error;
 use super::error::ApiError;

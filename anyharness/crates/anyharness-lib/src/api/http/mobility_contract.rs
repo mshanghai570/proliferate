@@ -8,8 +8,8 @@ use anyharness_contract::v1::{
     WorkspaceMobilityFileEntry, WorkspaceMobilityPreflightResponse, WorkspaceMobilitySessionBundle,
     WorkspaceMobilitySessionCandidate,
 };
-use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
+use base64::engine::general_purpose::STANDARD;
 
 use crate::domains::agents::portability::AgentArtifactFileData;
 use crate::domains::mobility::model::{
@@ -20,8 +20,9 @@ use crate::domains::mobility::model::{
 use crate::domains::sessions::links::completions::LinkWakeScheduleRecord;
 use crate::domains::sessions::links::model::SessionLinkRecord;
 use crate::domains::sessions::model::{
-    parse_action_capabilities, PendingConfigChangeRecord, PendingPromptRecord, SessionEventRecord,
+    PendingConfigChangeRecord, PendingPromptRecord, SessionEventRecord,
     SessionLiveConfigSnapshotRecord, SessionRawNotificationRecord, SessionRecord,
+    parse_action_capabilities,
 };
 use crate::domains::sessions::subagents::delivery::CompletionDeliveryRecord;
 use crate::domains::sessions::subagents::model::SubagentCompletionRecord;

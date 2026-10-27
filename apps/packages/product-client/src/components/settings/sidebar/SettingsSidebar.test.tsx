@@ -181,6 +181,7 @@ describe("SettingsSidebar layout and shortcuts", () => {
       "OpenCode",
       "Grok",
       "API keys",
+      "MCP servers",
     ];
     let previousIndex = -1;
     for (const label of expectedOrder) {

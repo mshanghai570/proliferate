@@ -7,9 +7,9 @@ use anyharness_contract::v1::{
     WorkspaceMobilityArchive, WorkspaceMobilityPreflightResponse, WorkspaceMobilityRuntimeState,
 };
 use axum::{
+    Json,
     extract::{Path, State},
     http::HeaderMap,
-    Json,
 };
 use std::time::Instant;
 
@@ -455,7 +455,10 @@ fn map_mobility_error(error: MobilityError) -> ApiError {
         MobilityError::WorkspaceNotFound(_) => {
             ApiError::not_found("Workspace not found".to_string(), "WORKSPACE_NOT_FOUND")
         }
-        MobilityError::BaseCommitMismatch { archive, destination } => ApiError::conflict(
+        MobilityError::BaseCommitMismatch {
+            archive,
+            destination,
+        } => ApiError::conflict(
             format!(
                 "Destination workspace HEAD did not match archive base commit (destination={destination}, archive={archive})"
             ),

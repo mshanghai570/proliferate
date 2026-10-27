@@ -4,9 +4,9 @@ use anyharness_contract::v1::skills::{
     ImportSkillRequest, ListSkillsResponse, SetSkillEnabledRequest, SkillSummary,
 };
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
 
 fn invalid(error: anyhow::Error) -> ApiError {
@@ -16,7 +16,10 @@ fn invalid(error: anyhow::Error) -> ApiError {
     {
         return unavailable();
     }
-    ApiError::bad_request("Skill operation failed. Check the package size, root SKILL.md, relative paths, and enablement scope.", "SKILL_OPERATION_FAILED")
+    ApiError::bad_request(
+        "Skill operation failed. Check the package size, root SKILL.md, relative paths, and enablement scope.",
+        "SKILL_OPERATION_FAILED",
+    )
 }
 fn unavailable() -> ApiError {
     ApiError::new(

@@ -8,6 +8,7 @@ The settings surface: one route (`/settings?section=…`) hosting user-scope, or
 | Appearance scaling gate and preference — target | [appearance-scaling.md](appearance-scaling.md) |
 | Billing surfaces' semantics | [BILLING.md](../billing/deep-dive.md) |
 | Agent auth panes' semantics | [AGENT_AUTH.md](../agent_auth/README.md), [MODELS.md](../harnesses/launch-options.md) |
+| Runtime-local MCP server management | [mcp-servers.md](../harnesses/mcp-servers.md) |
 | Organization invitations and members | [../organizations/invitations.md](../identity/invitations.md) |
 
 ## Purpose
@@ -48,6 +49,7 @@ Let a person (or an org admin) configure their account, appearance, agents and t
 | Billing (Cloud) | plan, credits, usage timeseries, checkout/portal return | [use-cloud-billing.ts](../../../apps/packages/product-client/src/hooks/access/cloud/use-cloud-billing.ts), [billing-return.ts](../../../apps/packages/product-client/src/lib/access/cloud/billing-return.ts) |
 | Agent auth + model gateway (Cloud `agent-gateway`, `auth`) | selections, enrollment, org model policy, limits/budgets, API keys | `useAuthSelections`, `useAgentGatewayEnrollment` (`@proliferate/cloud-sdk-react`); panes under [agents/harness/](../../../apps/packages/product-client/src/components/settings/panes/agents/harness/HarnessPane.tsx) |
 | Agent catalog + install (runtime `agents`) | installed harnesses, models table, install/reconcile, CLI login terminal | [use-agent-catalog.ts](../../../apps/packages/product-client/src/hooks/agents/derived/use-agent-catalog.ts), [use-harness-install-action.ts](../../../apps/packages/product-client/src/hooks/agents/workflows/use-harness-install-action.ts) |
+| User MCP servers (runtime `mcp-servers`) | local stdio/HTTP definitions, secrets, and repository enablement | [McpServersPane.tsx](../../../apps/packages/product-client/src/components/settings/panes/agents/mcp/McpServersPane.tsx); behavior belongs to [harnesses/mcp-servers.md](../harnesses/mcp-servers.md) |
 | Integrations (Cloud `integrations`) | catalog, connect (OAuth flow), health, admin definitions | [hooks/access/cloud/integrations/](../../../apps/packages/product-client/src/hooks/access/cloud/integrations/use-integration-catalog.ts) |
 | GitHub App (Cloud `github-app`) | installation state, user authorization | [use-github-app-installation.ts](../../../apps/packages/product-client/src/hooks/settings/workflows/use-github-app-installation.ts) |
 | Secrets (Cloud `cloud-secrets`) | personal + organization secret CRUD | `PersonalSecretsPane`, `OrganizationSecretsPane` |
@@ -125,7 +127,7 @@ apps/packages/product-client/src/
 ├── components/settings/
 │   ├── screen/       SettingsScreen, scope header controls, section renderer
 │   ├── sidebar/      SettingsSidebar (scoped groups)
-│   ├── panes/        one folder or file per section: account/, agents/{harness,api-keys}/,
+│   ├── panes/        one folder or file per section: account/, agents/{harness,api-keys,mcp}/,
 │   │                 integrations/, organization/, repo/, archived/, billing/, environments/,
 │   │                 Appearance, General, Personal/Organization secrets, model policy, limits
 │   └── shared/       AdminOnlyPlaceholder, AgentHarnessConfigComposer, RunCommandHelp

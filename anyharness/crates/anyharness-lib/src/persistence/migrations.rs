@@ -264,6 +264,10 @@ pub(super) const MIGRATIONS: &[(&str, &str)] = &[
         "0077_installed_extensions",
         include_str!("sql/0077_installed_extensions.sql"),
     ),
+    (
+        "0078_user_mcp_servers",
+        include_str!("sql/0078_user_mcp_servers.sql"),
+    ),
 ];
 
 pub fn run_migrations(conn: &mut Connection) -> rusqlite::Result<()> {
@@ -525,5 +529,44 @@ mod tests {
             })
             .expect("query foreign key state");
         assert!(!enabled);
+    }
+
+    #[test]
+    fn user_mcp_servers_migration_creates_sealed_storage_and_unique_names() {
+        let mut conn = Connection::open_in_memory().expect("open in-memory db");
+        run_migrations(&mut conn).expect("run migrations");
+
+        let mut statement = conn
+            .prepare("PRAGMA table_info(user_mcp_servers)")
+            .expect("prepare table info");
+        let columns = statement
+            .query_map([], |row| row.get::<_, String>(1))
+            .expect("query table info")
+            .collect::<rusqlite::Result<Vec<_>>>()
+            .expect("collect table columns");
+        for expected in [
+            "server_name",
+            "transport",
+            "env_sealed",
+            "headers_sealed",
+            "enabled_user_default",
+            "repository_overrides_json",
+        ] {
+            assert!(columns.iter().any(|column| column.as_str() == expected));
+        }
+
+        conn.execute(
+            "INSERT INTO user_mcp_servers (id, server_name, transport, stdio_command)
+             VALUES ('first', 'filesystem', 'stdio', 'mcp-filesystem')",
+            [],
+        )
+        .expect("insert first server");
+        assert!(conn
+            .execute(
+                "INSERT INTO user_mcp_servers (id, server_name, transport, stdio_command)
+                 VALUES ('second', 'filesystem', 'stdio', 'mcp-filesystem')",
+                [],
+            )
+            .is_err());
     }
 }

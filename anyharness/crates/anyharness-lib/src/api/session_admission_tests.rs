@@ -9,14 +9,14 @@ use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use axum::{
-    body::{to_bytes, Body},
-    http::{header, Request, StatusCode},
+    body::{Body, to_bytes},
+    http::{Request, StatusCode, header},
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tower::util::ServiceExt;
 
 use super::router::build_router;
-use crate::app::{test_support, AppState};
+use crate::app::{AppState, test_support};
 use crate::domains::agents::installer::seed::AgentSeedStore;
 use crate::domains::sessions::admission::{
     AllSessionsOperable, SessionControllerPolicy, SessionMutationConflict, SessionMutationKind,
@@ -151,11 +151,13 @@ async fn foreign_and_stale_workflow_sources_denied_owning_admitted() {
 
     // The OWNING workflow source is admitted.
     let owning = SessionMutationSource::workflow_run(&run_id);
-    assert!(state
-        .session_admission
-        .acquire(&session_id, SessionMutationKind::Cancel, &owning)
-        .await
-        .is_ok());
+    assert!(
+        state
+            .session_admission
+            .acquire(&session_id, SessionMutationKind::Cancel, &owning)
+            .await
+            .is_ok()
+    );
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -243,10 +245,12 @@ async fn every_fenced_route_conflicts_before_side_effects_and_reads_stay_availab
     assert_eq!(session["status"], "starting");
     assert!(session["lastPromptAt"].is_null());
     assert!(session.get("closedAt").map(|v| v.is_null()).unwrap_or(true));
-    assert!(session
-        .get("dismissedAt")
-        .map(|v| v.is_null())
-        .unwrap_or(true));
+    assert!(
+        session
+            .get("dismissedAt")
+            .map(|v| v.is_null())
+            .unwrap_or(true)
+    );
     let wake_schedule_count = state
         .db
         .with_conn(|conn| {

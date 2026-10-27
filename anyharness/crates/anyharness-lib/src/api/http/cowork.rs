@@ -7,8 +7,8 @@ use anyharness_contract::v1::{
     SessionStatus, Workspace,
 };
 use axum::{
-    extract::{Path, State},
     Json,
+    extract::{Path, State},
 };
 
 use super::blocking::run_blocking;

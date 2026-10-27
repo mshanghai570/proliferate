@@ -833,6 +833,86 @@
         }
       }
     },
+    "/v1/ai-providers/models": {
+      "post": {
+        "tags": [
+          "super::http::ai_providers"
+        ],
+        "operationId": "discover_provider_models",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscoverProviderModelsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Discovered provider models",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoverProviderModelsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The endpoint or credential header is invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "The provider rejected its credential",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "The provider returned an unusable model list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The provider is unreachable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "The provider request timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/auth/revoked-jtis": {
       "put": {
         "tags": [
@@ -1237,6 +1317,117 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mcp-servers": {
+      "get": {
+        "tags": [
+          "mcp_servers"
+        ],
+        "operationId": "list_mcp_servers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListMcpServersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "mcp_servers"
+        ],
+        "operationId": "create_mcp_server",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMcpServerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/mcp-servers/{id}": {
+      "delete": {
+        "tags": [
+          "mcp_servers"
+        ],
+        "operationId": "remove_mcp_server",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/v1/mcp-servers/{id}/enabled": {
+      "put": {
+        "tags": [
+          "mcp_servers"
+        ],
+        "operationId": "set_mcp_server_enabled",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMcpServerEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/McpServerSummary"
                 }
               }
             }
@@ -10866,6 +11057,28 @@
           }
         }
       },
+      "CreateMcpServerRequest": {
+        "type": "object",
+        "required": [
+          "serverName",
+          "config"
+        ],
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/McpServerConfig"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "serverName": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreatePullRequestRequest": {
         "type": "object",
         "required": [
@@ -11454,6 +11667,35 @@
             "items": {
               "$ref": "#/components/schemas/SetupHint"
             }
+          }
+        }
+      },
+      "DiscoverProviderModelsRequest": {
+        "type": "object",
+        "required": [
+          "endpoint"
+        ],
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscoverProviderModelsResponse": {
+        "type": "object",
+        "required": [
+          "models",
+          "refreshedAt"
+        ],
+        "properties": {
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderModel"
+            }
+          },
+          "refreshedAt": {
+            "type": "string"
           }
         }
       },
@@ -13413,6 +13655,20 @@
           }
         }
       },
+      "ListMcpServersResponse": {
+        "type": "object",
+        "required": [
+          "servers"
+        ],
+        "properties": {
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/McpServerSummary"
+            }
+          }
+        }
+      },
       "ListProposedPlansResponse": {
         "type": "object",
         "required": [
@@ -14275,6 +14531,195 @@
             "type": "string"
           }
         }
+      },
+      "McpServerConfig": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "A server started as a child process by the harness at session launch.",
+            "required": [
+              "command",
+              "transport"
+            ],
+            "properties": {
+              "args": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "command": {
+                "type": "string"
+              },
+              "env": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/McpServerCredential"
+                }
+              },
+              "transport": {
+                "type": "string",
+                "enum": [
+                  "stdio"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "A reachable HTTP MCP endpoint.",
+            "required": [
+              "url",
+              "transport"
+            ],
+            "properties": {
+              "headers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/McpServerCredential"
+                }
+              },
+              "transport": {
+                "type": "string",
+                "enum": [
+                  "http"
+                ]
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "McpServerCredential": {
+        "type": "object",
+        "description": "One env variable or header the user attaches to a server. The value is a\nsecret at rest; it never appears in summaries, logs, or listings.",
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "McpServerRepositoryOverride": {
+        "type": "object",
+        "required": [
+          "repoRootId",
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Required, but nullable: null removes only this repository override."
+          },
+          "repoRootId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "McpServerSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "serverName",
+          "transport",
+          "envNames",
+          "headerNames",
+          "repositoryOverrides",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "args": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "command": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "envNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "headerNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "repositoryOverrides": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "serverName": {
+            "type": "string"
+          },
+          "transport": {
+            "$ref": "#/components/schemas/McpServerTransport"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "userEnabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Null means inherited off."
+          }
+        }
+      },
+      "McpServerTransport": {
+        "type": "string",
+        "enum": [
+          "stdio",
+          "http"
+        ]
       },
       "MobilityPendingConfigChangeRecord": {
         "type": "object",
@@ -16351,6 +16796,23 @@
             "type": "string"
           },
           "workspaceId": {
+            "type": "string"
+          }
+        }
+      },
+      "ProviderModel": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "displayName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
             "type": "string"
           }
         }
@@ -19644,6 +20106,18 @@
             "$ref": "#/components/schemas/AgentOperationsAgent"
           }
         }
+      },
+      "SetMcpServerEnabledRequest": {
+        "oneOf": [
+          {
+            "type": "boolean",
+            "description": "A JSON boolean updates the runtime user's default."
+          },
+          {
+            "$ref": "#/components/schemas/McpServerRepositoryOverride",
+            "description": "A repository-specific boolean overrides the default; null resets it."
+          }
+        ]
       },
       "SetSessionConfigOptionRequest": {
         "type": "object",

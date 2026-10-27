@@ -86,7 +86,7 @@ impl fmt::Debug for SessionMcpStdioServer {
             .field("connection_id", &self.connection_id)
             .field("catalog_entry_id", &self.catalog_entry_id)
             .field("server_name", &self.server_name)
-            .field("command", &self.command)
+            .field("command", &"<redacted>")
             .field("arg_count", &self.args.len())
             .field("env_names", &env_names)
             .finish()
@@ -130,6 +130,8 @@ mod tests {
         let debug_output = format!("{binding:?}");
 
         assert!(!debug_output.contains("secret"));
+        assert!(!debug_output.contains("mcp-server-filesystem"));
+        assert!(!debug_output.contains("/workspace"));
         assert!(debug_output.contains("API_KEY"));
     }
 }
