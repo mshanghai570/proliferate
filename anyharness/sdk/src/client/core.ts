@@ -4,6 +4,8 @@ import { AgentAuthClient } from "./agent-auth.js";
 import { AgentsClient } from "./agents.js";
 import { CoworkClient } from "./cowork.js";
 import { FilesClient } from "./files.js";
+import { ExtensionsClient } from "./extensions.js";
+import { SkillsClient } from "./skills.js";
 import { GitClient } from "./git.js";
 import { MobilityClient } from "./mobility.js";
 import { PlansClient } from "./plans.js";
@@ -538,6 +540,8 @@ export class AnyHarnessClient {
   readonly worktrees: WorktreesClient;
   readonly cowork: CoworkClient;
   readonly files: FilesClient;
+  readonly extensions: ExtensionsClient;
+  readonly skills: SkillsClient;
   readonly sessions: SessionsClient;
   readonly git: GitClient;
   readonly pullRequests: PullRequestsClient;
@@ -559,6 +563,8 @@ export class AnyHarnessClient {
     this.worktrees = new WorktreesClient(transport);
     this.cowork = new CoworkClient(transport);
     this.files = new FilesClient(transport);
+    this.extensions = new ExtensionsClient(transport);
+    this.skills = new SkillsClient(transport);
     this.sessions = new SessionsClient(transport);
     this.git = new GitClient(transport);
     this.pullRequests = new PullRequestsClient(transport);

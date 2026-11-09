@@ -30,10 +30,11 @@ use crate::api::auth::{user_route_allowed, AuthContext, AuthError};
 use crate::api::http::error::ApiError;
 use crate::app::AppState;
 mod pending_prompt_routes;
+mod settings_routes;
 mod support_window_routes;
 pub fn build_router(state: AppState) -> Router {
     let v1 = Router::new()
-        // Agents
+        .merge(settings_routes::routes())
         .route("/agents", get(agents::list_agents))
         .route(
             "/agents/reconcile",

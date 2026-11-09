@@ -118,7 +118,8 @@
         "kind": {
           "enum": [
             "aws_bedrock",
-            "azure_openai"
+            "azure_openai",
+            "openai_compatible"
           ]
         },
         "label": {

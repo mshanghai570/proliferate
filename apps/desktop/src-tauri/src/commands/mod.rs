@@ -4,6 +4,7 @@ pub mod config;
 pub mod desktop_identity;
 pub mod diagnostics;
 pub mod drag_drop;
+pub mod fonts;
 pub mod google_workspace_mcp;
 pub mod keychain;
 pub mod process;

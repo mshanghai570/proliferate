@@ -8,13 +8,32 @@ import type {
   PrepareRepoRootMobilityDestinationRequest,
   PrepareRepoRootMobilityDestinationResponse,
   RepoRoot,
+  ProjectMcpServersResponse,
+  ProjectMcpServerSummary,
   ResolveRepoRootFromPathRequest,
 } from "../types/repo-roots.js";
 import type { ReadWorkspaceFileResponse } from "../types/files.js";
+import type { SessionMcpServer } from "../types/sessions.js";
 import { withTimingCategory, type AnyHarnessRequestOptions, type AnyHarnessTransport } from "./core.js";
 
 export class RepoRootsClient {
   constructor(private readonly transport: AnyHarnessTransport) {}
+
+  listMcpServers(repoRootId: string, options?: AnyHarnessRequestOptions): Promise<ProjectMcpServersResponse> {
+    return this.transport.get(`/v1/repo-roots/${encodeURIComponent(repoRootId)}/mcp-servers`, options);
+  }
+
+  putMcpServer(repoRootId: string, name: string, server: SessionMcpServer): Promise<ProjectMcpServerSummary> {
+    return this.transport.put(`/v1/repo-roots/${encodeURIComponent(repoRootId)}/mcp-servers/${encodeURIComponent(name)}`, server);
+  }
+
+  setMcpServerEnabled(repoRootId: string, name: string, enabled: boolean): Promise<ProjectMcpServerSummary> {
+    return this.transport.patch(`/v1/repo-roots/${encodeURIComponent(repoRootId)}/mcp-servers/${encodeURIComponent(name)}`, { enabled });
+  }
+
+  removeMcpServer(repoRootId: string, name: string): Promise<void> {
+    return this.transport.delete(`/v1/repo-roots/${encodeURIComponent(repoRootId)}/mcp-servers/${encodeURIComponent(name)}`);
+  }
 
   async list(options?: AnyHarnessRequestOptions): Promise<RepoRoot[]> {
     return this.transport.get<RepoRoot[]>(

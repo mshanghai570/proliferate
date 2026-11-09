@@ -89,6 +89,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agents/custom": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_custom_agents"];
+        put?: never;
+        post: operations["register_custom_agent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agents/custom/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_custom_agent"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/agents/login-terminals/{terminal_id}": {
         parameters: {
             query?: never;
@@ -329,6 +361,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/extensions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_extensions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/extensions/install": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["install_registry_extension"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/extensions/{namespace}/{name}/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["uninstall_extension"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/extensions/{namespace}/{name}/{version}/color-themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_color_themes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/replay/recordings": {
         parameters: {
             query?: never;
@@ -503,6 +599,38 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/v1/repo-roots/{repo_root_id}/mcp-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/repo-roots/{repo_root_id}/mcp-servers/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["put"];
+        post?: never;
+        delete: operations["remove"];
+        options?: never;
+        head?: never;
+        patch: operations["set_enabled"];
         trace?: never;
     };
     "/v1/repo-roots/{repo_root_id}/mobility/prepare-destination": {
@@ -1079,6 +1207,54 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["update_session_title"];
+        trace?: never;
+    };
+    "/v1/skills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_skills"];
+        put?: never;
+        post: operations["import_skill"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/skills/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_skill"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/skills/{id}/enabled": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["set_skill_enabled"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/terminal-command-runs/{command_run_id}": {
@@ -2941,6 +3117,14 @@ export interface components {
         CurrentPullRequestResponse: {
             pullRequest?: null | components["schemas"]["PullRequestSummary"];
         };
+        /** @description A runtime-local ACP registration. Environment values are never returned. */
+        CustomAcpAgent: {
+            args: string[];
+            command: string;
+            envNames: string[];
+            id: string;
+            name: string;
+        };
         DefinitionEdge: {
             from: string;
             to: string;
@@ -3028,6 +3212,20 @@ export interface components {
             expectedHandoffOpId?: string | null;
             requireCleanGitState?: boolean;
         };
+        ExtensionColorTheme: {
+            available: boolean;
+            /** @description Normalized light/dark mode; absent when the theme cannot be imported. */
+            colorMode?: string | null;
+            /** @description Only the six supported core app color keys are exposed. */
+            colors: {
+                [key: string]: string;
+            };
+            label: string;
+        };
+        /** @enum {string} */
+        ExtensionInstallationState: "installing" | "installed" | "removing" | "error";
+        /** @enum {string} */
+        ExtensionPackageErrorCode: "interrupted_install" | "package_missing" | "package_invalid";
         /** @enum {string} */
         FeedKind: "terminal_bytes" | "transcript";
         /**
@@ -3360,6 +3558,10 @@ export interface components {
             status: string;
             version: string;
         };
+        ImportSkillRequest: {
+            files: components["schemas"]["SkillFile"][];
+            name: string;
+        };
         InstallAgentRequest: {
             agentProcessVersion?: string | null;
             nativeVersion?: string | null;
@@ -3369,6 +3571,11 @@ export interface components {
             agent: components["schemas"]["AgentSummary"];
             alreadyInstalled: boolean;
             installedArtifacts: components["schemas"]["ArtifactStatus"][];
+        };
+        InstallRegistryExtensionRequest: {
+            name: string;
+            namespace: string;
+            version: string;
         };
         InstallWorkspaceMobilityArchiveRequest: {
             archive: components["schemas"]["WorkspaceMobilityArchive"];
@@ -3382,6 +3589,16 @@ export interface components {
             importedSessionIds: string[];
             sourceWorkspacePath: string;
             workspaceId: string;
+        };
+        InstalledExtensionSummary: {
+            /** @description Package materialization does not imply activation. Currently always false. */
+            active: boolean;
+            errorCode?: null | components["schemas"]["ExtensionPackageErrorCode"];
+            name: string;
+            namespace: string;
+            sha256: string;
+            state: components["schemas"]["ExtensionInstallationState"];
+            version: string;
         };
         /** @enum {string} */
         InteractionDecision: "allow" | "deny";
@@ -3452,11 +3669,21 @@ export interface components {
         ItemStartedEvent: {
             item: components["schemas"]["TranscriptItemPayload"];
         };
+        ListExtensionColorThemesResponse: {
+            themes: components["schemas"]["ExtensionColorTheme"][];
+            truncated: boolean;
+        };
+        ListInstalledExtensionsResponse: {
+            extensions: components["schemas"]["InstalledExtensionSummary"][];
+        };
         ListProposedPlansResponse: {
             plans: components["schemas"]["ProposedPlanSummary"][];
         };
         ListReplayRecordingsResponse: {
             recordings: components["schemas"]["ReplayRecordingSummary"][];
+        };
+        ListSkillsResponse: {
+            skills: components["schemas"]["SkillSummary"][];
         };
         ListWorkspaceFilesResponse: {
             directoryPath: string;
@@ -4064,6 +4291,16 @@ export interface components {
             /** @enum {string} */
             status: "exited";
         };
+        /** @description Public inventory never includes connection URLs, commands, or credentials. */
+        ProjectMcpServerSummary: {
+            enabled: boolean;
+            name: string;
+            transport: components["schemas"]["SessionMcpTransport"];
+        };
+        ProjectMcpServersResponse: {
+            encryptionAvailable: boolean;
+            servers: components["schemas"]["ProjectMcpServerSummary"][];
+        };
         /** @enum {string} */
         PromptAttachmentSource: "upload" | "paste";
         PromptCapabilities: {
@@ -4320,6 +4557,14 @@ export interface components {
         ReconcileJobStatus: "idle" | "queued" | "running" | "completed" | "failed";
         /** @enum {string} */
         ReconcileOutcome: "installed" | "already_installed" | "skipped" | "failed";
+        RegisterCustomAcpAgentRequest: {
+            args?: string[];
+            command: string;
+            env?: {
+                [key: string]: string;
+            };
+            name: string;
+        };
         RenameWorkspaceFileEntryRequest: {
             newPath: string;
             path: string;
@@ -4960,6 +5205,9 @@ export interface components {
             children: components["schemas"]["SubagentRosterEntry"][];
             parent: components["schemas"]["AgentOperationsAgent"];
         };
+        SetProjectMcpServerEnabledRequest: {
+            enabled: boolean;
+        };
         /** @description Request payload for changing a single live session config option. */
         SetSessionConfigOptionRequest: {
             /** @description Raw ACP config option identifier to mutate. */
@@ -5000,6 +5248,12 @@ export interface components {
             recurring?: boolean;
             schedule: components["schemas"]["LoopSchedule"];
         };
+        SetSkillEnabledRequest: {
+            /** @description Null removes a repository override; user defaults require a boolean. */
+            enabled?: boolean | null;
+            /** @description Omit for the runtime user's default. A repository override wins over it. */
+            repositoryId?: string | null;
+        };
         SetupHint: {
             category: components["schemas"]["SetupHintCategory"];
             detectedFile: string;
@@ -5021,6 +5275,19 @@ export interface components {
         };
         /** @enum {string} */
         SetupScriptStatus: "queued" | "running" | "succeeded" | "failed";
+        SkillFile: {
+            contentBase64: string;
+            path: string;
+        };
+        SkillSummary: {
+            fileCount: number;
+            id: string;
+            name: string;
+            repositoryOverrides: {
+                [key: string]: boolean;
+            };
+            userEnabled: boolean;
+        };
         StagePatchRequest: {
             /** @description A valid unified diff patch (file headers + hunk) to apply to the index. */
             patch: string;
@@ -5881,6 +6148,89 @@ export interface operations {
             };
         };
     };
+    list_custom_agents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Local custom ACP registrations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAcpAgent"][];
+                };
+            };
+        };
+    };
+    register_custom_agent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterCustomAcpAgentRequest"];
+            };
+        };
+        responses: {
+            /** @description Custom ACP command registered */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomAcpAgent"];
+                };
+            };
+            /** @description Invalid registration */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    remove_custom_agent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Custom ACP registration id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Registration removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Registration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     get_agent_login_terminal: {
         parameters: {
             query?: never;
@@ -6491,6 +6841,249 @@ export interface operations {
             };
         };
     };
+    list_extensions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Registered extension packages; installation does not imply activation */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListInstalledExtensionsResponse"];
+                };
+            };
+            /** @description Runtime authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension management unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    install_registry_extension: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InstallRegistryExtensionRequest"];
+            };
+        };
+        responses: {
+            /** @description Package downloaded from the registry, verified, and registered; installation does not imply activation */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstalledExtensionSummary"];
+                };
+            };
+            /** @description Invalid extension identity */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Runtime authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension version not found in the registry */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Version already registered or package validation failed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Registry returned an unusable package */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension management unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    uninstall_extension: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                namespace: string;
+                name: string;
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Selected version removed or not registered */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid extension identity */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Runtime authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Package validation failed; package preserved */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension management unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_color_themes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                namespace: string;
+                name: string;
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Declared core app color data from an installed package */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListExtensionColorThemesResponse"];
+                };
+            };
+            /** @description Invalid extension identity */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Runtime authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension version is not installed */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Package validation failed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension management unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     list_replay_recordings: {
         parameters: {
             query?: never;
@@ -6938,6 +7531,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Write-only MCP inventory for a project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServersResponse"];
+                };
+            };
+        };
+    };
+    put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionMcpServer"];
+            };
+        };
+        responses: {
+            /** @description Server replaced and enabled; used at next session process launch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServerSummary"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Server removed; live sessions keep their current configuration */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetProjectMcpServerEnabledRequest"];
+            };
+        };
+        responses: {
+            /** @description Server enabled state updated; used at next session process launch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServerSummary"];
                 };
             };
         };
@@ -8748,6 +9438,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_skills: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListSkillsResponse"];
+                };
+            };
+        };
+    };
+    import_skill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportSkillRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SkillSummary"];
+                };
+            };
+        };
+    };
+    remove_skill: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_skill_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetSkillEnabledRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SkillSummary"];
                 };
             };
         };

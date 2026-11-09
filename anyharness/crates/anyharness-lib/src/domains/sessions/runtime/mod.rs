@@ -11,7 +11,6 @@ use super::active_goals::ActiveGoalResolver;
 use super::active_loops::LoopsResolver;
 use super::links::model::SessionLinkRecord;
 use super::links::service::SessionLinkService;
-use super::mcp_bindings::crypto::SessionDataCipher;
 use super::mcp_bindings::model::SessionMcpServer;
 use super::mcp_bindings::product_catalog::ProductMcpLaunchCatalog;
 use super::mcp_bindings::workspace_attachment::WorkspaceMcpAttachmentError;
@@ -26,6 +25,7 @@ use crate::domains::workspaces::checkpoints::WorkspaceCheckpointService;
 use crate::domains::workspaces::operation_gate::WorkspaceOperationGate;
 use crate::domains::workspaces::runtime::WorkspaceRuntime;
 use crate::live::sessions::LiveSessionManager;
+use crate::persistence::data_cipher::DataCipher;
 
 mod agent_creation;
 #[cfg(test)]
@@ -98,7 +98,7 @@ pub struct SessionRuntime {
     workspace_runtime: Arc<WorkspaceRuntime>,
     acp_manager: LiveSessionManager,
     runtime_home: PathBuf,
-    session_data_cipher: Option<SessionDataCipher>,
+    session_data_cipher: Option<DataCipher>,
     session_extensions: Vec<Arc<dyn SessionExtension>>,
     product_mcp_launch_catalog: ProductMcpLaunchCatalog,
     access_gate: Arc<WorkspaceAccessGate>,
@@ -475,7 +475,7 @@ impl SessionRuntime {
         workspace_runtime: Arc<WorkspaceRuntime>,
         acp_manager: LiveSessionManager,
         runtime_home: PathBuf,
-        session_data_cipher: Option<SessionDataCipher>,
+        session_data_cipher: Option<DataCipher>,
         session_extensions: Vec<Arc<dyn SessionExtension>>,
         product_mcp_launch_catalog: ProductMcpLaunchCatalog,
         access_gate: Arc<WorkspaceAccessGate>,

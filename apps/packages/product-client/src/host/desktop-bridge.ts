@@ -207,6 +207,7 @@ export interface WorkspaceActivityPayload {
 export interface DesktopNativeUiBridge {
   showContextMenu(items: NativeMenuItem[], position?: MenuPosition): Promise<boolean>;
   subscribeMenuCommands(listener: (command: ProductCommand) => void): () => void;
+  listLocalFontFamilies(): Promise<string[]>;
 
   setRunningAgentCount(count: number): Promise<void>;
   setWorkspaceActivity(payload: WorkspaceActivityPayload): Promise<void>;

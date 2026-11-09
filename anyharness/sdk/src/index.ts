@@ -20,6 +20,14 @@ export type {
 export { supportWindowResponseBytes } from "./client/support-window-response-bytes.js";
 
 export type {
+  ExtensionPackageIdentity,
+  InstalledExtensionSummary,
+  ListInstalledExtensionsResponse,
+  ExtensionColorTheme,
+  ListExtensionColorThemesResponse,
+} from "./types/extensions.js";
+
+export type {
   HealthResponse,
   RuntimeCapabilities,
   RuntimePressureLevel,
@@ -52,6 +60,9 @@ export type {
   AgentAuthStateDocument,
   ApplyAgentAuthStateResponse,
   NativeBridgeResponse,
+  CreateLocalProviderRequest,
+  LocalProviderSummary,
+  LocalProvidersResponse,
 } from "./types/agent-auth.js";
 
 export type {
@@ -70,6 +81,8 @@ export type {
   HarnessLaunchOptionsResponse,
   ArtifactStatus,
   AgentSummary,
+  CustomAcpAgent,
+  RegisterCustomAcpAgentRequest,
   InstallAgentRequest,
   InstallAgentResponse,
   LoginCommand,
@@ -92,6 +105,8 @@ export type {
 
 export type {
   RepoRootKind,
+  ProjectMcpServerSummary,
+  ProjectMcpServersResponse,
   RepoRoot,
   ResolveRepoRootFromPathRequest,
   PrepareRepoRootMobilityDestinationRequest,
@@ -561,10 +576,7 @@ export type {
   UpdateTerminalTitleRequest,
 } from "./types/terminals.js";
 
-export type {
-  RunCommandRequest,
-  RunCommandResponse,
-} from "./types/processes.js";
+export type { RunCommandRequest, RunCommandResponse } from "./types/processes.js";
 
 export {
   connectAgentLoginTerminal,
@@ -597,3 +609,5 @@ export type {
   FeedTextFrame,
   FeedWebSocketAuthTransport,
 } from "./streams/feeds.js";
+
+export type { SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse } from "./types/skills.js";

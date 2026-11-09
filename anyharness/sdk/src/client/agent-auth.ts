@@ -1,4 +1,7 @@
 import type {
+  CreateLocalProviderRequest,
+  LocalProviderSummary,
+  LocalProvidersResponse,
   AgentAuthStateDocument,
   ApplyAgentAuthStateResponse,
   NativeBridgeResponse,
@@ -7,6 +10,22 @@ import type { AnyHarnessRequestOptions, AnyHarnessTransport } from "./core.js";
 
 export class AgentAuthClient {
   constructor(private readonly transport: AnyHarnessTransport) {}
+
+  listLocalProviders(options?: AnyHarnessRequestOptions): Promise<LocalProvidersResponse> {
+    return this.transport.get("/v1/agent-auth/local-providers", options);
+  }
+
+  createLocalProvider(input: CreateLocalProviderRequest): Promise<LocalProviderSummary> {
+    return this.transport.post("/v1/agent-auth/local-providers", input);
+  }
+
+  setLocalProviderEnabled(id: string, enabled: boolean): Promise<LocalProviderSummary> {
+    return this.transport.patch(`/v1/agent-auth/local-providers/${encodeURIComponent(id)}`, { enabled });
+  }
+
+  removeLocalProvider(id: string): Promise<void> {
+    return this.transport.delete(`/v1/agent-auth/local-providers/${encodeURIComponent(id)}`);
+  }
 
   async applyState(
     input: AgentAuthStateDocument,

@@ -24,8 +24,8 @@ pub struct TurnPromptExtras {
     /// platform-owned block on every turn and never becomes authored content.
     pub product_context: Option<String>,
     /// When set, prepended as a hidden system-instruction text block (the
-    /// codex first-prompt append). The has-turn-started gating is the
-    /// caller's decision; render folds the result in verbatim.
+    /// harness-specific first-turn append and per-launch skill instructions).
+    /// Delivery gating is the caller's decision; render folds it in verbatim.
     pub first_prompt_system_prompt_append: Option<String>,
 }
 

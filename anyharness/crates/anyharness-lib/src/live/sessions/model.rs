@@ -123,6 +123,8 @@ pub struct LaunchEnv {
 pub struct SystemPromptAppends {
     pub every_prompt: Option<String>,
     pub first_prompt: Option<String>,
+    /// Consumed at the first ACP prompt dispatch for this process, even on resume.
+    pub launch_prompt: Option<String>,
 }
 
 /// Everything that describes ONE session launch: the durable session row, the

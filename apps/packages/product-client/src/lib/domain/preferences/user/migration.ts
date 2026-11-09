@@ -16,6 +16,8 @@ import {
   type UserPreferences,
 } from "#product/lib/domain/preferences/user/model";
 import { isValidWorktreeAutoDeleteLimit } from "#product/lib/domain/preferences/user/worktree-auto-delete";
+import { normalizeLocalFontFamily } from "#product/lib/domain/preferences/local-font-family";
+import { sanitizeImportedAppTheme } from "#product/lib/domain/preferences/imported-app-theme";
 import type { LegacyUserPreferencesInput } from "#product/lib/domain/preferences/user/persisted-keys";
 import {
   normalizeReleaseTitlePair,
@@ -37,6 +39,12 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
     defaultChatModelIdByAgentKind: {},
   } as UserPreferences;
   let changed = false;
+  if (preferences.uiFontFamily === undefined || preferences.codeFontFamily === undefined) {
+    changed = true;
+  }
+  if (preferences.importedAppTheme === undefined) {
+    changed = true;
+  }
 
   const sanitizedDefaultChatAgentKind = typeof next.defaultChatAgentKind === "string"
     ? next.defaultChatAgentKind.trim()
@@ -165,6 +173,19 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
   const readableCodeFontSizeId = resolveAppearanceSizeId(next.readableCodeFontSizeId);
   if (readableCodeFontSizeId !== next.readableCodeFontSizeId) {
     next.readableCodeFontSizeId = readableCodeFontSizeId;
+    changed = true;
+  }
+
+  for (const key of ["uiFontFamily", "codeFontFamily"] as const) {
+    const normalized = normalizeLocalFontFamily(next[key]);
+    if (normalized !== next[key]) {
+      next[key] = normalized;
+      changed = true;
+    }
+  }
+  const importedAppTheme = sanitizeImportedAppTheme(next.importedAppTheme);
+  if (JSON.stringify(importedAppTheme) !== JSON.stringify(next.importedAppTheme)) {
+    next.importedAppTheme = importedAppTheme;
     changed = true;
   }
 

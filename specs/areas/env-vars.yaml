@@ -1102,3 +1102,9 @@
   default: ""
   description: Debug builds only. Lets an externally launched AnyHarness runtime attach its diagnostics producer when it did not inherit the control-bridge descriptor, which is the normal case under ANYHARNESS_DEV_URL
   tags: [local-dev]
+
+- name: VITE_EXTENSION_MARKETPLACE
+  secret: false
+  default: "0"
+  description: "Set to 1 to enable the Open VSX extension discovery preview. Installation and execution remain unavailable."
+  tags: [desktop, web, local-dev]

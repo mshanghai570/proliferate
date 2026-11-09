@@ -42,6 +42,8 @@ describe("user appearance preference persistence", () => {
       ...USER_PREFERENCE_DEFAULTS,
       uiFontSizeId: "xxsmall",
       readableCodeFontSizeId: "xxxlarge",
+      uiFontFamily: "Avenir Next",
+      codeFontFamily: "JetBrains Mono",
       windowZoomId: "zoom120",
     } as UserPreferences);
 
@@ -50,6 +52,8 @@ describe("user appearance preference persistence", () => {
     const preferences = useUserPreferencesStore.getState();
     expect(preferences.uiFontSizeId).toBe("xxsmall");
     expect(preferences.readableCodeFontSizeId).toBe("xxxlarge");
+    expect(preferences.uiFontFamily).toBe("Avenir Next");
+    expect(preferences.codeFontFamily).toBe("JetBrains Mono");
     expect(preferences.windowZoomId).toBe("zoom120");
     expect(setItemSpy).not.toHaveBeenCalled();
 
@@ -63,6 +67,8 @@ describe("user appearance preference persistence", () => {
     const persisted = memory.readJson<Record<string, unknown>>("user_preferences")!;
     expect(persisted.uiFontSizeId).toBe("xxsmall");
     expect(persisted.readableCodeFontSizeId).toBe("xxxlarge");
+    expect(persisted.uiFontFamily).toBe("Avenir Next");
+    expect(persisted.codeFontFamily).toBe("JetBrains Mono");
     expect(persisted.windowZoomId).toBe("zoom120");
     expect(persisted.turnEndSoundEnabled).toBe(true);
   });

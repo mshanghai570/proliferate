@@ -36,3 +36,10 @@ describe("cursor's per-harness settings section (C1 nav-wiring fix)", () => {
     expect(getSettingsSectionForHarnessKind("cursor")).toBe("agent-cursor");
   });
 });
+
+it("offers LLM providers separately from custom ACP agents", () => {
+  const items = getSettingsScopeNav("agents").groups.flatMap((group) => group.items);
+  expect(items).toContainEqual({ kind: "section", id: "agent-providers", label: "LLM providers", iconId: "agent-providers" });
+  expect(items).toContainEqual({ kind: "section", id: "agent-custom", label: "Custom ACP agents", iconId: "agent-custom" });
+  expect(isSettingsHarnessSection("agent-providers")).toBe(false);
+});

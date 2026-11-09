@@ -22,7 +22,7 @@ mod workspace_activity_indicator;
 
 use commands::{
     anonymous_telemetry, cloud_worker, config, desktop_identity,
-    diagnostics as diagnostics_commands, drag_drop, google_workspace_mcp, keychain, process,
+    diagnostics as diagnostics_commands, drag_drop, fonts, google_workspace_mcp, keychain, process,
     runtime, shell, support, support_snapshot, window_chrome, workspace_scratch,
 };
 use quit_flow::QuitFlowState;
@@ -306,6 +306,7 @@ pub fn run() {
             workspace_activity_indicator::set_workspace_activity_indicator,
             drag_drop::drag_pasteboard_change_count,
             drag_drop::read_drag_drop_paths,
+            fonts::list_local_font_families,
             shell::pick_folder,
             shell::copy_text,
             shell::list_available_editors,

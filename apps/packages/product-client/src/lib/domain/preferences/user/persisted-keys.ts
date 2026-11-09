@@ -3,8 +3,11 @@ import type { UserPreferences } from "#product/lib/domain/preferences/user/model
 const USER_PREFERENCE_KEYS = [
   "themePreset",
   "colorMode",
+  "importedAppTheme",
   "uiFontSizeId",
   "readableCodeFontSizeId",
+  "uiFontFamily",
+  "codeFontFamily",
   "windowZoomId",
   "defaultChatAgentKind",
   "defaultChatModelIdByAgentKind",

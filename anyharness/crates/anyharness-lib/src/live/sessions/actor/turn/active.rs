@@ -163,6 +163,8 @@ impl SessionActor {
             );
 
             let req = acp::schema::PromptRequest::new(self.native_session_id.clone(), acp_blocks);
+            // Skipped or rejected turns leave launch instructions available for retry.
+            self.prompts.launch_prompt.take();
 
             let mut prompt_result = None;
             let unload_deadline = tokio::time::sleep(UNLOAD_CANCEL_GRACE);

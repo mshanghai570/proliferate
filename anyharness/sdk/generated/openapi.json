@@ -200,6 +200,101 @@
         }
       }
     },
+    "/v1/agents/custom": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "operationId": "list_custom_agents",
+        "responses": {
+          "200": {
+            "description": "Local custom ACP registrations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CustomAcpAgent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "operationId": "register_custom_agent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterCustomAcpAgentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Custom ACP command registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomAcpAgent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid registration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/custom/{id}": {
+      "delete": {
+        "tags": [
+          "agents"
+        ],
+        "operationId": "remove_custom_agent",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Custom ACP registration id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Registration removed"
+          },
+          "404": {
+            "description": "Registration not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agents/login-terminals/{terminal_id}": {
       "get": {
         "tags": [
@@ -940,6 +1035,311 @@
         }
       }
     },
+    "/v1/extensions": {
+      "get": {
+        "tags": [
+          "extensions"
+        ],
+        "operationId": "list_extensions",
+        "responses": {
+          "200": {
+            "description": "Registered extension packages; installation does not imply activation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListInstalledExtensionsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Runtime authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Extension management unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/extensions/install": {
+      "post": {
+        "tags": [
+          "extensions"
+        ],
+        "operationId": "install_registry_extension",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InstallRegistryExtensionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Package downloaded from the registry, verified, and registered; installation does not imply activation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstalledExtensionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid extension identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Runtime authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Extension version not found in the registry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Version already registered or package validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Registry returned an unusable package",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Extension management unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/extensions/{namespace}/{name}/{version}": {
+      "delete": {
+        "tags": [
+          "extensions"
+        ],
+        "operationId": "uninstall_extension",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Selected version removed or not registered"
+          },
+          "400": {
+            "description": "Invalid extension identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Runtime authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Package validation failed; package preserved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Extension management unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/extensions/{namespace}/{name}/{version}/color-themes": {
+      "get": {
+        "tags": [
+          "extensions"
+        ],
+        "operationId": "list_color_themes",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Declared core app color data from an installed package",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListExtensionColorThemesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid extension identity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Runtime authentication required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Extension version is not installed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Package validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Extension management unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/replay/recordings": {
       "get": {
         "tags": [
@@ -1491,6 +1891,159 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/repo-roots/{repo_root_id}/mcp-servers": {
+      "get": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Write-only MCP inventory for a project",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMcpServersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/repo-roots/{repo_root_id}/mcp-servers/{name}": {
+      "put": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "put",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionMcpServer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Server replaced and enabled; used at next session process launch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMcpServerSummary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "remove",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Server removed; live sessions keep their current configuration"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "repo-roots"
+        ],
+        "operationId": "set_enabled",
+        "parameters": [
+          {
+            "name": "repo_root_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetProjectMcpServerEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Server enabled state updated; used at next session process launch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectMcpServerSummary"
                 }
               }
             }
@@ -4002,6 +4555,117 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/skills": {
+      "get": {
+        "tags": [
+          "skills"
+        ],
+        "operationId": "list_skills",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSkillsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "skills"
+        ],
+        "operationId": "import_skill",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportSkillRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/skills/{id}": {
+      "delete": {
+        "tags": [
+          "skills"
+        ],
+        "operationId": "remove_skill",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/v1/skills/{id}/enabled": {
+      "put": {
+        "tags": [
+          "skills"
+        ],
+        "operationId": "set_skill_enabled",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSkillEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkillSummary"
                 }
               }
             }
@@ -10878,6 +11542,40 @@
           }
         }
       },
+      "CustomAcpAgent": {
+        "type": "object",
+        "description": "A runtime-local ACP registration. Environment values are never returned.",
+        "required": [
+          "id",
+          "name",
+          "command",
+          "args",
+          "envNames"
+        ],
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "command": {
+            "type": "string"
+          },
+          "envNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "DefinitionEdge": {
         "type": "object",
         "required": [
@@ -11237,6 +11935,56 @@
             "type": "boolean"
           }
         }
+      },
+      "ExtensionColorTheme": {
+        "type": "object",
+        "required": [
+          "label",
+          "colors",
+          "available"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "colorMode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Normalized light/dark mode; absent when the theme cannot be imported."
+          },
+          "colors": {
+            "type": "object",
+            "description": "Only the six supported core app color keys are exposed.",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "ExtensionInstallationState": {
+        "type": "string",
+        "enum": [
+          "installing",
+          "installed",
+          "removing",
+          "error"
+        ]
+      },
+      "ExtensionPackageErrorCode": {
+        "type": "string",
+        "enum": [
+          "interrupted_install",
+          "package_missing",
+          "package_invalid"
+        ]
       },
       "FeedKind": {
         "type": "string",
@@ -12437,6 +13185,25 @@
           }
         }
       },
+      "ImportSkillRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "files"
+        ],
+        "properties": {
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillFile"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "InstallAgentRequest": {
         "type": "object",
         "properties": {
@@ -12476,6 +13243,25 @@
             "items": {
               "$ref": "#/components/schemas/ArtifactStatus"
             }
+          }
+        }
+      },
+      "InstallRegistryExtensionRequest": {
+        "type": "object",
+        "required": [
+          "namespace",
+          "name",
+          "version"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
           }
         }
       },
@@ -12533,6 +13319,48 @@
             "type": "string"
           },
           "workspaceId": {
+            "type": "string"
+          }
+        }
+      },
+      "InstalledExtensionSummary": {
+        "type": "object",
+        "required": [
+          "namespace",
+          "name",
+          "version",
+          "sha256",
+          "state",
+          "active"
+        ],
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "description": "Package materialization does not imply activation. Currently always false."
+          },
+          "errorCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ExtensionPackageErrorCode"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ExtensionInstallationState"
+          },
+          "version": {
             "type": "string"
           }
         }
@@ -12853,6 +13681,38 @@
           }
         }
       },
+      "ListExtensionColorThemesResponse": {
+        "type": "object",
+        "required": [
+          "themes",
+          "truncated"
+        ],
+        "properties": {
+          "themes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtensionColorTheme"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ListInstalledExtensionsResponse": {
+        "type": "object",
+        "required": [
+          "extensions"
+        ],
+        "properties": {
+          "extensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstalledExtensionSummary"
+            }
+          }
+        }
+      },
       "ListProposedPlansResponse": {
         "type": "object",
         "required": [
@@ -12877,6 +13737,20 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ReplayRecordingSummary"
+            }
+          }
+        }
+      },
+      "ListSkillsResponse": {
+        "type": "object",
+        "required": [
+          "skills"
+        ],
+        "properties": {
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkillSummary"
             }
           }
         }
@@ -15215,6 +16089,44 @@
           }
         ]
       },
+      "ProjectMcpServerSummary": {
+        "type": "object",
+        "description": "Public inventory never includes connection URLs, commands, or credentials.",
+        "required": [
+          "name",
+          "enabled",
+          "transport"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "transport": {
+            "$ref": "#/components/schemas/SessionMcpTransport"
+          }
+        }
+      },
+      "ProjectMcpServersResponse": {
+        "type": "object",
+        "required": [
+          "servers",
+          "encryptionAvailable"
+        ],
+        "properties": {
+          "encryptionAvailable": {
+            "type": "boolean"
+          },
+          "servers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectMcpServerSummary"
+            }
+          }
+        }
+      },
       "PromptAttachmentSource": {
         "type": "string",
         "enum": [
@@ -16191,6 +17103,37 @@
           "skipped",
           "failed"
         ]
+      },
+      "RegisterCustomAcpAgentRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "command"
+        ],
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "command": {
+            "type": "string"
+          },
+          "env": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "RenameWorkspaceFileEntryRequest": {
         "type": "object",
@@ -19040,6 +19983,18 @@
           }
         }
       },
+      "SetProjectMcpServerEnabledRequest": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
       "SetSessionConfigOptionRequest": {
         "type": "object",
         "description": "Request payload for changing a single live session config option.",
@@ -19144,6 +20099,26 @@
           }
         }
       },
+      "SetSkillEnabledRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Null removes a repository override; user defaults require a boolean."
+          },
+          "repositoryId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Omit for the runtime user's default. A repository override wins over it."
+          }
+        },
+        "additionalProperties": false
+      },
       "SetupHint": {
         "type": "object",
         "required": [
@@ -19220,6 +20195,56 @@
           "succeeded",
           "failed"
         ]
+      },
+      "SkillFile": {
+        "type": "object",
+        "required": [
+          "path",
+          "contentBase64"
+        ],
+        "properties": {
+          "contentBase64": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SkillSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "userEnabled",
+          "repositoryOverrides",
+          "fileCount"
+        ],
+        "properties": {
+          "fileCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "repositoryOverrides": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "userEnabled": {
+            "type": "boolean"
+          }
+        }
       },
       "StagePatchRequest": {
         "type": "object",

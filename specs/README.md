@@ -52,12 +52,13 @@ One line per system. A spec marked *target* describes an accepted destination an
 - [desktop-host](systems/desktop-host/README.md) — the Desktop shell ↔ sidecar ↔ desktop worker seam; Desktop as a thin native shell over the same product code.
 - [environments](systems/environments/README.md) — *target.* The container a run executes in: provisioning, lifecycle, usage fencing, templates; personal and task classes. Its [seam](systems/environments/seam.md) is the one contract between the control plane and a runtime: enrollment, heartbeat; courier and event shipping as the target half.
 - [github](systems/github/README.md) — *target.* GitHub App authorization and installations, repository authority, webhook intake, the repo catalog — the identity of work.
-- [harnesses](systems/harnesses/README.md) — supported agent kinds, catalog and registry, install and distribution, readiness, launch options and probes; [skills](systems/harnesses/skills.md) as target.
+- [extensions](systems/extensions/README.md) — Open VSX discovery, manifest compatibility analysis, verified package installation, durable registration/removal, and declared core color-theme reads; extension code remains inactive.
+- [harnesses](systems/harnesses/README.md) — supported agent kinds, local custom ACP registrations, catalog and registry, install and distribution, readiness, launch options and probes; runtime-local [skills](systems/harnesses/skills.md).
 - [identity](systems/identity/README.md) — who acts: accounts (sign-in, linked identities, tokens) and organizations (tenancy, membership, roles, service subjects).
 - [integration_gateway](systems/integration_gateway/README.md) — *target.* Agents act on company systems without a credential entering the environment; connections, per-call capability, approvals, revocation, audit.
 - [onboarding](systems/onboarding/README.md) — install to first useful prompt with every blocked layer named; sequences readiness owned elsewhere.
 - [runs-triage](systems/runs-triage/README.md) — *target.* One inbox for delegated work: what is running, what finished, what needs a decision.
-- [sessions](systems/sessions/README.md) — the session, both halves in one spec: the runtime's append-only event log (the truth) and the control plane's registry row and bindings; artifacts as a section.
+- [sessions](systems/sessions/README.md) — the runtime's append-only event log, encrypted local project MCP launch settings, and the control plane's registry row and bindings; artifacts as a section.
 - [settings](systems/settings/README.md) — the settings surface: each pane a thin editor over the owning system's contract, with the blocked layer named.
 - [slack](systems/slack/README.md) — *target.* The product Slack app as trigger and client over session bindings; not Slack-as-tool.
 - [subagents](systems/subagents/README.md) — a parent agent's bounded roster of child sessions on the same checkout, each woken exactly once with its result; the product MCP; [steering](systems/subagents/steering.md) as target.

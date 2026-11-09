@@ -27,8 +27,11 @@ export function selectPersistedUserPreferencesSlice(
   return {
     themePreset: preferences.themePreset,
     colorMode: preferences.colorMode,
+    importedAppTheme: preferences.importedAppTheme,
     uiFontSizeId: preferences.uiFontSizeId,
     readableCodeFontSizeId: preferences.readableCodeFontSizeId,
+    uiFontFamily: preferences.uiFontFamily,
+    codeFontFamily: preferences.codeFontFamily,
     windowZoomId: preferences.windowZoomId,
     defaultChatAgentKind: preferences.defaultChatAgentKind,
     defaultChatModelIdByAgentKind: preferences.defaultChatModelIdByAgentKind,

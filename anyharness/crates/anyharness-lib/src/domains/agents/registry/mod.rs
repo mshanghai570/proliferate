@@ -6,7 +6,7 @@ pub mod validation;
 
 use super::model::AgentDescriptor;
 use projection::bundled_agent_descriptors;
-pub use service::descriptor;
+pub use service::{descriptor, descriptor_at, runtime_registry};
 
 /// Returns the built-in registry of supported agent descriptors for v1.
 ///

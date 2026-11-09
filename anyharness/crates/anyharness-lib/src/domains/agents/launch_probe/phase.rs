@@ -37,6 +37,27 @@ impl LivePhaseReading {
 }
 
 impl LaunchProbeService {
+    fn abandoned_attempt_bound(&self) -> chrono::Duration {
+        let bundled_count = crate::domains::agents::model::AgentKind::all().len();
+        let registered_count =
+            crate::domains::agents::registry::runtime_registry(&self.runtime_home).len();
+        let queued_count = self
+            .slots
+            .lock()
+            .expect("model snapshot slots poisoned")
+            .len();
+        let extra = registered_count
+            .max(queued_count)
+            .saturating_sub(bundled_count);
+        self.abandoned_attempt_after
+            + chrono::Duration::from_std(
+                self.config
+                    .per_probe_timeout
+                    .saturating_mul(u32::try_from(extra).unwrap_or(u32::MAX)),
+            )
+            .unwrap_or_else(|_| chrono::Duration::hours(1))
+    }
+
     /// The probe phase for one harness, for a surface that wants the phase alone —
     /// the launch-options response, which cannot otherwise tell an active probe
     /// apart from a provisional row nothing will ever refresh.
@@ -157,7 +178,7 @@ impl LaunchProbeService {
         self.is_owner()
             && self.targets.allows_automatic_probe(harness_kind)
             && !self.startup_pass_dispatched.load(Ordering::Relaxed)
-            && now.signed_duration_since(self.started_at) <= self.abandoned_attempt_after
+            && now.signed_duration_since(self.started_at) <= self.abandoned_attempt_bound()
     }
 
     /// Is this harness one an UNATTENDED poke may touch at all? Exposed because
@@ -181,7 +202,7 @@ impl LaunchProbeService {
     /// a sealed-container home has no owner at all. Without this bound such a row
     /// polls a client every 1.5s for the life of the process.
     fn attempt_is_abandoned(&self, started_at: DateTime<Utc>, now: DateTime<Utc>) -> bool {
-        now.signed_duration_since(started_at) > self.abandoned_attempt_after
+        now.signed_duration_since(started_at) > self.abandoned_attempt_bound()
     }
 }
 

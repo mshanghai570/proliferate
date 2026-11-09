@@ -11,6 +11,7 @@ export const TERMINAL_GRID_PROBE_ATTRIBUTE = "data-terminal-grid-probe";
 export interface TerminalGridProbeOptions {
   fontSize: number;
   lineHeight?: number;
+  fontFamily?: string;
 }
 
 // The PTY must be created at the exact grid the xterm renderer will display.
@@ -44,7 +45,7 @@ export async function measureWorkspaceTerminalGrid(
     const term = new Terminal({
       fontSize: options.fontSize,
       ...(options.lineHeight === undefined ? {} : { lineHeight: options.lineHeight }),
-      fontFamily: TERMINAL_FONT_FAMILY,
+      fontFamily: options.fontFamily ?? TERMINAL_FONT_FAMILY,
     });
     try {
       const fitAddon = new FitAddon();

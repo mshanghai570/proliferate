@@ -2,44 +2,48 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 /// Identifies which coding-agent family this descriptor represents.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone)]
 pub enum AgentKind {
     Claude,
     Codex,
     Cursor,
     OpenCode,
     Grok,
+    Custom { id: String, name: String },
 }
 
 impl AgentKind {
-    pub fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &str {
         match self {
             Self::Claude => "claude",
             Self::Codex => "codex",
             Self::Cursor => "cursor",
             Self::OpenCode => "opencode",
             Self::Grok => "grok",
+            Self::Custom { id, .. } => id,
         }
     }
 
-    pub fn display_name(&self) -> &'static str {
+    pub fn display_name(&self) -> &str {
         match self {
             Self::Claude => "Claude",
             Self::Codex => "Codex",
             Self::Cursor => "Cursor",
             Self::OpenCode => "OpenCode",
             Self::Grok => "Grok",
+            Self::Custom { name, .. } => name,
         }
     }
 
     pub fn all() -> &'static [AgentKind] {
-        &[
-            Self::Claude,
-            Self::Codex,
-            Self::Cursor,
-            Self::OpenCode,
-            Self::Grok,
-        ]
+        static KINDS: [AgentKind; 5] = [
+            AgentKind::Claude,
+            AgentKind::Codex,
+            AgentKind::Cursor,
+            AgentKind::OpenCode,
+            AgentKind::Grok,
+        ];
+        &KINDS
     }
 
     pub fn parse(s: &str) -> Option<Self> {
@@ -49,8 +53,24 @@ impl AgentKind {
             "cursor" => Some(Self::Cursor),
             "opencode" => Some(Self::OpenCode),
             "grok" => Some(Self::Grok),
+            value if super::custom::is_custom_id(value) => Some(Self::Custom {
+                id: value.to_string(),
+                name: value.to_string(),
+            }),
             _ => None,
         }
+    }
+}
+
+impl PartialEq for AgentKind {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_str() == other.as_str()
+    }
+}
+impl Eq for AgentKind {}
+impl std::hash::Hash for AgentKind {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        std::hash::Hash::hash(self.as_str(), state);
     }
 }
 

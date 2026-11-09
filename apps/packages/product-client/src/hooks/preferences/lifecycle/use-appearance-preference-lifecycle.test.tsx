@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAppearancePreferenceLifecycle } from "#product/hooks/preferences/lifecycle/use-appearance-preference-lifecycle";
 import { USER_PREFERENCE_DEFAULTS } from "#product/lib/domain/preferences/user/model";
 import { useUserPreferencesStore } from "#product/stores/preferences/user-preferences-store";
+import { parseImportedAppTheme } from "#product/lib/domain/preferences/imported-app-theme";
 
 interface MatchMediaStub {
   setMatches: (matches: boolean) => void;
@@ -107,6 +108,57 @@ describe("useAppearancePreferenceLifecycle", () => {
       expect(document.documentElement.style.getPropertyValue("--readable-code-font-size")).toBe("16px");
       expect(document.documentElement.style.getPropertyValue("--proliferate-window-zoom")).toBe("0.9");
     });
+  });
+
+  it("applies installed font family names and restores defaults on reset", async () => {
+    installMatchMediaStub(true);
+    renderHook(() => useAppearancePreferenceLifecycle());
+
+    act(() => {
+      useUserPreferencesStore.getState().setMultiple({
+        uiFontFamily: "Avenir Next",
+        codeFontFamily: "JetBrains Mono",
+      });
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement.style.getPropertyValue("--font-sans"))
+        .toContain('"Avenir Next"');
+      expect(document.documentElement.style.getPropertyValue("--font-mono"))
+        .toContain('"JetBrains Mono"');
+    });
+
+    act(() => {
+      useUserPreferencesStore.getState().setMultiple({ uiFontFamily: null, codeFontFamily: null });
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement.style.getPropertyValue("--font-sans")).toBe("");
+      expect(document.documentElement.style.getPropertyValue("--font-mono")).toBe("");
+    });
+  });
+
+  it("applies imported colors only in their mode and restores the built-in tokens", async () => {
+    installMatchMediaStub(true);
+    renderHook(() => useAppearancePreferenceLifecycle());
+    const importedAppTheme = parseImportedAppTheme(JSON.stringify({
+      name: "Midnight",
+      type: "dark",
+      colors: { "editor.background": "#101820", "editor.foreground": "#ffffff" },
+    }));
+
+    act(() => useUserPreferencesStore.getState().set("importedAppTheme", importedAppTheme));
+    await waitFor(() => expect(document.documentElement.style.getPropertyValue("--color-background"))
+      .toBe("#101820"));
+
+    act(() => useUserPreferencesStore.getState().set("colorMode", "light"));
+    await waitFor(() => expect(document.documentElement.style.getPropertyValue("--color-background"))
+      .toBe(""));
+
+    act(() => useUserPreferencesStore.getState().set("colorMode", "dark"));
+    act(() => useUserPreferencesStore.getState().set("importedAppTheme", null));
+    await waitFor(() => expect(document.documentElement.style.getPropertyValue("--color-background"))
+      .toBe(""));
   });
 
   it("reapplies system color mode when the system preference changes", async () => {

@@ -1,3 +1,5 @@
+import { localFontStack } from "#product/lib/domain/preferences/local-font-family";
+
 export interface TerminalGrid {
   cols: number;
   rows: number;
@@ -12,6 +14,10 @@ export const DEFAULT_TERMINAL_GRID: TerminalGrid = { cols: 120, rows: 40 };
 // exactly the same renderer options as the live xterm surface.
 export const TERMINAL_FONT_FAMILY =
   "'Geist Mono', 'SF Mono', Menlo, Monaco, 'Courier New', monospace";
+
+export function resolveTerminalFontFamily(localFamily: string | null): string {
+  return localFontStack(localFamily, TERMINAL_FONT_FAMILY);
+}
 
 // xterm's lineHeight is a unitless renderer multiplier, not Monaco's pixel
 // line height. Keep terminal rows proportional to the chosen readable-code

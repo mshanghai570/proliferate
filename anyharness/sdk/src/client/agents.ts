@@ -1,5 +1,7 @@
 import type {
   AgentSummary,
+  CustomAcpAgent,
+  RegisterCustomAcpAgentRequest,
   HarnessLaunchOptionsResponse,
   InstallAgentRequest,
   InstallAgentResponse,
@@ -15,6 +17,18 @@ import type { AnyHarnessRequestOptions, AnyHarnessTransport } from "./core.js";
 
 export class AgentsClient {
   constructor(private readonly transport: AnyHarnessTransport) {}
+
+  async listCustom(options?: AnyHarnessRequestOptions): Promise<CustomAcpAgent[]> {
+    return this.transport.get<CustomAcpAgent[]>("/v1/agents/custom", options);
+  }
+
+  async registerCustom(request: RegisterCustomAcpAgentRequest): Promise<CustomAcpAgent> {
+    return this.transport.post<CustomAcpAgent>("/v1/agents/custom", request);
+  }
+
+  async removeCustom(id: string): Promise<void> {
+    return this.transport.delete(`/v1/agents/custom/${encodeURIComponent(id)}`);
+  }
 
   async list(options?: AnyHarnessRequestOptions): Promise<AgentSummary[]> {
     return this.transport.get<AgentSummary[]>("/v1/agents", options);

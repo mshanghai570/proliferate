@@ -41,6 +41,7 @@ export interface CommitCallbacks {
 }
 
 export interface HarnessAuthEditorApi {
+  surface: AgentAuthSurface;
   // Queries
   // The auth plane is ready: the user is signed into the control plane and it
   // is reachable. Model-auth (BYOK/api_key + gateway route) is an auth-plane
@@ -112,7 +113,7 @@ export interface HarnessAuthEditorApi {
   handleRemoveRow: (uid: string) => void;
   addRow: (envVarName: string, providerHint: string | null) => void;
   addBoundApiKey: (
-    envVarName: string,
+    envVarName: string | null,
     providerHint: string | null,
     apiKeyId: string,
     callbacks?: CommitCallbacks,
@@ -369,7 +370,7 @@ export function useHarnessAuthEditor(
   }
 
   function addBoundApiKey(
-    envVarName: string,
+    envVarName: string | null,
     providerHint: string | null,
     apiKeyId: string,
     callbacks: CommitCallbacks = {},
@@ -386,7 +387,9 @@ export function useHarnessAuthEditor(
     // selection scope by (source_kind, env_var_name) and rejects duplicates,
     // so binding a key to an already-bound var swaps the row in ONE commit
     // (one PUT) rather than a remove-then-add pair racing each other.
-    const kept = rows.filter((row) => row.envVarName !== envVarName);
+    const kept = rows.filter((row) => envVarName === null
+      ? row.apiKeyId !== apiKeyId
+      : row.envVarName !== envVarName);
     // Single-source: enabling a new bound row disables everything else.
     const nextRows = multiSource
       ? [...kept, newRow]
@@ -405,6 +408,7 @@ export function useHarnessAuthEditor(
   }
 
   return {
+    surface,
     authReady,
     capabilitiesQuery,
     enrollmentQuery,

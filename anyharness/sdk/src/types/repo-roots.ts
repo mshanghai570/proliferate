@@ -1,6 +1,8 @@
 import type { components } from "../generated/openapi.js";
 
 export type RepoRootKind = components["schemas"]["RepoRootKind"];
+export type ProjectMcpServerSummary = components["schemas"]["ProjectMcpServerSummary"];
+export type ProjectMcpServersResponse = components["schemas"]["ProjectMcpServersResponse"];
 export type RepoRoot = components["schemas"]["RepoRoot"];
 export type ResolveRepoRootFromPathRequest =
   components["schemas"]["ResolveRepoRootFromPathRequest"];

@@ -3,6 +3,7 @@ pub mod agent_operations;
 pub mod agents;
 pub mod artifacts;
 pub mod cowork;
+pub mod extensions;
 pub mod goals;
 pub mod loops;
 pub mod materialization;
@@ -14,3 +15,5 @@ pub mod sessions;
 pub mod terminals;
 pub mod workflows;
 pub mod workspaces;
+
+pub mod skills;

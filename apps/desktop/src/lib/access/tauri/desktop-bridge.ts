@@ -51,6 +51,7 @@ import {
   stagedUpdateStatus,
 } from "./updater";
 import { getDesktopInstallId } from "./desktop-install-id";
+import { listLocalFontFamilies } from "./fonts";
 import {
   ensureDesktopDispatchWorker,
   stopDesktopDispatchWorker,
@@ -136,6 +137,7 @@ export const desktopBridge: DesktopBridge = {
   },
 
   nativeUi: {
+    listLocalFontFamilies,
     showContextMenu: showNativeContextMenu,
     subscribeMenuCommands(
       listener: (command: ProductCommand) => void,

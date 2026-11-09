@@ -10,6 +10,7 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { catalogForProviderConfigChange } from "./registry-metadata.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const generatedDir = join(here, "generated");
@@ -18,13 +19,24 @@ const bundledPath = join(here, "..", "..", "catalogs", "agents", "catalog.json")
 const probeStatePath = join(generatedDir, ".probe-logs", "run.state");
 const resolvedCandidatePath = join(generatedDir, ".probe-logs", "resolved-candidate.json");
 const allowedArgs = new Set(["--require-complete-probe"]);
+const providerConfigArg = process.argv.slice(2).find((arg) => arg.startsWith("--provider-config-only="));
 for (const arg of process.argv.slice(2)) {
-  if (!allowedArgs.has(arg)) throw new Error(`unexpected argument ${arg}`);
+  if (!allowedArgs.has(arg) && arg !== providerConfigArg) throw new Error(`unexpected argument ${arg}`);
 }
 const requireCompleteProbe = process.argv.includes("--require-complete-probe");
 let previousCatalog = null;
 try { previousCatalog = JSON.parse(readFileSync(bundledPath, "utf8")); } catch {}
 const previousByKind = new Map((previousCatalog?.agents ?? []).map((agent) => [agent.kind, agent]));
+
+if (providerConfigArg) {
+  if (requireCompleteProbe) throw new Error("Provider-config metadata regeneration cannot replace a complete probe.");
+  const previousRegistry = JSON.parse(readFileSync(providerConfigArg.slice("--provider-config-only=".length), "utf8"));
+  const registry = JSON.parse(readFileSync(join(here, "..", "..", "catalogs", "agents", "registry.json"), "utf8"));
+  const catalog = catalogForProviderConfigChange(previousCatalog, previousRegistry, registry);
+  writeFileSync(outPath, JSON.stringify(catalog, null, 2) + "\n");
+  console.log(`wrote ${outPath}; retained all bundled agents, pins, and model presentation`);
+  process.exit(0);
+}
 
 function normalizedNativeVersion(value) {
   if (typeof value !== "string") return null;

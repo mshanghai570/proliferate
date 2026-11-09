@@ -24,6 +24,28 @@ Let a person (or an org admin) configure their account, appearance, agents and t
 | User/repo preferences | Appearance, zoom, worktree auto-delete adoption, repo preferences — persisted through the host | [user-preferences-store.ts](../../../apps/packages/product-client/src/stores/preferences/user-preferences-store.ts), [repo-preferences-store.ts](../../../apps/packages/product-client/src/stores/preferences/repo-preferences-store.ts) |
 | Active organization | Selected organization id for org-scoped panes | [organization-store.ts](../../../apps/packages/product-client/src/stores/organizations/organization-store.ts) |
 
+## LLM providers
+
+Settings → Agents → LLM providers manages the runtime's encrypted
+[local provider vault](../agent_auth/local-providers.md), separately from custom
+ACP agent registrations. It requires a local runtime and its encryption key,
+with no control-plane sign-in. Managed authentication takes precedence; while
+applied, local entries can be disabled or removed but cannot be newly enabled.
+
+The [provider pane](../../../apps/packages/product-client/src/components/settings/panes/agents/providers/LlmProvidersPane.tsx)
+uses metadata-only inventory, confirmation for removal, and runtime-scoped
+drafts. Switching runtime or actor discards credential drafts. Writes bypass
+the query mutation cache; successful saves close the credential form immediately.
+Failed reads block edits and offer retry. The runtime's launch-options inventory
+owns displayed model choices; saving does not establish endpoint connectivity.
+
+[Local presets](../../../apps/packages/product-client/src/config/custom-provider-presets.ts)
+fill editable Ollama or LM Studio URLs and clear keys/models when switched.
+[Draft validation](../../../apps/packages/product-client/src/lib/domain/settings/custom-provider-draft.ts)
+rejects malformed endpoints, URL credentials, substitutions, and invalid model
+lists before submission; the runtime remains authoritative. Managed provider
+configuration remains available through the OpenCode settings link.
+
 ## Public surface
 
 - [`SettingsPage`](../../../apps/packages/product-client/src/pages/SettingsPage.tsx)
@@ -49,6 +71,7 @@ Let a person (or an org admin) configure their account, appearance, agents and t
 | Agent auth + model gateway (Cloud `agent-gateway`, `auth`) | selections, enrollment, org model policy, limits/budgets, API keys | `useAuthSelections`, `useAgentGatewayEnrollment` (`@proliferate/cloud-sdk-react`); panes under [agents/harness/](../../../apps/packages/product-client/src/components/settings/panes/agents/harness/HarnessPane.tsx) |
 | Agent catalog + install (runtime `agents`) | installed harnesses, models table, install/reconcile, CLI login terminal | [use-agent-catalog.ts](../../../apps/packages/product-client/src/hooks/agents/derived/use-agent-catalog.ts), [use-harness-install-action.ts](../../../apps/packages/product-client/src/hooks/agents/workflows/use-harness-install-action.ts) |
 | Integrations (Cloud `integrations`) | catalog, connect (OAuth flow), health, admin definitions | [hooks/access/cloud/integrations/](../../../apps/packages/product-client/src/hooks/access/cloud/integrations/use-integration-catalog.ts) |
+| Sessions (runtime project MCP) | encrypted repository-scoped HTTP/stdio configuration, enable state, removal | [ProjectMcpSettings.tsx](../../../apps/packages/product-client/src/components/settings/panes/repo/ProjectMcpSettings.tsx), [project MCP reference](../sessions/project-mcp.md) |
 | GitHub App (Cloud `github-app`) | installation state, user authorization | [use-github-app-installation.ts](../../../apps/packages/product-client/src/hooks/settings/workflows/use-github-app-installation.ts) |
 | Secrets (Cloud `cloud-secrets`) | personal + organization secret CRUD | `PersonalSecretsPane`, `OrganizationSecretsPane` |
 | Repositories (runtime `repoRoots`, `worktrees`) | repo actions, commit instructions, worktree storage | [use-repository-settings.ts](../../../apps/packages/product-client/src/hooks/settings/workflows/use-repository-settings.ts) |
@@ -82,6 +105,21 @@ The `environments` / `repo-environment` sections edit cloud environment records 
   only; the appearance-scaling checker bans literal sizes
   ([appearance-scaling.md](appearance-scaling.md),
   [check_appearance_scaling.py](../../../scripts/check_appearance_scaling.py)).
+- **Desktop font families are local preferences.** Appearance lists installed
+  macOS font families and accepts a family name separately for interface and code text. The
+  family is validated, stored through ProductHost.storage, and applied through
+  the existing font tokens. Clearing it restores the built-in stack. The code
+  choice also updates terminal rendering and its creation grid probe. The app
+  does not install font files or assert that a manually typed family exists on the Mac;
+  CSS falls back to the built-in stack when it does not.
+- **Desktop theme import is bounded.** Appearance imports strict JSON color
+  themes with a dark/light type and readable editor foreground/background.
+  Optional sidebar and button colors must also have readable text. Only core
+  app surface tokens are overridden at runtime; the generated built-in palette
+  remains authoritative when the imported theme is reset or its mode is not
+  active. Desktop can also copy the same bounded palette from a registered
+  extension's declared JSON theme through Extensions → Installed. The copied
+  preference survives package removal. Syntax highlighting remains separate.
 
 ## Emits
 

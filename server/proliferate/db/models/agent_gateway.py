@@ -50,7 +50,8 @@ class AgentApiKey(Base):
             name="ck_agent_api_key_status",
         ),
         CheckConstraint(
-            "kind IN ('api_key', 'aws_bedrock', 'azure_openai', 'anthropic_subscription')",
+            "kind IN ('api_key', 'aws_bedrock', 'azure_openai', "
+            "'openai_compatible', 'anthropic_subscription')",
             name="ck_agent_api_key_kind",
         ),
         Index("ix_agent_api_key_user_status", "user_id", "status"),

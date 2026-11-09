@@ -269,7 +269,7 @@ impl SessionRuntime {
         );
 
         let descriptor_lookup_started = Instant::now();
-        let descriptor = registry::descriptor(&record.agent_kind)
+        let descriptor = registry::descriptor_at(&self.runtime_home, &record.agent_kind)
             .ok_or_else(|| StartSessionError::AgentDescriptorNotFound(record.agent_kind.clone()))?;
         tracing::info!(
             session_id = %record.id,
@@ -284,7 +284,7 @@ impl SessionRuntime {
             .workspace_env(&workspace)
             .map_err(StartSessionError::Internal)?;
         if let Some(env_var_name) =
-            find_capability_affecting_env_override(&descriptor, &workspace_env)
+            find_capability_affecting_env_override(&self.runtime_home, &descriptor, &workspace_env)
         {
             return Err(StartSessionError::AgentEnvOverrideUnsupported {
                 agent_kind: record.agent_kind.clone(),
@@ -445,6 +445,7 @@ impl SessionRuntime {
             startup: startup_strategy,
             every_prompt_append: mcp_launch.system_prompt_append,
             first_prompt_append: mcp_launch.first_prompt_system_prompt_append,
+            launch_prompt_append: mcp_launch.launch_prompt_append,
         });
         let hooks = SessionHooks {
             on_turn_finish: Some(Arc::new({

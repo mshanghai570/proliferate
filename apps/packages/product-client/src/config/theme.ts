@@ -11,9 +11,16 @@ import {
   type UiFontSizeId,
   type WindowZoomId,
 } from "#product/lib/domain/preferences/appearance";
+import { localFontStack, normalizeLocalFontFamily } from "#product/lib/domain/preferences/local-font-family";
+import {
+  IMPORTED_THEME_CSS_PROPERTIES,
+  importedThemeCssProperties,
+  sanitizeImportedAppTheme,
+  type ImportedAppTheme,
+} from "#product/lib/domain/preferences/imported-app-theme";
 
 // ---------------------------------------------------------------------------
-// Color mode (the app ships a single Mono theme; mode is the only switch)
+// Color mode for the built-in palette and optional imported app colors
 // ---------------------------------------------------------------------------
 
 export const COLOR_MODES = ["dark", "light", "system"] as const;
@@ -40,15 +47,21 @@ function applyMode(mode: ColorMode) {
 
 export interface AppearancePreference {
   colorMode: ColorMode;
+  importedAppTheme: ImportedAppTheme | null;
   uiFontSizeId: UiFontSizeId;
   readableCodeFontSizeId: ReadableCodeFontSizeId;
+  uiFontFamily: string | null;
+  codeFontFamily: string | null;
   windowZoomId: WindowZoomId;
 }
 
 export function applyAppearancePreference({
   colorMode,
+  importedAppTheme,
   uiFontSizeId,
   readableCodeFontSizeId,
+  uiFontFamily,
+  codeFontFamily,
   windowZoomId,
 }: AppearancePreference) {
   const root = document.documentElement;
@@ -66,6 +79,13 @@ export function applyAppearancePreference({
   root.dataset.readableCodeFontSize = resolvedReadableCodeFontSizeId;
   root.dataset.windowZoom = resolvedWindowZoomId;
   applyMode(colorMode);
+  for (const property of IMPORTED_THEME_CSS_PROPERTIES) root.style.removeProperty(property);
+  const safeTheme = sanitizeImportedAppTheme(importedAppTheme);
+  if (safeTheme?.type === resolveMode(colorMode)) {
+    for (const [property, value] of Object.entries(importedThemeCssProperties(safeTheme))) {
+      root.style.setProperty(property, value);
+    }
+  }
 
   for (const [property, value] of Object.entries(buildUiTextScaleCssVariables(uiScale))) {
     root.style.setProperty(property, value);
@@ -75,6 +95,16 @@ export function applyAppearancePreference({
   root.style.setProperty("--readable-code-font-size", readableCodeScale.codeFontSize);
   root.style.setProperty("--readable-code-line-height", readableCodeScale.codeLineHeight);
   root.style.setProperty("--proliferate-window-zoom", windowZoomScale.cssValue);
+  if (normalizeLocalFontFamily(uiFontFamily)) {
+    root.style.setProperty("--font-sans", localFontStack(uiFontFamily, "system-ui, sans-serif"));
+  } else {
+    root.style.removeProperty("--font-sans");
+  }
+  if (normalizeLocalFontFamily(codeFontFamily)) {
+    root.style.setProperty("--font-mono", localFontStack(codeFontFamily, "ui-monospace, monospace"));
+  } else {
+    root.style.removeProperty("--font-mono");
+  }
 
   notify();
 }

@@ -46,7 +46,7 @@ pub fn compute_harness_basis_revision(runtime_home: &Path, harness_kind: &str) -
         None => hash_field(&mut hasher, b"no-install-manifest"),
     }
 
-    if let Some(descriptor) = registry::descriptor(harness_kind) {
+    if let Some(descriptor) = registry::descriptor_at(runtime_home, harness_kind) {
         let resolved = resolve_agent_unrouted(&descriptor, runtime_home);
         let ambient_native_override = effective_ambient_native_override(harness_kind);
         hash_effective_native_artifact(
@@ -70,6 +70,12 @@ pub fn compute_harness_basis_revision(runtime_home: &Path, harness_kind: &str) -
         .map(|state| state.revision)
         .unwrap_or(0);
     hasher.update(auth_revision.to_be_bytes());
+    if harness_kind == "opencode" {
+        hash_field(
+            &mut hasher,
+            super::super::local_providers::basis_revision(runtime_home).as_bytes(),
+        );
+    }
 
     let mut revision = String::with_capacity(64);
     for byte in hasher.finalize() {
