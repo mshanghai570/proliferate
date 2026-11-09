@@ -111,44 +111,23 @@ describe("OpenVsxRegistry.search", () => {
     expect(new URL(requests[0]!.url).search).toBe("");
   });
 
-  it("identifies the client with a descriptive user agent", async () => {
-    const { fetchImpl, requests } = createFetchStub(() => jsonResponse(SEARCH_BODY));
-    await new OpenVsxRegistry({ fetchImpl, clientUserAgent: "test-client/1" }).search({});
-    expect(requests[0]!.headers["user-agent"]).toBe("test-client/1");
+  it("uses only CORS-safelisted headers and delegates revalidation to the browser", async () => {
+    const fetchImpl = vi.fn(async (_input: string, _init?: RequestInit) => jsonResponse(SEARCH_BODY, { headers: { etag: '"abc"' } }));
+    const registry = new OpenVsxRegistry({ fetchImpl });
+    await registry.search({});
+    await registry.search({});
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    for (const [, init] of fetchImpl.mock.calls) {
+      expect(init?.headers).toEqual({ accept: "application/json" });
+      expect(init?.cache).toBe("no-cache");
+      expect(init?.credentials).toBe("omit");
+    }
   });
 
   it("honors a custom registry origin", async () => {
     const { fetchImpl, requests } = createFetchStub(() => jsonResponse(SEARCH_BODY));
     await new OpenVsxRegistry({ fetchImpl, baseUrl: "https://vsx.internal.example/" }).search({});
     expect(requests[0]!.url.startsWith("https://vsx.internal.example/api/-/search")).toBe(true);
-  });
-});
-
-describe("OpenVsxRegistry conditional requests", () => {
-  it("stores the ETag and serves the cached body on a 304", async () => {
-    const { fetchImpl, requests } = createFetchStub((request) => {
-      if (request.headers["if-none-match"] === '"abc123"') {
-        return new Response(null, { status: 304 });
-      }
-      return jsonResponse(SEARCH_BODY, { headers: { etag: '"abc123"' } });
-    });
-    const registry = new OpenVsxRegistry({ fetchImpl });
-
-    const first = await registry.search({ query: "python" });
-    const second = await registry.search({ query: "python" });
-
-    expect(requests).toHaveLength(2);
-    expect(requests[0]!.headers["if-none-match"]).toBeUndefined();
-    expect(requests[1]!.headers["if-none-match"]).toBe('"abc123"');
-    expect(second).toEqual(first);
-  });
-
-  it("does not send a validator for URLs it has not seen", async () => {
-    const { fetchImpl, requests } = createFetchStub(() => jsonResponse(SEARCH_BODY));
-    const registry = new OpenVsxRegistry({ fetchImpl });
-    await registry.search({ query: "python" });
-    await registry.search({ query: "rust" });
-    expect(requests[1]!.headers["if-none-match"]).toBeUndefined();
   });
 });
 
@@ -317,15 +296,6 @@ describe("marketplace request lifecycle", () => {
     const abort = new DOMException("Aborted", "AbortError");
     const registry = new OpenVsxRegistry({ fetchImpl: async () => { throw abort; } });
     await expect(registry.search({})).rejects.toBe(abort);
-  });
-
-  it("evicts old ETags when the configured cache limit is reached", async () => {
-    const { fetchImpl, requests } = createFetchStub(() => jsonResponse(SEARCH_BODY, { headers: { etag: '"a"' } }));
-    const registry = new OpenVsxRegistry({ fetchImpl, maxCacheEntries: 1 });
-    await registry.search({ query: "first" });
-    await registry.search({ query: "second" });
-    await registry.search({ query: "first" });
-    expect(requests[2]?.headers["if-none-match"]).toBeUndefined();
   });
 
   it("surfaces a long Retry-After without leaving a request asleep indefinitely", async () => {

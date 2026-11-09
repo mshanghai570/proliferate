@@ -72,11 +72,31 @@ describe("extension discovery", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Example Theme/ }, { timeout: 5000 }));
     await screen.findByRole("heading", { name: "Theme guide" });
     fireEvent.click(screen.getByRole("button", { name: "Install" }));
-    expect(await screen.findByText("Extension installed. On macOS, check Installed for supported app color themes. Extension code remains inactive.")).toBeTruthy();
+    expect(await screen.findByText("Extension installed. On macOS, check Installed for supported app and syntax themes. Extension code remains inactive.")).toBeTruthy();
     await waitFor(() => expect(runtimeFetch).toHaveBeenCalledWith("http://runtime.test/v1/extensions/install", expect.objectContaining({ method: "POST" })));
     expect(runtimeFetch.mock.calls[0]?.[1]).toMatchObject({
       body: JSON.stringify({ namespace: "example", name: "theme", version: "1.0.0" }),
     });
+  });
+
+  it("opens registry details from Installed and returns with keyboard focus", async () => {
+    const runtimeFetch = vi.fn(async (_url: RequestInfo | URL, _options?: RequestInit) => new Response(JSON.stringify({ extensions: [{
+      namespace: "example", name: "theme", version: "0.9.0", active: false,
+      state: "installed", sha256: "a".repeat(64), errorCode: null,
+    }] })));
+    renderMarketplace(false, "http://runtime.test", runtimeFetch);
+    fireEvent.click(screen.getByRole("button", { name: "Installed" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Details and versions for example.theme" }));
+    await screen.findByRole("heading", { name: "Theme guide" });
+    fireEvent.click(screen.getByRole("button", { name: "Versions" }));
+    await screen.findByRole("heading", { name: "Version history" });
+    expect(screen.getByText("1.0.0")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Back to extensions" }));
+    await screen.findByText("0.9.0");
+    const installed = screen.getByRole("button", { name: "Installed" });
+    expect(installed.getAttribute("aria-pressed")).toBe("true");
+    expect(document.activeElement).toBe(installed);
+    expect(runtimeFetch.mock.calls.every(([, options]) => !options?.method || options.method === "GET")).toBe(true);
   });
 
   it("shows an actionable failure and retries", async () => {

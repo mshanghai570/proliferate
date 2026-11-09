@@ -50,23 +50,45 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 - **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
 - **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
 - **Local project MCP servers** - configure HTTP and stdio servers for a repository's local sessions, with encrypted credentials and enable, disable, replace, and remove controls
-- **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and copy supported theme colors into the macOS app; extension code remains inactive
+- **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and apply supported app and syntax theme colors in the macOS app; extension code remains inactive
 - **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
 
-Personal Intel preview builds run in GitHub Actions on the
-`codex/macos-extensions-fonts` branch. Download the DMG from the
-**Build Intel preview DMG** run's artifacts. The separate Preview app requires
-macOS 15+, is ad-hoc signed without notarization. Managed features use the local API on
-port 8000; a successful build does not provision that control plane. Local API
-providers and project MCP settings use the bundled runtime.
+Personal Intel preview builds run in GitHub Actions through
+**Build Intel preview DMG**. Feature branches can be built by manually starting
+that workflow with the desired branch. Download the DMG from that run's artifacts. The separate Preview app requires
+macOS 15+, is ad-hoc signed without notarization. Account features connect to
+`https://app.proliferate.com/api` by default. Account sign-in is optional; local
+agents, API providers, and project MCP settings use the bundled runtime.
+
+### Daily-driver release audit
+
+The release target is a versioned, ad-hoc-signed DMG published on GitHub, with
+checksums and release notes. Apple notarization is unavailable for this build.
+Current qualification status:
+
+| Area | Current state |
+| --- | --- |
+| Local agent login | In-app provider login and refresh available without a product account; client workflow checks pass. Live provider login still needs hands-on qualification. |
+| Proliferate account | Client connection and callback checks pass; hosted service returned `503 DEPLOYMENT_PAUSED` during the audit. |
+| Project RAG | Local keyword-index and cited-search runtime APIs are under verification; no composer UI yet. |
+| Per-agent rules | Private Markdown storage, repository replacements, launch delivery, and Settings → Agents → Rules are authored; cloud qualification is pending. |
+| Marketplace, MCP, skills | Implemented scopes are described below; executable extension hosting is unavailable. |
+| Distribution | GitHub builds produce verified DMG artifacts; no versioned daily-driver release has been published. |
 
 ### Current macOS customization scope
 
 The Extensions destination is visible by default in the macOS app. It provides
-Open VSX discovery, package installation, inventory, and removal. In **Installed →
-App color themes**, copy readable core colors from a declared standalone JSON
+Open VSX discovery, package installation, inventory, and removal. Registry
+requests use browser-managed caching without custom headers, allowing the
+macOS webview to access the public registry under its CORS policy. Open **Details
+and versions** from an installed package to inspect its registry listing and
+version history, then return to Installed. In **Installed →
+App color themes**, copy readable core colors from a declared standalone JSON or JSONC
 theme into Appearance settings. The copy survives package removal and can be
-reset in Appearance. Syntax colors, theme includes, and executable extensions
+reset in Appearance. **Installed → Syntax themes** applies foreground token
+colors from a supported theme to source views, code blocks, and diffs, together
+with matching background/text colors. The copied theme persists across restarts and package
+removal. Reset it in **Appearance → Imported syntax colors**. Theme includes and executable extensions
 are unsupported. Extension code does not activate in the editor. Set
 `VITE_EXTENSION_MARKETPLACE=0` when building Desktop to hide the preview.
 
@@ -77,7 +99,10 @@ Protocol. MCP tools are available through supported integrations and local
 project server settings described below. Appearance
 settings cover built-in color modes and text sizing. The macOS app can import
 core app colors from a readable, strict JSON color theme with `type`,
-`editor.background`, and `editor.foreground`; syntax colors remain unsupported.
+`editor.background`, and `editor.foreground`. Syntax colors are available from
+supported installed packages through **Syntax themes**. This accepts at most 256
+token rules and 32 KiB of scope/color data per theme. Token font styles,
+semantic-token overrides, includes, and external token files are unsupported.
 Theme files must use six-digit hex color values without comments or trailing
 commas. In the macOS app, enter
 installed font family names for interface and code text under **Settings →
@@ -117,8 +142,8 @@ workspace. They are not claims about current availability.
   tasks, and show what information is indexed and sent to a model.
 - **MCP management:** extend local project server management with connection
   checks, tool inspection, OAuth setup, and access controls for individual agents.
-- **Editor personalization:** extend imported color themes to syntax highlighting
-  and extension themes, and add font previews to the installed-family choices.
+- **Editor personalization:** extend syntax themes to font styles, semantic
+  tokens, and theme includes; add font previews to the installed-family choices.
 
 These goals can ship in stages. The feature list above should grow only when
 the corresponding capability works in the macOS app.
@@ -264,11 +289,37 @@ An agent must advertise model choices through ACP to appear in the model picker.
 Removing a registration leaves running sessions alone, but sessions using it
 cannot launch again without that registration.
 
+## Sign in to local agents
+
+Local ACP agents do not require a Proliferate account. Open **Settings → Agents**,
+choose the agent, then use **Agent sign-in → Authenticate** to open its supported
+login flow on this Mac. Complete the provider's login in the terminal/browser;
+**Refresh agent sign-in** checks credentials already saved by the provider CLI.
+Agents without an in-app login command use their documented CLI login. For
+OpenCode API connections, use **Settings → Agents → LLM providers**.
+
+Proliferate account sign-in is separate: it needs a reachable, configured control
+plane. The personal preview targets Proliferate's hosted service at
+`https://app.proliferate.com/api`. Open **Settings → Account** for the sign-in
+methods supported by that service. If the service is unavailable, retry the
+account connection from the same screen; local agent login, API providers,
+skills, and project MCP settings remain available.
+
+**Account server → Connect to a server** opens server validation and confirmation
+before changing the saved endpoint and restarting the app. Existing local or
+self-hosted overrides can choose **Use Proliferate hosted service**. Overrides in
+`~/.proliferate/config.json` take precedence over the packaged default. The
+preview registers `proliferate-local://auth/callback` for browser login, separate
+from the production app's `proliferate` scheme. The service must accept this
+callback and be online for hosted sign-in to complete.
+
 ## Use agent skills
 
-Open **Settings → Agents → Skills** and import a directory with a root
-`SKILL.md`. Include any relative resources referenced by the instructions in
-the same directory. Imports are disabled initially; enable a package for all
+Open **Settings → Agents → Skills**. To import one instructions file, enter a
+skill name and choose **Import SKILL.md file**; lowercase `skill.md` is also
+accepted and stored as `SKILL.md`. Instructions must contain 1–65,536 bytes of
+UTF-8 text. Use **Import skill folder** for a directory with a root `SKILL.md`
+and any relative resources referenced by the instructions. Imports are disabled initially; enable a package for all
 repositories or choose a repository override. A repository override can also
 disable a globally enabled skill.
 

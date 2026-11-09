@@ -78,6 +78,28 @@ impl ExtensionManager {
     }
 
     #[tracing::instrument(skip_all)]
+    pub fn syntax_themes(
+        &self,
+        identity: &ExtensionPackageIdentity,
+    ) -> Result<(Vec<super::syntax_themes::PackageSyntaxTheme>, bool), ManagementError> {
+        let name = identity.directory_name()?;
+        let packages = PackageDirectory::lock(&self.home)?;
+        self.recover(&packages)?;
+        let row = self
+            .store
+            .list()?
+            .into_iter()
+            .find(|row| row.identity == *identity && row.state == ExtensionState::Installed)
+            .ok_or(ManagementError::NotInstalled)?;
+        self.validate_package(&packages, &row)?;
+        Ok(super::syntax_themes::read_syntax_themes(
+            &packages,
+            &name,
+            &packages.read_manifest(&name)?,
+        ))
+    }
+
+    #[tracing::instrument(skip_all)]
     pub fn install(
         &self,
         archive: &Path,

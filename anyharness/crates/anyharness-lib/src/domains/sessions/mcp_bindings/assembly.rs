@@ -324,6 +324,50 @@ mod tests {
         }
     }
 
+    #[test]
+    fn agent_rules_launch_context_is_agent_scoped_and_refreshes_on_resume() {
+        let home =
+            std::env::temp_dir().join(format!("agent-rules-launch-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir(&home).unwrap();
+        let manager = crate::domains::sessions::agent_rules::AgentRulesManager::new(home.clone());
+        manager
+            .set("claude", None, Some("# Initial rules\n"))
+            .unwrap();
+        let workspace = workspace_record();
+        let mut session = session_record();
+        let initial = manager
+            .resolve_launch_extras(&SessionLaunchContext {
+                workspace: &workspace,
+                session: &session,
+            })
+            .unwrap();
+        assert!(initial.launch_prompt_append[0].ends_with("# Initial rules\n"));
+        assert!(initial.system_prompt_append.is_empty());
+        assert!(initial.mcp_servers.is_empty());
+        manager
+            .set("claude", None, Some("# Updated rules\n"))
+            .unwrap();
+        session.native_session_id = Some("resume-id".into());
+        let resumed = manager
+            .resolve_launch_extras(&SessionLaunchContext {
+                workspace: &workspace,
+                session: &session,
+            })
+            .unwrap();
+        assert!(resumed.launch_prompt_append[0].ends_with("# Updated rules\n"));
+        assert!(initial.launch_prompt_append[0].ends_with("# Initial rules\n"));
+        session.agent_kind = "codex".into();
+        assert!(manager
+            .resolve_launch_extras(&SessionLaunchContext {
+                workspace: &workspace,
+                session: &session
+            })
+            .unwrap()
+            .launch_prompt_append
+            .is_empty());
+        std::fs::remove_dir_all(home).unwrap();
+    }
+
     fn session_record() -> SessionRecord {
         SessionRecord {
             id: "session-1".to_string(),

@@ -7,6 +7,7 @@ mod agent_launch_options_grace_tests;
 mod agent_launch_options_test_fixtures;
 #[cfg(test)]
 mod agent_launch_options_tests;
+pub mod agent_rules;
 pub mod agents;
 mod agents_contract;
 mod agents_errors;
@@ -33,6 +34,7 @@ pub mod plans;
 pub mod processes;
 pub mod product_mcp;
 pub mod project_mcp;
+pub mod project_retrieval;
 pub mod replay;
 pub mod repo_roots;
 pub mod reviews;

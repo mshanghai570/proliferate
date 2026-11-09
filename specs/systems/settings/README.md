@@ -46,6 +46,13 @@ rejects malformed endpoints, URL credentials, substitutions, and invalid model
 lists before submission; the runtime remains authoritative. Managed provider
 configuration remains available through the OpenCode settings link.
 
+## Agent rules
+
+Settings → Agents → Rules is a local, account-independent editor over the
+[Sessions agent rules contract](../sessions/agent-rules.md). It selects catalog
+agents and repository overrides, imports Markdown/text files, and preserves
+dirty drafts until saved or discarded. The runtime owns storage and delivery.
+
 ## Public surface
 
 - [`SettingsPage`](../../../apps/packages/product-client/src/pages/SettingsPage.tsx)
@@ -118,7 +125,7 @@ The `environments` / `repo-environment` sections edit cloud environment records 
   app surface tokens are overridden at runtime; the generated built-in palette
   remains authoritative when the imported theme is reset or its mode is not
   active. Desktop can also copy the same bounded palette from a registered
-  extension's declared JSON theme through Extensions → Installed. The copied
+  extension's declared JSON/JSONC theme through Extensions → Installed. The copied
   preference survives package removal. Syntax highlighting remains separate.
 
 ## Emits
@@ -201,3 +208,9 @@ Target moves (later sweep wave): `components/settings/panes/agents/**` + `hooks/
   primitives slated for rebuild as run envelopes; keep them thin.
 - The `slack-bot` section is parked in the registry comment pending the
   product Slack app.
+
+Imported syntax colors are a validated user-preference snapshot supplied by
+supported installed extension themes. Appearance shows the selected theme and
+resets syntax independently from imported app colors. The extension system owns
+admission and application; the current limits and proof are in
+[Extensions](../extensions/README.md).

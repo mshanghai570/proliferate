@@ -16,6 +16,8 @@ import { DEFAULT_OPEN_IN_TARGET_ID } from "#product/config/open-target-defaults"
 import type { ReleaseTitle } from "#product/lib/domain/updates/release-notice";
 import type { ImportedAppTheme } from "#product/lib/domain/preferences/imported-app-theme";
 
+import type { ImportedSyntaxTheme } from "#product/lib/domain/preferences/imported-syntax-theme";
+
 export type BranchPrefixType = "none" | "proliferate" | "github_username";
 export type TurnEndSoundId = "ding";
 export type DefaultNewWorkspaceMode = "worktree" | "local";
@@ -31,6 +33,7 @@ export interface UserPreferences {
   themePreset: ThemePreset;
   colorMode: ColorMode;
   importedAppTheme: ImportedAppTheme | null;
+  importedSyntaxTheme: ImportedSyntaxTheme | null;
   uiFontSizeId: UiFontSizeId;
   readableCodeFontSizeId: ReadableCodeFontSizeId;
   uiFontFamily: string | null;
@@ -71,6 +74,7 @@ export const NEW_USER_DEFAULTS: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
   importedAppTheme: null,
+  importedSyntaxTheme: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
   uiFontFamily: null,
@@ -101,6 +105,7 @@ export const PERSISTED_RECORD_BACKFILL: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
   importedAppTheme: null,
+  importedSyntaxTheme: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
   uiFontFamily: null,

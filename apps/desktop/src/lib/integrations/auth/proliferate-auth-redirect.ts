@@ -92,6 +92,11 @@ function isLocalDesktopHost(): boolean {
 }
 
 function desktopRedirectScheme(): string {
+  const configured = import.meta.env.VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME;
+  if (configured) {
+    if (!DESKTOP_REDIRECT_SCHEMES.has(configured)) throw new Error("Unsupported desktop auth callback scheme");
+    return configured;
+  }
   return isLocalDesktopHost() ? LOCAL_DESKTOP_REDIRECT_SCHEME : DESKTOP_REDIRECT_SCHEME
 }
 

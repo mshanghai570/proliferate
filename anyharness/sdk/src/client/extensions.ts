@@ -1,4 +1,4 @@
-import type { ExtensionPackageIdentity, InstalledExtensionSummary, ListInstalledExtensionsResponse, ListExtensionColorThemesResponse } from "../types/extensions.js";
+import type { ExtensionPackageIdentity, InstalledExtensionSummary, ListInstalledExtensionsResponse, ListExtensionColorThemesResponse, ListExtensionSyntaxThemesResponse } from "../types/extensions.js";
 import type { AnyHarnessRequestOptions, AnyHarnessTransport } from "./core.js";
 
 export class ExtensionsClient {
@@ -12,6 +12,12 @@ export class ExtensionsClient {
     return this.transport.get(
       `/v1/extensions/${encodeURIComponent(identity.namespace)}/${encodeURIComponent(identity.name)}/${encodeURIComponent(identity.version)}/color-themes`,
       options,
+    );
+  }
+
+  syntaxThemes(identity: ExtensionPackageIdentity, options?: AnyHarnessRequestOptions): Promise<ListExtensionSyntaxThemesResponse> {
+    return this.transport.get(
+      `/v1/extensions/${encodeURIComponent(identity.namespace)}/${encodeURIComponent(identity.name)}/${encodeURIComponent(identity.version)}/syntax-themes`, options,
     );
   }
 

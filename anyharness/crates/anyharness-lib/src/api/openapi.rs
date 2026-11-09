@@ -9,6 +9,12 @@ mod support_windows;
         description = "Local sidecar runtime for managing coding agent installations, credentials, and ACP sessions."
     ),
     paths(
+        super::http::project_retrieval::get,
+        super::http::project_retrieval::index,
+        super::http::project_retrieval::clear,
+        super::http::project_retrieval::search,
+        super::http::agent_rules::get,
+        super::http::agent_rules::put,
         super::http::skills::list_skills,
         super::http::skills::import_skill,
         super::http::skills::set_skill_enabled,
@@ -23,6 +29,7 @@ mod support_windows;
         super::http::project_mcp::set_enabled,
         super::http::project_mcp::remove,
         super::http::extensions::list_color_themes,
+        super::http::extensions::list_syntax_themes,
         super::http::extensions::install_registry_extension,
         super::http::extensions::uninstall_extension,
         super::http::health::get_health,

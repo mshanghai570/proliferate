@@ -1,3 +1,4 @@
+pub mod agent_rules;
 pub mod extensions;
 pub mod files;
 pub mod git;

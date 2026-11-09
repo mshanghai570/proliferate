@@ -10,11 +10,15 @@ mod workflow_runs_openapi;
 pub mod ws;
 
 #[cfg(test)]
+mod agent_rules_tests;
+#[cfg(test)]
 mod extensions_tests;
 #[cfg(test)]
 mod openapi_tests;
 #[cfg(test)]
 mod project_mcp_tests;
+#[cfg(test)]
+mod project_retrieval_tests;
 #[cfg(test)]
 mod review_admission_tests;
 #[cfg(test)]

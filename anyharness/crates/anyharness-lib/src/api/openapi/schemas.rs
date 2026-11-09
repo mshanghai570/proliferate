@@ -1,11 +1,17 @@
+use anyharness_contract::v1::agent_rules::{AgentRules, SetAgentRulesRequest};
 use anyharness_contract::v1::extensions::{
     ExtensionColorTheme, ExtensionInstallationState, ExtensionPackageErrorCode,
-    InstallRegistryExtensionRequest, InstalledExtensionSummary, ListExtensionColorThemesResponse,
+    ExtensionSyntaxRule, ExtensionSyntaxTheme, InstallRegistryExtensionRequest,
+    InstalledExtensionSummary, ListExtensionColorThemesResponse, ListExtensionSyntaxThemesResponse,
     ListInstalledExtensionsResponse,
 };
 use anyharness_contract::v1::local_providers::{
     CreateLocalProviderRequest, LocalProviderSummary, LocalProvidersResponse,
     SetLocalProviderEnabledRequest,
+};
+use anyharness_contract::v1::retrieval::{
+    ProjectContextExcerpt, ProjectContextSearchResponse, ProjectRetrievalStatus,
+    SearchProjectContextRequest,
 };
 use anyharness_contract::v1::skills::{
     ImportSkillRequest, ListSkillsResponse, SetSkillEnabledRequest, SkillFile, SkillSummary,
@@ -135,7 +141,13 @@ use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(components(schemas(
+    ProjectContextExcerpt,
+    ProjectContextSearchResponse,
+    ProjectRetrievalStatus,
+    SearchProjectContextRequest,
     SkillFile,
+    AgentRules,
+    SetAgentRulesRequest,
     SkillSummary,
     ImportSkillRequest,
     SetSkillEnabledRequest,
@@ -147,6 +159,9 @@ use utoipa::OpenApi;
     ListInstalledExtensionsResponse,
     ExtensionColorTheme,
     ListExtensionColorThemesResponse,
+    ExtensionSyntaxTheme,
+    ExtensionSyntaxRule,
+    ListExtensionSyntaxThemesResponse,
     HealthResponse,
     RuntimeCapabilities,
     RuntimePressureLevel,

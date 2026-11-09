@@ -1,3 +1,5 @@
+import { AccountSignInSection } from "#product/components/settings/panes/account/AccountSignInSection";
+import { AccountServerSection } from "#product/components/settings/panes/account/AccountServerSection";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -258,6 +260,8 @@ export function AccountPane() {
         />
       ) : null}
 
+      {status === "anonymous" && !devAuthBypassed ? <AccountSignInSection /> : null}
+
       <AccountSettingsPane
         displayName={displayName}
         email={user?.email ?? "Not signed in"}
@@ -303,18 +307,6 @@ export function AccountPane() {
             }
           : undefined}
         actions={{
-          signIn: !devAuthBypassed && !isAuthenticated && !localMode && !signInUnavailable && !cloudSignInChecking
-            ? {
-                label: signingIn
-                  ? AUTH_ACCOUNT_LABELS.signingIn
-                  : cloudSignInChecking
-                    ? AUTH_ACCOUNT_LABELS.checkingSignIn
-                    : AUTH_ACCOUNT_LABELS.signIn,
-                loading: signingIn,
-                disabled: signingIn || cloudSignInChecking,
-                onClick: () => { void signInWithGitHub(); },
-              }
-            : undefined,
           reconnectGitHub: canReconnectGitHub
             ? {
                 label: signingIn
@@ -365,6 +357,8 @@ export function AccountPane() {
         }}
         error={signInError || providerLinkError}
       />
+
+      <AccountServerSection />
 
       {/* Invite links from a different server open this trust-confirm dialog
           before the app is ever repointed (join-invitation flow's security

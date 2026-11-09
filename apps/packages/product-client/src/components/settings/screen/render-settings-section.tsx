@@ -6,6 +6,7 @@ import { LlmProvidersPane } from "#product/components/settings/panes/agents/prov
 import { ApiKeysPane } from "#product/components/settings/panes/agents/api-keys/ApiKeysPane";
 import { HarnessPane } from "#product/components/settings/panes/agents/harness/HarnessPane";
 import { CustomAgentsPane } from "#product/components/settings/panes/agents/custom/CustomAgentsPane";
+import { AgentRulesPane } from "#product/components/settings/panes/agents/rules/AgentRulesPane";
 import { SkillsSection } from "#product/components/settings/panes/agents/skills/SkillsSection";
 import { SettingsPageBody } from "#product/primitives/patterns/settings/SettingsPageBody";
 import { AppearancePane } from "#product/components/settings/panes/AppearancePane";
@@ -78,6 +79,7 @@ export function renderSettingsSection(
   if (activeSection === "agent-custom") {
     return <CustomAgentsPane />;
   }
+  if (activeSection === "agent-rules") return <AgentRulesPane />;
   if (activeSection === "agent-skills") {
     return <SettingsPageBody><SkillsSection /></SettingsPageBody>;
   }

@@ -1,3 +1,4 @@
+import { useSyntaxHighlightTheme } from "#product/hooks/ui/highlighting/use-syntax-highlight-theme";
 import { useMemo, useState, useEffect } from "react";
 import { parsePatch, type ParsedPatch } from "#product/lib/domain/files/diff-parser";
 import {
@@ -50,6 +51,7 @@ export function useDiffHighlight(
   }, [operationId, patch]);
   const [tokens, setTokens] = useState<HighlightedToken[][] | null>(null);
   const resolvedMode = useResolvedMode();
+  const syntaxTheme = useSyntaxHighlightTheme();
   const theme: HighlightTheme = resolvedMode === "dark" ? "dark" : "light";
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export function useDiffHighlight(
     setTokens(null);
     const startedAt = typeof performance === "undefined" ? Date.now() : performance.now();
 
-    void highlightLines(parsed.allCodeLines, filePath, theme).then((result) => {
+    void highlightLines(parsed.allCodeLines, filePath, theme, syntaxTheme).then((result) => {
       recordMeasurementDiagnostic({
         category: "diff_viewer",
         label: "highlight_lines",
@@ -76,7 +78,7 @@ export function useDiffHighlight(
     return () => {
       cancelled = true;
     };
-  }, [operationId, parsed, filePath, theme]);
+  }, [operationId, parsed, filePath, theme, syntaxTheme]);
 
   return { parsed, tokens };
 }

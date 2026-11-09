@@ -4,7 +4,7 @@ export const EXTENSION_MARKETPLACE_COPY = {
   preview: "Discovery",
   install: "Install",
   installUnavailable: "Installation is not available in this build.",
-  installSuccess: "Extension installed. On macOS, check Installed for supported app color themes. Extension code remains inactive.",
+  installSuccess: "Extension installed. On macOS, check Installed for supported app and syntax themes. Extension code remains inactive.",
   installFailure: "Could not install this extension. Check the runtime connection and try again.",
   noHost: "No extension host is available. On macOS, supported theme colors can be copied from Installed; other contributions cannot run yet.",
   unverified: "Publisher is not verified by the registry. Verification does not establish package safety or compatibility.",

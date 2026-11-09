@@ -2,7 +2,7 @@
 
 Owns Open VSX discovery, extension metadata/content access, manifest compatibility
 analysis, local VSIX package materialization, durable registration/removal,
-bounded declared color-theme reads, and the VSIX inspection/extraction
+bounded declared app/syntax color-theme reads, and the VSIX inspection/extraction
 adapter. The
 [workspace surface](../workspace-surface/README.md) owns the shared sidebar and
 route shell; [harnesses](../harnesses/README.md) owns agent skills and harness
@@ -25,7 +25,10 @@ The [marketplace hook](../../../apps/packages/product-client/src/hooks/extension
 holds search/filter/page/selection state for its mounted screen. TanStack Query
 owns remote search, metadata, manifest, and document caches. The scoped
 [registry provider](../../../apps/packages/product-client/src/providers/ExtensionRegistryProvider.tsx)
-owns an adapter with at most 32 cached ETag responses. The runtime installer
+owns a registry adapter. Registry requests send only an Accept header and omit
+credentials; the browser manages cache revalidation with `cache: no-cache`.
+Custom User-Agent and If-None-Match headers are not authored because the public
+registry does not allow them in CORS preflights. The runtime installer
 writes immutable version directories and a `.proliferate-package.json` receipt
 under the selected runtime home's `extensions/packages` directory. A receipt
 records schema version 1, requested identity, and verified SHA-256. It establishes
@@ -56,11 +59,14 @@ The UI reports success while clearly stating that the package remains inactive;
 failures use bounded authored feedback. Installation remains disabled when no
 runtime is connected. The
 [Installed section](../../../apps/packages/product-client/src/components/extensions/marketplace/InstalledExtensions.tsx)
-loads the connected runtime's registered versions on demand, shows inactive state
+loads the connected runtime's registered versions on demand, offers **Details and
+versions** for the package's current registry listing, shows inactive state
 and package errors, and requires confirmation before uninstall. Missing runtime
 connections and unsupported management endpoints show authored messages instead
 of a fabricated empty list. Queries include runtime URL and actor cache scope;
 uninstall completion refreshes the originating scope, even after target changes.
+Returning from registry details preserves the Installed destination and restores
+keyboard focus to its tab. Browsing details does not install or remove a version.
 
 On Desktop, **App color themes** reads declared theme data on demand. A readable
 palette can be copied into the existing imported app color preference; this
@@ -70,9 +76,29 @@ does not enable an extension host or syntax theme. The authenticated
 registration and package validity under the management lock, then reads at most
 32 declared theme files, each bounded to 1 MiB. It returns only a bounded label,
 normalized light/dark mode, six supported color fields, availability, and a
-truncation flag. Strict JSON, standalone themes are supported; includes are
+truncation flag. Standalone JSON and JSONC themes are supported; includes are
 never followed. The client validates color syntax and text contrast before
 offering the copy action. Queries retain runtime and actor isolation.
+
+On Desktop, **Syntax themes** reads the exact installed version through
+`GET /v1/extensions/{namespace}/{name}/{version}/syntax-themes`. It applies a
+validated preference snapshot containing foreground rules and matching app
+background/text colors. Source views, transcript code blocks, and code diffs use the existing
+syntax highlighter with the imported theme object. Selection survives restart
+and uninstall; Appearance resets syntax independently from app colors. The
+selection applies only in its matching light/dark mode. Markdown uses its grammar
+when imported syntax colors are selected; built-in Markdown rendering is unchanged.
+The same receipt, resource, registration, owner-authentication, and management-lock
+checks as app color reads apply. At most 32 themes, 256 rules per theme, 32 scopes
+per rule (at most 1,024 UTF-8 bytes each), and 32 KiB of UTF-8 scope/color data per theme are admitted. Foreground
+colors must be six-digit hex. Includes, token-file paths, semantic token colors, and font styles are not
+loaded. Theme resource parsing accepts line/block comments, trailing commas,
+and a UTF-8 BOM before validating values with the existing JSON parser. Package
+manifests and receipts remain strict JSON. Syntax application copies only editor
+background/text colors, so optional UI colors with alpha do not block syntax. The client revalidates preferences
+and app-color contrast. Highlight cache accounting includes custom theme data,
+so switching themes cannot bypass its existing memory budget. Theme data never
+executes code or registers additional editor APIs.
 
 The blocking library entrypoint
 [install_local_vsix](../../../anyharness/crates/anyharness-lib/src/domains/extensions/installer.rs)
@@ -229,14 +255,16 @@ anyharness/crates/anyharness-lib/src/adapters/extensions/
 ├── mod.rs                                    adapter registration
 ├── vsix.rs · vsix_tests.rs                    bounded archive validation/extraction
 ├── package.rs · package_tests.rs              snapshot, integrity, staging, publication
-└── management.rs                             lock, bounded reads, quarantine/removal
+├── management.rs                             lock, bounded reads, quarantine/removal
+└── theme_json.rs                             theme-only JSONC normalization
 anyharness/crates/anyharness-lib/src/domains/extensions/
 ├── mod.rs                                    domain registration
 ├── manifest.rs                               identity and declarative admission policy
 ├── installer.rs · installer_tests.rs          local install use case and receipts
 ├── model.rs · store.rs                        registered lifecycle state and SQLite access
 ├── manager.rs · manager_tests.rs              install/list/remove and interruption recovery
-└── themes.rs                                 bounded declared color theme reads
+├── themes.rs                                 bounded declared app color reads
+└── syntax_themes.rs                          bounded foreground scope/color rules
 anyharness/crates/anyharness-lib/src/persistence/
 └── sql/0077_installed_extensions.sql          additive registration migration
 anyharness/crates/anyharness-contract/src/v1/extensions.rs   public wire models
@@ -304,7 +332,9 @@ anyharness/sdk/src/types/extensions.ts                     generated type aliase
   inactive; the [detail surface](../../../apps/packages/product-client/src/components/extensions/marketplace/ExtensionDetails.tsx)
   communicates that boundary and shows bounded success/failure outcomes.
 - Declared color themes supply only core app colors through an explicit copy.
-  Syntax colors, includes, JSON comments, and theme asset loading are absent.
+  Syntax foreground colors are available through an explicit copy of supported
+  installed JSON/JSONC themes. Includes, token font styles, semantic token
+  overrides, and theme asset loading are absent.
   Only the first 32 declared themes are offered; truncation is visible.
 - Featured and recommended collections have no owned source. Discovery exposes
   real registry sorting without relabeling popularity as recommendations.
@@ -333,3 +363,12 @@ Local installation additionally reports typed invalid checksum/layout/identity,
 checksum mismatch, archive violation, unsupported entrypoints/dependencies/
 contributions, missing resources, existing-version, and I/O/rollback failures.
 The caller receives an error; the installer does not enable a partial package.
+
+Syntax theme proofs are colocated in `domains/extensions/syntax_themes.rs`,
+manager/router tests, the SDK extension client test, imported syntax preference
+tests, the real highlighter test, and `InstalledExtensionSyntax.test.tsx`. They
+cover bounded admission, includes/symlink refusal, owner access, safe response
+shape, real scope colors, concurrent palette isolation, cache identity, explicit
+application/reset, preference persistence, and actor changes. No new telemetry
+event is emitted; authored query failures remain telemetry-handled and theme
+contents are not logged.

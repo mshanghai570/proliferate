@@ -50,6 +50,11 @@ Scratch is local workspace notes:
 
 The durable right-panel tool id remains `git`; “Changes” is a display label.
 
+Source views and code diffs consume the validated imported syntax-color
+preference through shared highlighting hooks. The extension system owns the
+installed-theme read and copy action; Appearance owns reset. See
+[Extensions](../extensions/README.md) for the supported subset and limits.
+
 ## Viewer Targets
 
 Center tabs use `ViewerTarget`, owned by `apps/packages/product-client/src/lib/domain/workspaces/viewer/viewer-target.ts`.

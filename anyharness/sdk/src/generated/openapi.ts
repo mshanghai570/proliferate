@@ -20,6 +20,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agent-auth/local-providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_local_providers"];
+        put?: never;
+        post: operations["create_local_provider"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agent-auth/local-providers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_local_provider"];
+        options?: never;
+        head?: never;
+        patch: operations["set_local_provider_enabled"];
+        trace?: never;
+    };
     "/v1/agent-auth/native-bridge": {
         parameters: {
             query?: never;
@@ -68,6 +100,22 @@ export interface paths {
         put: operations["put_agent_auth_state"];
         post?: never;
         delete: operations["delete_agent_auth_state"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agent-rules/{agent_kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_agent_rules"];
+        put: operations["set_agent_rules"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -417,6 +465,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["list_color_themes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/extensions/{namespace}/{name}/{version}/syntax-themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_extension_syntax_themes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2572,6 +2636,12 @@ export interface components {
             skipped: number;
             status: components["schemas"]["ReconcileJobStatus"];
         };
+        AgentRules: {
+            agentKind: string;
+            inherited: boolean;
+            repositoryId?: string | null;
+            text: string;
+        };
         /** @enum {string} */
         AgentSeedFailureKind: "missing_archive" | "invalid_checksum" | "invalid_manifest" | "invalid_archive" | "io" | "unsupported_target" | "verification_failed";
         AgentSeedHealth: {
@@ -3022,6 +3092,13 @@ export interface components {
             thread: components["schemas"]["CoworkThread"];
             workspace: components["schemas"]["Workspace"];
         };
+        CreateLocalProviderRequest: {
+            apiFormat: string;
+            apiKey?: string | null;
+            endpoint: string;
+            models: string[];
+            name: string;
+        };
         CreatePullRequestRequest: {
             baseBranch: string;
             body?: string | null;
@@ -3226,6 +3303,19 @@ export interface components {
         ExtensionInstallationState: "installing" | "installed" | "removing" | "error";
         /** @enum {string} */
         ExtensionPackageErrorCode: "interrupted_install" | "package_missing" | "package_invalid";
+        ExtensionSyntaxRule: {
+            foreground: string;
+            scopes: string[];
+        };
+        ExtensionSyntaxTheme: {
+            available: boolean;
+            colorMode?: string | null;
+            colors: {
+                [key: string]: string;
+            };
+            label: string;
+            rules: components["schemas"]["ExtensionSyntaxRule"][];
+        };
         /** @enum {string} */
         FeedKind: "terminal_bytes" | "transcript";
         /**
@@ -3673,6 +3763,10 @@ export interface components {
             themes: components["schemas"]["ExtensionColorTheme"][];
             truncated: boolean;
         };
+        ListExtensionSyntaxThemesResponse: {
+            themes: components["schemas"]["ExtensionSyntaxTheme"][];
+            truncated: boolean;
+        };
         ListInstalledExtensionsResponse: {
             extensions: components["schemas"]["InstalledExtensionSummary"][];
         };
@@ -3688,6 +3782,17 @@ export interface components {
         ListWorkspaceFilesResponse: {
             directoryPath: string;
             entries: components["schemas"]["WorkspaceFileEntry"][];
+        };
+        LocalProviderSummary: {
+            enabled: boolean;
+            id: string;
+            modelCount: number;
+            name: string;
+        };
+        LocalProvidersResponse: {
+            encryptionAvailable: boolean;
+            managedAuthActive: boolean;
+            providers: components["schemas"]["LocalProviderSummary"][];
         };
         LoginCommand: {
             args: string[];
@@ -5205,6 +5310,14 @@ export interface components {
             children: components["schemas"]["SubagentRosterEntry"][];
             parent: components["schemas"]["AgentOperationsAgent"];
         };
+        SetAgentRulesRequest: {
+            repositoryId?: string | null;
+            /** @description Null removes the scope's file. An empty string explicitly disables rules. */
+            text: string | null;
+        };
+        SetLocalProviderEnabledRequest: {
+            enabled: boolean;
+        };
         SetProjectMcpServerEnabledRequest: {
             enabled: boolean;
         };
@@ -5990,6 +6103,92 @@ export interface operations {
             };
         };
     };
+    list_local_providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProvidersResponse"];
+                };
+            };
+        };
+    };
+    create_local_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLocalProviderRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProviderSummary"];
+                };
+            };
+        };
+    };
+    remove_local_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_local_provider_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetLocalProviderEnabledRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProviderSummary"];
+                };
+            };
+        };
+    };
     get_native_bridge: {
         parameters: {
             query?: never;
@@ -6124,6 +6323,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_agent_rules: {
+        parameters: {
+            query?: {
+                repositoryId?: string;
+            };
+            header?: never;
+            path: {
+                agent_kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRules"];
+                };
+            };
+        };
+    };
+    set_agent_rules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAgentRulesRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRules"];
                 };
             };
         };
@@ -7080,6 +7327,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_extension_syntax_themes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                namespace: string;
+                name: string;
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListExtensionSyntaxThemesResponse"];
                 };
             };
         };

@@ -30,6 +30,115 @@
         }
       }
     },
+    "/v1/agent-auth/local-providers": {
+      "get": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "list_local_providers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalProvidersResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "create_local_provider",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLocalProviderRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalProviderSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agent-auth/local-providers/{id}": {
+      "delete": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "remove_local_provider",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "agent-auth"
+        ],
+        "operationId": "set_local_provider_enabled",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLocalProviderEnabledRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalProviderSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agent-auth/native-bridge": {
       "get": {
         "tags": [
@@ -170,6 +279,82 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agent-rules/{agent_kind}": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "operationId": "get_agent_rules",
+        "parameters": [
+          {
+            "name": "agent_kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "repositoryId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRules"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "agents"
+        ],
+        "operationId": "set_agent_rules",
+        "parameters": [
+          {
+            "name": "agent_kind",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAgentRulesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRules"
                 }
               }
             }
@@ -1333,6 +1518,52 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/extensions/{namespace}/{name}/{version}/syntax-themes": {
+      "get": {
+        "tags": [
+          "extensions"
+        ],
+        "operationId": "list_extension_syntax_themes",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListExtensionSyntaxThemesResponse"
                 }
               }
             }
@@ -9296,6 +9527,31 @@
           }
         }
       },
+      "AgentRules": {
+        "type": "object",
+        "required": [
+          "agentKind",
+          "text",
+          "inherited"
+        ],
+        "properties": {
+          "agentKind": {
+            "type": "string"
+          },
+          "inherited": {
+            "type": "boolean"
+          },
+          "repositoryId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
       "AgentSeedFailureKind": {
         "type": "string",
         "enum": [
@@ -11115,6 +11371,39 @@
           }
         }
       },
+      "CreateLocalProviderRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "endpoint",
+          "models",
+          "apiFormat"
+        ],
+        "properties": {
+          "apiFormat": {
+            "type": "string"
+          },
+          "apiKey": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
       "CreatePullRequestRequest": {
         "type": "object",
         "required": [
@@ -11985,6 +12274,62 @@
           "package_missing",
           "package_invalid"
         ]
+      },
+      "ExtensionSyntaxRule": {
+        "type": "object",
+        "required": [
+          "scopes",
+          "foreground"
+        ],
+        "properties": {
+          "foreground": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ExtensionSyntaxTheme": {
+        "type": "object",
+        "required": [
+          "label",
+          "colors",
+          "available",
+          "rules"
+        ],
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "colorMode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "colors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "type": "string"
+            }
+          },
+          "label": {
+            "type": "string"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtensionSyntaxRule"
+            }
+          }
+        }
       },
       "FeedKind": {
         "type": "string",
@@ -13699,6 +14044,24 @@
           }
         }
       },
+      "ListExtensionSyntaxThemesResponse": {
+        "type": "object",
+        "required": [
+          "themes",
+          "truncated"
+        ],
+        "properties": {
+          "themes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtensionSyntaxTheme"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          }
+        }
+      },
       "ListInstalledExtensionsResponse": {
         "type": "object",
         "required": [
@@ -13769,6 +14132,52 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/WorkspaceFileEntry"
+            }
+          }
+        }
+      },
+      "LocalProviderSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "enabled",
+          "modelCount"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "modelCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "LocalProvidersResponse": {
+        "type": "object",
+        "required": [
+          "providers",
+          "encryptionAvailable",
+          "managedAuthActive"
+        ],
+        "properties": {
+          "encryptionAvailable": {
+            "type": "boolean"
+          },
+          "managedAuthActive": {
+            "type": "boolean"
+          },
+          "providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalProviderSummary"
             }
           }
         }
@@ -19982,6 +20391,40 @@
             "$ref": "#/components/schemas/AgentOperationsAgent"
           }
         }
+      },
+      "SetAgentRulesRequest": {
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "repositoryId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Null removes the scope's file. An empty string explicitly disables rules."
+          }
+        },
+        "additionalProperties": false
+      },
+      "SetLocalProviderEnabledRequest": {
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "SetProjectMcpServerEnabledRequest": {
         "type": "object",

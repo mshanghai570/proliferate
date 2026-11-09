@@ -371,3 +371,13 @@ The bounded reasons are `invalid_path`, `permission_denied`, `unsupported_type`,
 | Child exits before `/health` | Status becomes `failed`. |
 | `/health` times out | Status becomes `failed` after the startup timeout. |
 | External `ANYHARNESS_DEV_URL` never becomes healthy | Status becomes `failed`; no child process is killed because Desktop does not own it. |
+
+### Preview account callback
+
+The personal Intel preview compiles
+`VITE_PROLIFERATE_DESKTOP_REDIRECT_SCHEME=proliferate-local` and registers that
+scheme alongside `proliferate-preview` in its bundle. The renderer override
+accepts only the existing `proliferate` and `proliferate-local` schemes; unsupported
+values fail configuration. Builds without the override retain the existing
+host-based callback selection. Runtime server overrides keep precedence over the
+preview's hosted API default. See [release procedure](../../../guides/deploying/releases.md#fork-intel-preview).

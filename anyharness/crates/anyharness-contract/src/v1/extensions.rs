@@ -62,3 +62,27 @@ pub struct ListExtensionColorThemesResponse {
     pub themes: Vec<ExtensionColorTheme>,
     pub truncated: bool,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ExtensionSyntaxRule {
+    pub scopes: Vec<String>,
+    pub foreground: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ExtensionSyntaxTheme {
+    pub label: String,
+    pub color_mode: Option<String>,
+    pub colors: std::collections::BTreeMap<String, String>,
+    pub available: bool,
+    pub rules: Vec<ExtensionSyntaxRule>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ListExtensionSyntaxThemesResponse {
+    pub themes: Vec<ExtensionSyntaxTheme>,
+    pub truncated: bool,
+}

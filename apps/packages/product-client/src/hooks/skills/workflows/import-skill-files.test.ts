@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { importSkillFiles } from "./import-skill-files";
+import { importSkillFile, importSkillFiles } from "./import-skill-files";
 
 function file(path: string, bytes: number[]): File {
   const content = new Uint8Array(bytes);
@@ -21,5 +21,27 @@ describe("skill folder import", () => {
     await expect(importSkillFiles([])).rejects.toThrow("up to 128 files");
     await expect(importSkillFiles(Array.from({ length: 129 }, () => file("review/SKILL.md", [65])))).rejects.toThrow("up to 128 files");
     await expect(importSkillFiles([{ size: 1024 * 1024 + 1 } as File])).rejects.toThrow("1 MiB");
+  });
+});
+
+describe("standalone skill import", () => {
+  function standalone(name: string, bytes: number[]) {
+    return { ...file("", bytes), name } as File;
+  }
+  it("accepts lowercase skill.md and preserves instruction bytes under the canonical path", async () => {
+    expect(await importSkillFile(standalone("skill.md", [35, 32, 65]), " Review "))
+      .toEqual({ name: "Review", files: [{ path: "SKILL.md", contentBase64: "IyBB" }] });
+  });
+  it("rejects other filenames, empty instructions, and invalid UTF-8", async () => {
+    await expect(importSkillFile(standalone("README.md", [65]), "Review")).rejects.toThrow("Choose a SKILL.md");
+    await expect(importSkillFile(standalone("SKILL.md", []), "Review")).rejects.toThrow("1–65,536");
+    await expect(importSkillFile(standalone("SKILL.md", [255]), "Review")).rejects.toThrow();
+  });
+  it("checks byte limits and names before reading", async () => {
+    const unreadable = { name: "SKILL.md", size: 65_537 } as File;
+    await expect(importSkillFile(unreadable, "Review")).rejects.toThrow("1–65,536");
+    for (const name of [" ", "bad\nname", "é".repeat(51)]) {
+      await expect(importSkillFile(unreadable, name)).rejects.toThrow("skill name");
+    }
   });
 });

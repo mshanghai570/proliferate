@@ -1,3 +1,5 @@
+export const PROLIFERATE_HOSTED_API_BASE_URL = "https://app.proliferate.com/api";
+
 export const OFFICIAL_HOSTED_API_ORIGINS = [
   "https://app.proliferate.com",
   "https://api.proliferate.com",

@@ -72,11 +72,13 @@ impl PackageDirectory {
     }
 
     pub fn read_theme(&self, name: &str, relative: &Path) -> Result<Value, PackageError> {
-        self.read_json(
+        let bytes = self.read_bytes(
             name,
             &Path::new("extension").join(relative),
             MAX_VSIX_MANIFEST_BYTES,
-        )
+        )?;
+        super::theme_json::parse(&bytes)
+            .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "invalid theme data").into())
     }
 
     pub fn quarantine(&self, name: &str, removal_id: &str) -> Result<(), PackageError> {
@@ -147,6 +149,11 @@ impl PackageDirectory {
     }
 
     fn read_json(&self, name: &str, relative: &Path, limit: u64) -> Result<Value, PackageError> {
+        serde_json::from_slice(&self.read_bytes(name, relative, limit)?)
+            .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error).into())
+    }
+
+    fn read_bytes(&self, name: &str, relative: &Path, limit: u64) -> Result<Vec<u8>, PackageError> {
         let path = self.regular_file(name, relative)?;
         let mut options = OpenOptions::new();
         options.read(true);
@@ -164,7 +171,6 @@ impl PackageDirectory {
         if bytes.len() as u64 > limit {
             return Err(PackageError::TooLarge);
         }
-        serde_json::from_slice(&bytes)
-            .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e).into())
+        Ok(bytes)
     }
 }

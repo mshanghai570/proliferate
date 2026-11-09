@@ -1,4 +1,6 @@
-use crate::api::http::{custom_agents, extensions, local_providers, project_mcp, skills};
+use crate::api::http::{
+    agent_rules, custom_agents, extensions, local_providers, project_mcp, project_retrieval, skills,
+};
 use crate::app::AppState;
 use axum::{
     routing::{delete, get, post, put},
@@ -7,6 +9,20 @@ use axum::{
 
 pub(super) fn routes() -> Router<AppState> {
     Router::new()
+        .route(
+            "/workspaces/{workspace_id}/retrieval",
+            get(project_retrieval::get)
+                .post(project_retrieval::index)
+                .delete(project_retrieval::clear),
+        )
+        .route(
+            "/workspaces/{workspace_id}/retrieval/search",
+            post(project_retrieval::search),
+        )
+        .route(
+            "/agent-rules/{agent_kind}",
+            get(agent_rules::get).put(agent_rules::put),
+        )
         .route(
             "/skills",
             get(skills::list_skills).post(skills::import_skill),
@@ -25,6 +41,10 @@ pub(super) fn routes() -> Router<AppState> {
             axum::routing::patch(local_providers::set_enabled).delete(local_providers::remove),
         )
         .route("/extensions", get(extensions::list_extensions))
+        .route(
+            "/extensions/{namespace}/{name}/{version}/syntax-themes",
+            get(extensions::list_syntax_themes),
+        )
         .route(
             "/extensions/{namespace}/{name}/{version}/color-themes",
             get(extensions::list_color_themes),

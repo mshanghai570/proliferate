@@ -1,3 +1,4 @@
+import { sanitizeImportedSyntaxTheme } from "#product/lib/domain/preferences/imported-syntax-theme";
 import {
   resolveAppearanceSizeId,
   resolveWindowZoomId,
@@ -42,7 +43,7 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
   if (preferences.uiFontFamily === undefined || preferences.codeFontFamily === undefined) {
     changed = true;
   }
-  if (preferences.importedAppTheme === undefined) {
+  if (preferences.importedAppTheme === undefined || preferences.importedSyntaxTheme === undefined) {
     changed = true;
   }
 
@@ -182,6 +183,11 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
       next[key] = normalized;
       changed = true;
     }
+  }
+  const importedSyntaxTheme = sanitizeImportedSyntaxTheme(next.importedSyntaxTheme);
+  if (JSON.stringify(importedSyntaxTheme) !== JSON.stringify(next.importedSyntaxTheme)) {
+    next.importedSyntaxTheme = importedSyntaxTheme;
+    changed = true;
   }
   const importedAppTheme = sanitizeImportedAppTheme(next.importedAppTheme);
   if (JSON.stringify(importedAppTheme) !== JSON.stringify(next.importedAppTheme)) {

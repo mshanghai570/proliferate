@@ -5,3 +5,5 @@ export type ListInstalledExtensionsResponse = components["schemas"]["ListInstall
 export type ExtensionColorTheme = components["schemas"]["ExtensionColorTheme"];
 export type ListExtensionColorThemesResponse = components["schemas"]["ListExtensionColorThemesResponse"];
 export type ExtensionPackageIdentity = Pick<InstalledExtensionSummary, "namespace" | "name" | "version">;
+
+export type ListExtensionSyntaxThemesResponse = components["schemas"]["ListExtensionSyntaxThemesResponse"];

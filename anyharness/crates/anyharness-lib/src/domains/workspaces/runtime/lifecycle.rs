@@ -42,6 +42,10 @@ impl WorkspaceRuntime {
     }
 
     pub fn delete_workspace_record(&self, workspace_id: &str) -> anyhow::Result<()> {
+        crate::domains::sessions::retrieval::clear_workspace_cache(
+            &self.runtime_home,
+            workspace_id,
+        )?;
         self.delete_workflow.delete_workspace_record(workspace_id)
     }
 

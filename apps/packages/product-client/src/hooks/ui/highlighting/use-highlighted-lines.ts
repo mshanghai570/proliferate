@@ -1,3 +1,4 @@
+import { useSyntaxHighlightTheme } from "#product/hooks/ui/highlighting/use-syntax-highlight-theme";
 import { useEffect, useState } from "react";
 import { useResolvedMode } from "#product/hooks/theme/derived/use-resolved-mode";
 import {
@@ -11,13 +12,14 @@ export function useHighlightedLines(
   languageOrFilename: string,
 ): HighlightedToken[][] | null {
   const resolvedMode = useResolvedMode();
+  const syntaxTheme = useSyntaxHighlightTheme();
   const theme = resolveHighlightTheme(resolvedMode);
   const [lines, setLines] = useState<HighlightedToken[][] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     setLines(null);
-    void highlightLines(code.split("\n"), languageOrFilename, theme).then((result) => {
+    void highlightLines(code.split("\n"), languageOrFilename, theme, syntaxTheme).then((result) => {
       if (!cancelled) {
         setLines(result);
       }
@@ -25,7 +27,7 @@ export function useHighlightedLines(
     return () => {
       cancelled = true;
     };
-  }, [code, languageOrFilename, theme]);
+  }, [code, languageOrFilename, theme, syntaxTheme]);
 
   return lines;
 }

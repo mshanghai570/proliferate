@@ -1,5 +1,6 @@
 pub mod activity;
 pub mod agent_auth;
+pub mod agent_rules;
 pub mod agents;
 pub mod auth;
 pub mod catalogs;
@@ -23,6 +24,7 @@ pub mod plans;
 pub mod processes;
 pub mod replay;
 pub mod repo_roots;
+pub mod retrieval;
 pub mod reviews;
 pub mod session_config;
 pub mod sessions;

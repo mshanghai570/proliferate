@@ -16,3 +16,7 @@ export function uninstallRegisteredExtension(connection: AnyHarnessClientConnect
 export function installRegisteredExtension(connection: AnyHarnessClientConnection, identity: ExtensionPackageIdentity, options?: AnyHarnessRequestOptions) {
   return getAnyHarnessClient(connection).extensions.install(identity, options);
 }
+
+export function listExtensionSyntaxThemes(connection: AnyHarnessClientConnection, identity: ExtensionPackageIdentity, options?: AnyHarnessRequestOptions) {
+  return getAnyHarnessClient(connection).extensions.syntaxThemes(identity, options);
+}
