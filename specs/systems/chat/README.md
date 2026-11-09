@@ -14,6 +14,14 @@ The chat surface: one session's transcript plus the composer that writes to it, 
 
 Let a person read what an agent did and say what it should do next, for one session at a time, with the runtime as the only authority on what happened. Chat renders the runtime's append-only session log and turns keystrokes into prompt, config, permission, and interaction requests; it never invents session state.
 
+## Local project context
+
+The local composer exposes an explicit Project context picker for a materialized
+workspace. It consumes the [Sessions retrieval API](../sessions/project-retrieval.md),
+shows cited source excerpts, and appends selected reference text to the unsent
+draft. It never enables indexing or transmits model context automatically.
+Runtime, actor, and workspace changes discard open picker state.
+
 ## Owned state
 
 UI state only. Chat owns no durable record.

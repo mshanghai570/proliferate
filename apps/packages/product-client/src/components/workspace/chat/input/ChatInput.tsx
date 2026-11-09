@@ -1,3 +1,4 @@
+import { ProjectContextButton } from "#product/components/workspace/chat/input/ProjectContextButton";
 import {
   useCallback,
   useEffect,
@@ -95,6 +96,7 @@ export function ChatInput({
   const {
     workspaceUiKey,
     materializedWorkspaceId,
+    appendDraftText,
     getDraft,
     getSelectedResponseContexts,
     setDraft,
@@ -415,6 +417,7 @@ export function ChatInput({
                   />
                 </>
               )}
+            {materializedWorkspaceId && !effectiveIsEditingQueuedPrompt ? <ProjectContextButton workspaceId={materializedWorkspaceId} disabled={isSubmitting} onAdd={appendDraftText} /> : null}
           </form>
         </ChatComposerSurface>
       </div>

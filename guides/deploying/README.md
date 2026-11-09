@@ -12,6 +12,7 @@ same change.
 
 | Task | Procedure |
 | --- | --- |
+| Build and publish the fork’s macOS DMG without Apple credentials | [Fork macOS release](fork-macos.md) |
 | Deploy to hosted staging or production, inspect a plan, verify a deploy, or recover a failed lane | [Hosted deployments](hosted.md) |
 | Run or verify a nightly train, production hotfix, Desktop/Runtime/Server release, or E2B template promotion | [Releases](releases.md) |
 | Install or update the canonical self-hosted Compose deployment | [Self-hosted deployment](self-hosted-deploy.md) |

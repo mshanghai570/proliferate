@@ -7959,6 +7959,125 @@
         }
       }
     },
+    "/v1/workspaces/{workspace_id}/retrieval": {
+      "get": {
+        "tags": [
+          "workspaces"
+        ],
+        "operationId": "get_project_retrieval",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRetrievalStatus"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "workspaces"
+        ],
+        "operationId": "index_project_retrieval",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectRetrievalStatus"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "workspaces"
+        ],
+        "operationId": "clear_project_retrieval",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/v1/workspaces/{workspace_id}/retrieval/search": {
+      "post": {
+        "tags": [
+          "workspaces"
+        ],
+        "operationId": "search_project_context",
+        "parameters": [
+          {
+            "name": "workspace_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchProjectContextRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectContextSearchResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/workspaces/{workspace_id}/reviews/code": {
       "post": {
         "tags": [
@@ -16498,6 +16617,57 @@
           }
         ]
       },
+      "ProjectContextExcerpt": {
+        "type": "object",
+        "required": [
+          "path",
+          "startLine",
+          "endLine",
+          "contentHash",
+          "text"
+        ],
+        "properties": {
+          "contentHash": {
+            "type": "string"
+          },
+          "endLine": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "path": {
+            "type": "string"
+          },
+          "startLine": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "ProjectContextSearchResponse": {
+        "type": "object",
+        "required": [
+          "workspaceId",
+          "status",
+          "excerpts"
+        ],
+        "properties": {
+          "excerpts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProjectContextExcerpt"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/ProjectRetrievalStatus"
+          },
+          "workspaceId": {
+            "type": "string"
+          }
+        }
+      },
       "ProjectMcpServerSummary": {
         "type": "object",
         "description": "Public inventory never includes connection URLs, commands, or credentials.",
@@ -16533,6 +16703,42 @@
             "items": {
               "$ref": "#/components/schemas/ProjectMcpServerSummary"
             }
+          }
+        }
+      },
+      "ProjectRetrievalStatus": {
+        "type": "object",
+        "required": [
+          "enabled",
+          "indexedFiles",
+          "chunks",
+          "skippedFiles",
+          "truncated"
+        ],
+        "properties": {
+          "chunks": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "indexedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "indexedFiles": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "skippedFiles": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "truncated": {
+            "type": "boolean"
           }
         }
       },
@@ -18847,6 +19053,18 @@
             "format": "double"
           }
         }
+      },
+      "SearchProjectContextRequest": {
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
       },
       "SearchWorkspaceFilesResponse": {
         "type": "object",

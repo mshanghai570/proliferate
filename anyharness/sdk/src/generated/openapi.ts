@@ -2185,6 +2185,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/retrieval": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_project_retrieval"];
+        put?: never;
+        post: operations["index_project_retrieval"];
+        delete: operations["clear_project_retrieval"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/retrieval/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["search_project_context"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/reviews/code": {
         parameters: {
             query?: never;
@@ -4396,6 +4428,18 @@ export interface components {
             /** @enum {string} */
             status: "exited";
         };
+        ProjectContextExcerpt: {
+            contentHash: string;
+            endLine: number;
+            path: string;
+            startLine: number;
+            text: string;
+        };
+        ProjectContextSearchResponse: {
+            excerpts: components["schemas"]["ProjectContextExcerpt"][];
+            status: components["schemas"]["ProjectRetrievalStatus"];
+            workspaceId: string;
+        };
         /** @description Public inventory never includes connection URLs, commands, or credentials. */
         ProjectMcpServerSummary: {
             enabled: boolean;
@@ -4405,6 +4449,14 @@ export interface components {
         ProjectMcpServersResponse: {
             encryptionAvailable: boolean;
             servers: components["schemas"]["ProjectMcpServerSummary"][];
+        };
+        ProjectRetrievalStatus: {
+            chunks: number;
+            enabled: boolean;
+            indexedAt?: string | null;
+            indexedFiles: number;
+            skippedFiles: number;
+            truncated: boolean;
         };
         /** @enum {string} */
         PromptAttachmentSource: "upload" | "paste";
@@ -4985,6 +5037,9 @@ export interface components {
             memory?: null | components["schemas"]["RuntimeMemoryPressure"];
             /** Format: double */
             pressurePercent?: number | null;
+        };
+        SearchProjectContextRequest: {
+            query: string;
         };
         SearchWorkspaceFilesResponse: {
             results: components["schemas"]["WorkspaceFileSearchResult"][];
@@ -12080,6 +12135,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_project_retrieval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRetrievalStatus"];
+                };
+            };
+        };
+    };
+    index_project_retrieval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRetrievalStatus"];
+                };
+            };
+        };
+    };
+    clear_project_retrieval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    search_project_context: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchProjectContextRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectContextSearchResponse"];
                 };
             };
         };

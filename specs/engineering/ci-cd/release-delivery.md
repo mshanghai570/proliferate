@@ -199,3 +199,13 @@ Excluded on purpose: `intent-tests (provisional)` and `intent-billing (provision
 Server CI carries no `on.pull_request.paths` filter, because a path-skipped workflow never reports a conclusion at all and a required check pointing into it would strand every unrelated pull request on a pending check. It runs on every pull request instead, and a `changes` job publishes one relevance flag that each lane's steps consume. A lane with nothing to verify reports a real `success` rather than `skipped`, and an unset flag -- what a failed `changes` job produces -- runs the real suite.
 
 Any change to the set of required checks belongs here and in the comment block above `ci-ok` in `.github/workflows/ci.yml`, in the same commit.
+
+## Fork macOS distribution
+
+`build-intel-dmg.yml` and the reusable `publish-fork-macos.yml` are restricted
+to `mshanghai570/proliferate`. The fork channel builds an Intel macOS 15+ DMG,
+records its app version and exact source, and publishes only from a completed
+successful build after checking artifact identity and checksum. Publication is
+an explicit dispatch with an unused version tag; normal builds have no write
+permission. The native preview identity and disabled production updater remain
+stable. [Fork procedure](../../../guides/deploying/fork-macos.md) owns the steps.
