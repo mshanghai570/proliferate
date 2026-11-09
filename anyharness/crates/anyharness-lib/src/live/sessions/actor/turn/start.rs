@@ -49,6 +49,16 @@ impl SessionActor {
             }
         }
 
+        if let Some(launch_prompt) = &self.prompts.launch_prompt {
+            match &mut first_prompt_system_prompt_append {
+                Some(append) => {
+                    append.push_str("\n\n");
+                    append.push_str(launch_prompt);
+                }
+                None => first_prompt_system_prompt_append = Some(launch_prompt.clone()),
+            }
+        }
+
         let queued_subagent_wake = queue_seq.filter(|_| payload.has_subagent_wake_provenance());
 
         // Canonical completion wakes are exactly one text block. They render

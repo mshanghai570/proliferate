@@ -39,10 +39,12 @@ async fn repo_root_mode_reuses_the_workspace_and_enforces_one_live_run() {
     // Local registration for the same checkout.
     assert_eq!(projection["run"]["workspaceId"], json!(existing.id));
     // Context docs materialized into the user's checkout.
-    assert!(fixture
-        .repo_dir()
-        .join(format!(".proliferate/context/{first_run}/00-notes.md"))
-        .is_file());
+    assert!(
+        fixture
+            .repo_dir()
+            .join(format!(".proliferate/context/{first_run}/00-notes.md"))
+            .is_file()
+    );
 
     // The one-live-run law: a second run cannot land in the workspace while
     // the first is non-terminal — 409 with the placement-conflict code and

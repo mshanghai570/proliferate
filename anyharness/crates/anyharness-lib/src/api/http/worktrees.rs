@@ -9,7 +9,7 @@ use anyharness_contract::v1::{
     WorktreeInventoryWorkspaceSummary as ContractWorktreeInventoryWorkspaceSummary,
     WorktreeStorageEstimate as ContractWorktreeStorageEstimate,
 };
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 
 use super::error::ApiError;
 use crate::app::AppState;

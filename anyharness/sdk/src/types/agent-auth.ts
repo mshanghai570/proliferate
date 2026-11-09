@@ -29,7 +29,7 @@ export interface AgentAuthStateSource {
    * to the known vault kinds here (the Rust side keeps a raw string, same as
    * `kind`) to mirror the server's wire vocabulary.
    */
-  config_kind?: "aws_bedrock" | "azure_openai" | null;
+  config_kind?: "aws_bedrock" | "azure_openai" | "openai_compatible" | null;
   /** `provider_config` and `seat`: the harness's already-resolved env map. */
   env?: Record<string, string> | null;
   /** `seat` sources only (seats v1): the vault entry id, never key material. */

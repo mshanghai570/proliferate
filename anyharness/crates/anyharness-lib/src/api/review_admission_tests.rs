@@ -1,8 +1,8 @@
 use axum::{
-    body::{to_bytes, Body},
-    http::{header, Request, StatusCode},
+    body::{Body, to_bytes},
+    http::{Request, StatusCode, header},
 };
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tower::util::ServiceExt;
 
 use super::router::build_router;
@@ -104,17 +104,21 @@ async fn plan_lookup_error_fails_closed_before_review_side_effects() {
     assert_eq!(body["detail"], "Failed to load review plan");
     assert!(!body.to_string().contains("private-test-marker"));
 
-    assert!(state
-        .plan_service
-        .get(&plan.id)
-        .expect("fail-once lookup is consumed")
-        .is_some());
-    assert!(state
-        .review_service
-        .store()
-        .list_runs_for_parent(SESSION_ID)
-        .expect("list review runs")
-        .is_empty());
+    assert!(
+        state
+            .plan_service
+            .get(&plan.id)
+            .expect("fail-once lookup is consumed")
+            .is_some()
+    );
+    assert!(
+        state
+            .review_service
+            .store()
+            .list_runs_for_parent(SESSION_ID)
+            .expect("list review runs")
+            .is_empty()
+    );
     assert_eq!(
         state
             .session_service

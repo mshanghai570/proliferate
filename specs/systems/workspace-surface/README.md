@@ -110,6 +110,9 @@ The cloud-workspace client paths under `hooks/cloud/` and `domain/workspaces/clo
   ([../chat/README.md](../chat/README.md)).
 - **Agents** owns the subagent hierarchy the header tabs display
   ([../agents/delegated-work.md](../subagents/delegated-work.md)).
+- **Extensions** owns the opt-in registry discovery surface at `/extensions`;
+  this surface supplies its sidebar destination and shared route shell
+  ([../extensions/README.md](../extensions/README.md)).
 - **Settings** owns repository configuration, worktree storage, and
   environment panes — the sidebar links there
   ([../settings/README.md](../settings/README.md)).

@@ -8,12 +8,18 @@ import { useUserPreferencesStore } from "#product/stores/preferences/user-prefer
 function applyStoredAppearancePreference(): void {
   const {
     colorMode,
+    importedTheme,
+    uiFontFamily,
+    codeFontFamily,
     uiFontSizeId,
     readableCodeFontSizeId,
     windowZoomId,
   } = useUserPreferencesStore.getState();
   applyAppearancePreference({
     colorMode,
+    importedTheme,
+    uiFontFamily,
+    codeFontFamily,
     uiFontSizeId,
     readableCodeFontSizeId,
     windowZoomId,
@@ -29,6 +35,9 @@ export function useAppearancePreferenceLifecycle(): void {
     const unsubscribeAppearance = useUserPreferencesStore.subscribe((state, prev) => {
       if (
         state.colorMode !== prev.colorMode
+        || state.importedTheme !== prev.importedTheme
+        || state.uiFontFamily !== prev.uiFontFamily
+        || state.codeFontFamily !== prev.codeFontFamily
         || state.uiFontSizeId !== prev.uiFontSizeId
         || state.readableCodeFontSizeId !== prev.readableCodeFontSizeId
         || state.windowZoomId !== prev.windowZoomId

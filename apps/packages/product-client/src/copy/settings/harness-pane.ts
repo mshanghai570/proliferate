@@ -240,7 +240,7 @@ export const HARNESS_PANE_COPY = {
   configVaultNote: "Stored in your vault; delivered to the harness at launch.",
   // OpenCode providers section.
   providersTitle: "Providers",
-  providersDescription: "Keys you add are wired into OpenCode alongside its own logins.",
+  providersDescription: "Use your own providers alongside OpenCode's existing logins.",
   providersConfigure: "Configure",
   providersCliNote: "OpenCode's own CLI logins always apply alongside these keys.",
   providersNone: "No providers configured",

@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod auth_state;
 pub mod catalog;
+pub mod custom;
 pub mod installer;
 pub mod launch_options;
 pub mod launch_probe;

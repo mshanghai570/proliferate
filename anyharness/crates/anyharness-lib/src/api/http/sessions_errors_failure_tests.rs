@@ -2,10 +2,10 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
 use super::{
-    map_create_session_error, map_ensure_live_session_error, map_send_prompt_error, ApiError,
+    ApiError, map_create_session_error, map_ensure_live_session_error, map_send_prompt_error,
 };
 use crate::domains::sessions::mcp_bindings::workspace_attachment::{
-    WorkspaceMcpAttachmentError, WORKSPACE_MCP_ATTACHMENT_CODE, WORKSPACE_MCP_ATTACHMENT_DETAIL,
+    WORKSPACE_MCP_ATTACHMENT_CODE, WORKSPACE_MCP_ATTACHMENT_DETAIL, WorkspaceMcpAttachmentError,
 };
 use crate::domains::sessions::model::{AgentStartupExitError, RequestedModeApplyError};
 use crate::domains::sessions::runtime::{
@@ -33,9 +33,11 @@ fn assert_workspace_attachment_problem(error: ApiError) {
             .get_version_num(),
         4
     );
-    assert!(!error
-        .detail()
-        .is_some_and(|detail| detail.contains("private selector or token detail")));
+    assert!(
+        !error
+            .detail()
+            .is_some_and(|detail| detail.contains("private selector or token detail"))
+    );
 }
 
 #[test]
@@ -74,9 +76,11 @@ fn product_context_failure_is_an_exact_retryable_incident() {
         mapped.instance(),
         Some(format!("urn:proliferate:anyharness:incident:{incident_id}").as_str())
     );
-    assert!(!mapped
-        .detail()
-        .is_some_and(|detail| detail.contains("private store detail")));
+    assert!(
+        !mapped
+            .detail()
+            .is_some_and(|detail| detail.contains("private store detail"))
+    );
 }
 
 #[test]

@@ -20,6 +20,7 @@ target/
 !apps/packages/product-client/src/lib/domain/automations/target/
 !apps/packages/product-client/src/lib/domain/automations/target/**
 apps/desktop/index.js
+apps/desktop/release.local.config.json
 # ProductClient qualification build canary output (Desktop host build)
 apps/desktop/dist-product-client-qualification/
 *.db

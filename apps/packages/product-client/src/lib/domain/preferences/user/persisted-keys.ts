@@ -3,6 +3,9 @@ import type { UserPreferences } from "#product/lib/domain/preferences/user/model
 const USER_PREFERENCE_KEYS = [
   "themePreset",
   "colorMode",
+  "importedTheme",
+  "uiFontFamily",
+  "codeFontFamily",
   "uiFontSizeId",
   "readableCodeFontSizeId",
   "windowZoomId",

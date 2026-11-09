@@ -8,10 +8,10 @@
 //! stream until it attaches (clients re-open on attach).
 
 use anyharness_contract::v1::{SessionActivity, SessionEventEnvelope, TurnState};
+use axum::Extension;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
-use axum::Extension;
 use futures::{SinkExt, StreamExt};
 
 use crate::api::auth::AuthContext;

@@ -1,7 +1,7 @@
 use super::*;
 use axum::http::Method;
 
-use crate::api::auth::{user_route_allowed, AuthError, ClaimPermissions, UserClaimAuth};
+use crate::api::auth::{AuthError, ClaimPermissions, UserClaimAuth, user_route_allowed};
 use crate::domains::agent_operations::model::ListAgentsInput;
 use crate::domains::sessions::extensions::SessionTurnOutcome;
 use crate::domains::sessions::links::completions::LinkCompletionStore;
@@ -148,9 +148,11 @@ async fn workspace_and_parent_rosters_project_only_current_subagents() {
         "completion-latest"
     );
     assert_eq!(children[0]["latestCompletion"]["outcome"], "completed");
-    assert!(children[0]["latestCompletion"]
-        .get("parentPromptSeq")
-        .is_none());
+    assert!(
+        children[0]["latestCompletion"]
+            .get("parentPromptSeq")
+            .is_none()
+    );
     assert_eq!(children[1]["relationship"]["sessionLinkId"], "link-closed");
     assert_eq!(children[1]["agent"]["status"]["presentation"], "closed");
     assert_eq!(children[1]["agent"]["status"]["execution"], "closed");
@@ -310,10 +312,11 @@ async fn lifecycle_routes_preserve_identity_are_idempotent_and_hide_non_targets(
         )
         .await
         .expect("ordinary roster");
-    assert!(page
-        .agents
-        .iter()
-        .any(|agent| agent.identity.session_id == promote_child));
+    assert!(
+        page.agents
+            .iter()
+            .any(|agent| agent.identity.session_id == promote_child)
+    );
 
     let (status, parent_roster) = call(
         &state,
@@ -323,11 +326,13 @@ async fn lifecycle_routes_preserve_identity_are_idempotent_and_hide_non_targets(
     )
     .await;
     assert_eq!(status, StatusCode::OK, "{parent_roster}");
-    assert!(parent_roster["children"]
-        .as_array()
-        .expect("parent children")
-        .iter()
-        .all(|entry| entry["agent"]["identity"]["sessionId"] != promote_child));
+    assert!(
+        parent_roster["children"]
+            .as_array()
+            .expect("parent children")
+            .iter()
+            .all(|entry| entry["agent"]["identity"]["sessionId"] != promote_child)
+    );
     let (status, workspace_roster) = call(
         &state,
         "GET",
@@ -336,12 +341,14 @@ async fn lifecycle_routes_preserve_identity_are_idempotent_and_hide_non_targets(
     )
     .await;
     assert_eq!(status, StatusCode::OK, "{workspace_roster}");
-    assert!(workspace_roster["parents"]
-        .as_array()
-        .expect("workspace parents")
-        .iter()
-        .flat_map(|entry| entry["children"].as_array().into_iter().flatten())
-        .all(|entry| entry["agent"]["identity"]["sessionId"] != promote_child));
+    assert!(
+        workspace_roster["parents"]
+            .as_array()
+            .expect("workspace parents")
+            .iter()
+            .flat_map(|entry| entry["children"].as_array().into_iter().flatten())
+            .all(|entry| entry["agent"]["identity"]["sessionId"] != promote_child)
+    );
 
     let (repeat_status, repeat_payload) = call(
         &state,

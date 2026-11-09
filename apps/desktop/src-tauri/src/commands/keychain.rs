@@ -1,17 +1,19 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{mpsc, Mutex, OnceLock};
+use std::sync::{Mutex, OnceLock, mpsc};
 
 use base64::Engine;
 use getrandom::fill;
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::app_config::{app_dir_path, read_json_file};
 
 const RUNTIME_SERVICE: &str = "com.proliferate.app.runtime";
 const ANYHARNESS_DATA_KEY_ACCOUNT: &str = "anyharness_data_key";
 const ANYHARNESS_DATA_KEY_ENV: &str = "ANYHARNESS_DATA_KEY";
+const AI_PROVIDER_KEY_SERVICE: &str = "com.proliferate.app.ai-provider";
 
 // Legacy keychain locations recreatable secrets used to live in, kept only so we
 // can purge orphaned items after migrating to file storage (see
@@ -263,6 +265,74 @@ fn delete_password(service: &str, account: &str) -> Result<(), String> {
         .map_err(|_| "Keychain worker did not return a result.".to_string())?
 }
 
+pub(super) trait AiProviderKeyBackend {
+    fn set(&mut self, account: &str, value: &str) -> Result<(), String>;
+    fn delete(&mut self, account: &str) -> Result<(), String>;
+}
+
+pub(super) struct SystemAiProviderKeyBackend;
+
+impl AiProviderKeyBackend for SystemAiProviderKeyBackend {
+    fn set(&mut self, account: &str, value: &str) -> Result<(), String> {
+        set_password(AI_PROVIDER_KEY_SERVICE, account, value)
+            .map_err(|_| "Could not save provider key to macOS Keychain.".to_string())
+    }
+
+    fn delete(&mut self, account: &str) -> Result<(), String> {
+        delete_password(AI_PROVIDER_KEY_SERVICE, account)
+            .map_err(|_| "Could not delete provider key from macOS Keychain.".to_string())
+    }
+}
+
+pub(super) fn validate_ai_provider_profile_id(profile_id: &str) -> Result<(), String> {
+    let parsed = Uuid::parse_str(profile_id)
+        .map_err(|_| "Provider profile ID must be a canonical UUID.".to_string())?;
+    if parsed.to_string() != profile_id {
+        return Err("Provider profile ID must be a canonical UUID.".to_string());
+    }
+    Ok(())
+}
+
+fn ai_provider_account(profile_id: &str) -> Result<String, String> {
+    validate_ai_provider_profile_id(profile_id)?;
+    Ok(format!("profile:{profile_id}"))
+}
+
+pub(super) fn save_ai_provider_key_with_backend(
+    profile_id: &str,
+    value: &str,
+    backend: &mut impl AiProviderKeyBackend,
+) -> Result<(), String> {
+    if value.is_empty() {
+        return Err("Provider key cannot be empty.".to_string());
+    }
+    backend.set(&ai_provider_account(profile_id)?, value)
+}
+
+fn delete_ai_provider_key_with_backend(
+    profile_id: &str,
+    backend: &mut impl AiProviderKeyBackend,
+) -> Result<(), String> {
+    backend.delete(&ai_provider_account(profile_id)?)
+}
+
+pub(super) fn save_ai_provider_key(profile_id: &str, value: &str) -> Result<(), String> {
+    save_ai_provider_key_with_backend(profile_id, value, &mut SystemAiProviderKeyBackend)
+}
+
+pub(super) fn delete_ai_provider_key(profile_id: &str) -> Result<(), String> {
+    delete_ai_provider_key_with_backend(profile_id, &mut SystemAiProviderKeyBackend)
+}
+
+pub(super) fn read_ai_provider_key(profile_id: &str) -> Result<Option<String>, String> {
+    read_password(AI_PROVIDER_KEY_SERVICE, &ai_provider_account(profile_id)?)
+        .map_err(|_| "Could not read provider key from macOS Keychain.".to_string())
+}
+
+pub(super) fn has_ai_provider_key(profile_id: &str) -> Result<bool, String> {
+    Ok(read_ai_provider_key(profile_id)?.is_some())
+}
+
 /// One-time, best-effort cleanup of the keychain items that recreatable secrets
 /// used to live in, so an old refresh token / provider key is not left orphaned
 /// after the move to file storage. Deleting a keychain item never decrypts it,
@@ -355,7 +425,74 @@ pub fn load_all_secrets_for_sidecar() -> HashMap<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashMap;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[derive(Default)]
+    struct FakeAiProviderKeychain {
+        entries: HashMap<String, String>,
+    }
+
+    impl AiProviderKeyBackend for FakeAiProviderKeychain {
+        fn set(&mut self, account: &str, value: &str) -> Result<(), String> {
+            self.entries.insert(account.to_string(), value.to_string());
+            Ok(())
+        }
+
+        fn delete(&mut self, account: &str) -> Result<(), String> {
+            self.entries.remove(account);
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn provider_profile_ids_must_be_canonical_lowercase_uuids() {
+        assert!(validate_ai_provider_profile_id("0f1e2d3c-4b5a-6978-8f0e-1d2c3b4a5968").is_ok());
+        assert!(validate_ai_provider_profile_id("").is_err());
+        assert!(validate_ai_provider_profile_id("not-a-uuid").is_err());
+        assert!(validate_ai_provider_profile_id("../provider").is_err());
+        assert!(validate_ai_provider_profile_id(&"a".repeat(128)).is_err());
+        assert!(validate_ai_provider_profile_id("0F1E2D3C-4B5A-6978-8F0E-1D2C3B4A5968").is_err());
+    }
+
+    #[test]
+    fn provider_key_accounts_are_isolated_per_profile_and_delete_is_scoped() {
+        assert_ne!(AI_PROVIDER_KEY_SERVICE, LEGACY_ENV_SERVICE);
+
+        let mut backend = FakeAiProviderKeychain::default();
+        let profile_a = "0f1e2d3c-4b5a-6978-8f0e-1d2c3b4a5968";
+        let profile_b = "11111111-2222-4333-8444-555555555555";
+
+        save_ai_provider_key_with_backend(profile_a, "key-a", &mut backend)
+            .expect("profile A save should work");
+        save_ai_provider_key_with_backend(profile_b, "key-b", &mut backend)
+            .expect("profile B save should work");
+        assert_eq!(backend.entries.len(), 2);
+        assert_eq!(
+            backend
+                .entries
+                .get("profile:0f1e2d3c-4b5a-6978-8f0e-1d2c3b4a5968"),
+            Some(&"key-a".to_string())
+        );
+        assert_eq!(
+            backend
+                .entries
+                .get("profile:11111111-2222-4333-8444-555555555555"),
+            Some(&"key-b".to_string())
+        );
+
+        delete_ai_provider_key_with_backend(profile_a, &mut backend)
+            .expect("profile A delete should work");
+        delete_ai_provider_key_with_backend(profile_a, &mut backend)
+            .expect("deleting a missing profile key should be idempotent");
+        assert_eq!(backend.entries.len(), 1);
+        assert_eq!(
+            backend
+                .entries
+                .get("profile:11111111-2222-4333-8444-555555555555"),
+            Some(&"key-b".to_string())
+        );
+    }
 
     fn temp_path(file_name: &str) -> PathBuf {
         static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);

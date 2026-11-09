@@ -39,11 +39,13 @@ async fn app_wiring_enforces_reversible_subagent_operability() {
         SessionMutationKind::MobilitySnapshot,
         SessionMutationKind::MobilityTeardown,
     ] {
-        assert!(state
-            .session_admission
-            .acquire(&child_id, kind, &SessionMutationSource::external())
-            .await
-            .is_ok());
+        assert!(
+            state
+                .session_admission
+                .acquire(&child_id, kind, &SessionMutationSource::external())
+                .await
+                .is_ok()
+        );
     }
 }
 
@@ -79,14 +81,16 @@ async fn restore_cannot_reopen_a_reversibly_closed_dismissed_subagent() {
     .await;
     assert_eq!(status, StatusCode::CONFLICT, "{payload}");
     assert_eq!(payload["code"], "SUBAGENT_OPEN_REQUIRED");
-    assert!(state
-        .session_service
-        .store()
-        .find_by_id(&child_id)
-        .unwrap()
-        .unwrap()
-        .dismissed_at
-        .is_some());
+    assert!(
+        state
+            .session_service
+            .store()
+            .find_by_id(&child_id)
+            .unwrap()
+            .unwrap()
+            .dismissed_at
+            .is_some()
+    );
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
@@ -146,15 +150,17 @@ async fn mobility_imported_closed_link_stays_closed_until_opened() {
     .open_subagent_operability(&link.id)
     .expect("open imported relationship");
     drop(open_permit);
-    assert!(state
-        .session_admission
-        .acquire(
-            &child_id,
-            SessionMutationKind::Prompt,
-            &SessionMutationSource::external(),
-        )
-        .await
-        .is_ok());
+    assert!(
+        state
+            .session_admission
+            .acquire(
+                &child_id,
+                SessionMutationKind::Prompt,
+                &SessionMutationSource::external(),
+            )
+            .await
+            .is_ok()
+    );
 }
 
 #[test]

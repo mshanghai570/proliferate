@@ -1,10 +1,10 @@
+use axum::Extension;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::{Path, Query, State};
 use axum::response::IntoResponse;
-use axum::Extension;
 use base64::Engine;
-use futures::stream::StreamExt;
 use futures::SinkExt;
+use futures::stream::StreamExt;
 use serde::Deserialize;
 
 use crate::api::auth::AuthContext;

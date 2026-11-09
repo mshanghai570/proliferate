@@ -2,9 +2,9 @@ use crate::api::http::access::admit_session_mutation;
 use crate::domains::sessions::admission::SessionMutationKind;
 use anyharness_contract::v1::{InteractionDecision, ResolveInteractionRequest};
 use axum::{
+    Extension, Json,
     extract::{Path, State},
     http::{HeaderMap, HeaderValue},
-    Extension, Json,
 };
 
 use super::access::assert_session_auth_scope;

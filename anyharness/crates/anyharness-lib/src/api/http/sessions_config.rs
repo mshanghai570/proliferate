@@ -5,8 +5,8 @@ use anyharness_contract::v1::{
     SetSessionConfigOptionResponse, UpdateSessionTitleRequest,
 };
 use axum::{
-    extract::{Path, State},
     Extension, Json,
+    extract::{Path, State},
 };
 
 use super::access::{assert_session_auth_scope, assert_session_mutable};

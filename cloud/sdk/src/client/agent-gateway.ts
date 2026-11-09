@@ -11,6 +11,7 @@ import type {
   AgentModelOverride,
   AgentModels,
   CreateAgentApiKeyRequest,
+  CreateAgentProviderConfigRequest,
   OrgAgentPolicy,
   OrgAgentPolicyViolationListResponse,
   PutAuthSelectionsRequest,
@@ -63,6 +64,17 @@ export async function revokeAgentApiKey(
   return client.requestJson<AgentApiKey>({
     method: "DELETE",
     path: `/v1/cloud/agent-auth/keys/${encodeURIComponent(keyId)}`,
+  });
+}
+
+export async function createAgentProviderConfig(
+  input: CreateAgentProviderConfigRequest,
+  client: ProliferateCloudClient = getProliferateClient(),
+): Promise<AgentApiKey> {
+  return client.requestJson<AgentApiKey>({
+    method: "POST",
+    path: "/v1/cloud/agent-auth/keys/provider-config",
+    body: input,
   });
 }
 

@@ -6,15 +6,15 @@ use anyharness_contract::v1::{
     MobilitySessionRawNotificationRecord, MobilitySessionRecord, SessionEvent,
     WorkspaceMobilityArchive, WorkspaceMobilityFileEntry, WorkspaceMobilitySessionBundle,
 };
-use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
+use base64::engine::general_purpose::STANDARD;
 use sha2::{Digest, Sha256};
 
 use super::error::ApiError;
 use crate::domains::agents::portability::AgentArtifactFileData;
 use crate::domains::mobility::model::{
-    MobilityFileData, MobilityPromptAttachmentData, WorkspaceMobilityArchiveData,
-    WorkspaceMobilitySessionBundleData, MAX_MOBILITY_FILE_BYTES,
+    MAX_MOBILITY_FILE_BYTES, MobilityFileData, MobilityPromptAttachmentData,
+    WorkspaceMobilityArchiveData, WorkspaceMobilitySessionBundleData,
 };
 use crate::domains::sessions::attachment_storage::PromptAttachmentStorage;
 use crate::domains::sessions::extensions::SessionTurnOutcome;
@@ -23,9 +23,9 @@ use crate::domains::sessions::links::model::{
     SessionLinkRecord, SessionLinkRelation, SessionLinkWorkspaceRelation,
 };
 use crate::domains::sessions::model::{
-    serialize_action_capabilities, PendingConfigChangeRecord, PendingPromptRecord,
-    PromptAttachmentKind, PromptAttachmentRecord, PromptAttachmentState, SessionEventRecord,
-    SessionLiveConfigSnapshotRecord, SessionRawNotificationRecord, SessionRecord,
+    PendingConfigChangeRecord, PendingPromptRecord, PromptAttachmentKind, PromptAttachmentRecord,
+    PromptAttachmentState, SessionEventRecord, SessionLiveConfigSnapshotRecord,
+    SessionRawNotificationRecord, SessionRecord, serialize_action_capabilities,
 };
 use crate::domains::sessions::subagents::delivery::{
     CompletionDeliveryRecord, CompletionDeliveryState,
@@ -293,7 +293,7 @@ fn from_contract_completion_delivery(
                 return Err(ApiError::bad_request(
                     format!("Invalid completion delivery state: {other}"),
                     "MOBILITY_INVALID_ARCHIVE",
-                ))
+                ));
             }
         },
         parent_prompt_seq: record.parent_prompt_seq,
@@ -519,10 +519,12 @@ mod tests {
             "session-1",
         )
         .is_err());
-        assert!(from_contract_event(
-            event("session-1", "pending_prompt_added", r#"{"seq":1}"#),
-            "session-1",
-        )
-        .is_err());
+        assert!(
+            from_contract_event(
+                event("session-1", "pending_prompt_added", r#"{"seq":1}"#),
+                "session-1",
+            )
+            .is_err()
+        );
     }
 }

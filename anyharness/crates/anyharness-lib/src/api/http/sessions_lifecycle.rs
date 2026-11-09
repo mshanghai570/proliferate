@@ -4,9 +4,9 @@ use std::time::Instant;
 
 use anyharness_contract::v1::Session;
 use axum::{
+    Extension, Json,
     extract::{Path, State},
     http::HeaderMap,
-    Extension, Json,
 };
 
 use super::access::{assert_session_auth_scope, assert_workspace_auth_scope};

@@ -8,9 +8,9 @@ use anyharness_contract::v1::{
     StartAgentLoginResponse, StartAgentLoginTerminalResponse,
 };
 use axum::{
+    Json,
     extract::{Path, State},
     http::StatusCode,
-    Json,
 };
 
 use super::agents_contract::{
@@ -20,9 +20,10 @@ use super::agents_contract::{
 use super::error::ApiError;
 use crate::app::AppState;
 use crate::domains::agents::auth::login_terminal::{
+    AgentLoginVariant as DomainLoginVariant, MintClaimError,
     close_agent_login_terminal as close_agent_login_terminal_session,
     get_agent_login_terminal as get_agent_login_terminal_session,
-    start_agent_login_terminal_session, AgentLoginVariant as DomainLoginVariant, MintClaimError,
+    start_agent_login_terminal_session,
 };
 use crate::domains::agents::auth_state::AuthRuntimeInputs;
 use crate::domains::agents::launch_probe::{LaunchProbeService, PokeReason};

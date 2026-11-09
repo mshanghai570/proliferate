@@ -1,6 +1,6 @@
 use axum::{
-    routing::{get, patch, post, put},
     Router,
+    routing::{get, patch, post, put},
 };
 
 use crate::api::http::sessions_pending;

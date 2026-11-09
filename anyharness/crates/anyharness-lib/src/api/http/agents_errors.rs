@@ -6,8 +6,8 @@ use axum::http::StatusCode;
 
 use super::error::ApiError;
 use crate::domains::agents::auth::login::AgentLoginError;
-use crate::domains::agents::installer::reconcile::execution::AgentReconcileStartError;
 use crate::domains::agents::installer::InstallError;
+use crate::domains::agents::installer::reconcile::execution::AgentReconcileStartError;
 use crate::domains::agents::runtime::AgentRuntimeError;
 
 impl From<AgentRuntimeError> for ApiError {

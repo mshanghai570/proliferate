@@ -34,9 +34,11 @@ pub(super) fn build_session_launch_env(
         AgentKind::Claude => build_claude_session_launch_env(resolved_agent, requested_model_id),
         // Routed Codex configuration belongs to route_auth; native Codex and
         // every other harness need no non-auth launch env here.
-        AgentKind::Codex | AgentKind::OpenCode | AgentKind::Cursor | AgentKind::Grok => {
-            Ok(BTreeMap::new())
-        }
+        AgentKind::Codex
+        | AgentKind::OpenCode
+        | AgentKind::Cursor
+        | AgentKind::Grok
+        | AgentKind::Custom { .. } => Ok(BTreeMap::new()),
     }
 }
 

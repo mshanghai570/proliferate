@@ -1,11 +1,13 @@
 pub mod activity;
 pub mod agent_auth;
 pub mod agents;
+pub mod ai_providers;
 pub mod auth;
 pub mod catalogs;
 pub mod cowork;
 pub mod errors;
 pub mod events;
+pub mod extensions;
 pub mod files;
 pub mod git;
 pub mod goals;
@@ -34,6 +36,7 @@ pub mod worktrees;
 pub use activity::*;
 pub use agent_auth::*;
 pub use agents::*;
+pub use ai_providers::*;
 pub use auth::*;
 pub use catalogs::*;
 pub use cowork::*;
@@ -63,3 +66,6 @@ pub use terminals::*;
 pub use workspaces::*;
 pub use workspaces_lifecycle::*;
 pub use worktrees::*;
+
+pub mod skills;
+pub mod mcp_servers;

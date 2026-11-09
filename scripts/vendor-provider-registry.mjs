@@ -3,6 +3,8 @@
 // list for the desktop app's OpenCode "Add provider" picker (contract §6).
 //
 // Refresh: node scripts/vendor-provider-registry.mjs
+// Rebuild only the asset map from the existing catalog and files, without
+// downloading or restoring removed logos: add --logo-map-only.
 // (re-run whenever OpenCode-supported providers change upstream; the output
 // below is checked in, there is no build-time fetch).
 
@@ -162,6 +164,16 @@ function writeLogoMap(ids) {
 }
 
 async function main() {
+  if (process.argv.includes("--logo-map-only")) {
+    const providers = JSON.parse(readFileSync(outputPath, "utf8"));
+    const kept = providers.map((provider) => provider.id).filter((id) =>
+      typeof id === "string" && SAFE_PROVIDER_ID_RE.test(id)
+      && existsSync(path.join(logosDir, `${id}.svg`)),
+    );
+    writeLogoMap(kept);
+    console.log(`Mapped ${kept.length} existing provider logos; catalog and assets unchanged`);
+    return;
+  }
   const raw = await fetchProviders();
   const providers = mergeDocOverlay(reduceProviders(raw));
   mkdirSync(productConfigDir, { recursive: true });

@@ -90,6 +90,52 @@ class TestRuntimeWorkerEnrollment:
         assert gateway["authorization"].startswith("Bearer ")
 
     @pytest.mark.asyncio
+    async def test_desktop_worker_enrollment_uses_local_api_when_base_urls_are_unset(
+        self,
+        client: AsyncClient,
+        db_session: AsyncSession,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(settings, "cloud_worker_base_url", "")
+        monkeypatch.setattr(settings, "api_base_url", "")
+        monkeypatch.setattr(settings, "telemetry_mode", "local_dev")
+        auth = await _authed_user(client, db_session, prefix="worker-local-base-url")
+        token = await _desktop_enrollment_token(client, auth, install_id="install-local-base-url")
+
+        enroll = await client.post(
+            "/v1/cloud/worker/enroll",
+            json={"enrollmentToken": token, "hostname": "laptop"},
+        )
+
+        assert enroll.status_code == 200, enroll.text
+        assert enroll.json()["integrationGateway"]["url"] == (
+            "http://127.0.0.1:8000/v1/cloud/integration-gateway/mcp"
+        )
+
+    @pytest.mark.asyncio
+    async def test_desktop_worker_enrollment_still_fails_closed_outside_local_dev(
+        self,
+        client: AsyncClient,
+        db_session: AsyncSession,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setattr(settings, "cloud_worker_base_url", "")
+        monkeypatch.setattr(settings, "api_base_url", "")
+        monkeypatch.setattr(settings, "telemetry_mode", "hosted_product")
+        auth = await _authed_user(client, db_session, prefix="worker-hosted-no-base-url")
+        token = await _desktop_enrollment_token(
+            client, auth, install_id="install-hosted-no-base-url"
+        )
+
+        enroll = await client.post(
+            "/v1/cloud/worker/enroll",
+            json={"enrollmentToken": token, "hostname": "laptop"},
+        )
+
+        assert enroll.status_code == 500
+        assert enroll.json()["detail"]["code"] == "cloud_worker_misconfigured"
+
+    @pytest.mark.asyncio
     async def test_enrollment_token_is_single_use(
         self,
         client: AsyncClient,

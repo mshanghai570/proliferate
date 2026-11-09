@@ -117,7 +117,7 @@ export function ApiKeyDetails({
   // (design-handoff v2 "Bound key field") — trash unbinds and returns here.
   if (boundRow) {
     const boundKey = apiKeys.find((key) => key.id === boundRow.apiKeyId);
-    const label = getApiKeyBindingLabel(boundRow.envVarName, boundRow.providerHint);
+    const label = getApiKeyBindingLabel(boundRow.envVarName ?? "", boundRow.providerHint);
     return (
       // Bound-key field frame: not a Card site (this is an input-shaped
       // affordance, not a content container). h-[38px] is a stray 2px over
@@ -293,10 +293,9 @@ function GetApiKeyLink() {
  * FOLLOW-UP (typed-config UI wiring): the server side is fully open —
  * POST /v1/cloud/agent-auth/keys/provider-config stores the entry and a
  * selection referencing it (api_key source, NO envVarName) persists and
- * renders — but Save here is still a placeholder: the editor's row model
- * (EditableApiKeyRow / buildDesiredSources) is env-var-keyed and cannot yet
- * represent a typed row, so the collected payload is not wired anywhere.
- * The real mutation + typed-row editor support is the remaining UI half.
+ * renders — but Save here is still a placeholder: this panel does not call
+ * the typed vault mutation or bind its result. The shared editor preserves
+ * persisted typed rows; creation from this Bedrock/Azure panel remains unwired.
  */
 function ProviderConfigPanel({ kind, busy }: { kind: ProviderConfigKind; busy: boolean }) {
   const spec = getProviderConfigFieldSpec(kind);

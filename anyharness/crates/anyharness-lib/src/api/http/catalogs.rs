@@ -5,7 +5,7 @@
 //! `domains/agents/catalog/sync.rs`.
 
 use anyharness_contract::v1::AgentCatalogVersionResponse;
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 
 use crate::app::AppState;
 use crate::domains::agents::catalog::sync::CatalogSource;

@@ -41,6 +41,7 @@ export type {
  */
 export function projectHarnessLaunchOptions(
   response: Pick<HarnessLaunchOptionsResponse, "harnessKind" | "options">,
+  displayName?: string,
 ): DesktopAgentLaunchAgent | null {
   const options = response.options;
   if (!options) {
@@ -52,7 +53,7 @@ export function projectHarnessLaunchOptions(
   );
   return {
     kind: response.harnessKind,
-    displayName: response.harnessKind,
+    displayName: displayName ?? response.harnessKind,
     description: null,
     defaultModelId: options.defaults.modelId,
     models: options.models.map((model) => {

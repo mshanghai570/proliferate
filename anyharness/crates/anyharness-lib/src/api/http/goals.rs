@@ -4,8 +4,8 @@ use anyharness_contract::v1::{
     ClearSessionGoalResponse, SessionGoalResponse, SetSessionGoalRequest,
 };
 use axum::{
-    extract::{Path, State},
     Extension, Json,
+    extract::{Path, State},
 };
 
 use super::access::assert_session_auth_scope;
@@ -73,10 +73,9 @@ pub async fn clear_session_goal(
 fn map_goal_op_error(error: GoalOpError) -> ApiError {
     match error {
         GoalOpError::SessionNotFound => ApiError::not_found("Session not found", "NOT_FOUND"),
-        GoalOpError::Unsupported => ApiError::conflict(
-            "This agent does not support goals.",
-            "GOALS_UNSUPPORTED",
-        ),
+        GoalOpError::Unsupported => {
+            ApiError::conflict("This agent does not support goals.", "GOALS_UNSUPPORTED")
+        }
         GoalOpError::SessionNotLive => ApiError::conflict(
             "The session is not running; goals mutate only through the live native session.",
             "SESSION_NOT_LIVE",
@@ -84,17 +83,17 @@ fn map_goal_op_error(error: GoalOpError) -> ApiError {
         GoalOpError::EmptyObjective => {
             ApiError::bad_request("Goal objective must not be empty.", "GOAL_OBJECTIVE_EMPTY")
         }
-        GoalOpError::ObjectiveTooLarge => ApiError::bad_request(
-            "Goal objective is too large.",
-            "GOAL_OBJECTIVE_TOO_LARGE",
-        ),
+        GoalOpError::ObjectiveTooLarge => {
+            ApiError::bad_request("Goal objective is too large.", "GOAL_OBJECTIVE_TOO_LARGE")
+        }
         GoalOpError::NotConfirmed => ApiError::conflict(
             "The goal mutation was accepted but its native confirmation did not arrive; the session's goal events remain authoritative.",
             "GOAL_NOT_CONFIRMED",
         ),
-        GoalOpError::Rejected(detail) => {
-            ApiError::bad_request(format!("Agent rejected goal operation: {detail}"), "GOAL_REJECTED")
-        }
+        GoalOpError::Rejected(detail) => ApiError::bad_request(
+            format!("Agent rejected goal operation: {detail}"),
+            "GOAL_REJECTED",
+        ),
         GoalOpError::AgentUnavailable(detail) => ApiError::service_unavailable(
             format!("The agent could not service the goal operation: {detail}"),
             "AGENT_UNAVAILABLE",

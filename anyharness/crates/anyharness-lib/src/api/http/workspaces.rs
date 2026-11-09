@@ -5,9 +5,9 @@ use anyharness_contract::v1::{
     UpdateWorkspaceDisplayNameRequest, Workspace, WorkspaceLifecycleFilter,
 };
 use axum::{
+    Extension, Json,
     extract::{Path, Query, State},
     http::HeaderMap,
-    Extension, Json,
 };
 
 use super::access::{assert_workspace_auth_scope, assert_workspace_mutable};

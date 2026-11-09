@@ -7,9 +7,9 @@ use anyharness_contract::v1::{
     StagePatchRequest, StagePathsRequest, UnstagePatchRequest, UnstagePathsRequest,
 };
 use axum::{
+    Json,
     extract::{Path, Query, State},
     http::HeaderMap,
-    Json,
 };
 use serde::Deserialize;
 
@@ -19,9 +19,9 @@ use super::git_contract::{
     git_diff_scope_to_internal, git_diff_to_contract, git_revert_patch_entry_to_internal,
     git_revert_patches_error_to_api, git_revert_patches_to_contract, git_status_to_contract,
 };
-use super::git_task::{run_git_task, GitTaskAccess};
-use crate::adapters::git::types::{CommitError, GitDiffScope as InternalGitDiffScope, PushError};
+use super::git_task::{GitTaskAccess, run_git_task};
 use crate::adapters::git::GitService;
+use crate::adapters::git::types::{CommitError, GitDiffScope as InternalGitDiffScope, PushError};
 use crate::app::AppState;
 use crate::observability::latency::FlowHeaders;
 use tracing::Instrument;

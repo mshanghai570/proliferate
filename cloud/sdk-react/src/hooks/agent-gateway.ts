@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   createAgentApiKey,
+  createAgentProviderConfig,
   deleteAgentModelOverride,
   getAgentAuthState,
   getAgentGatewayCapabilities,
@@ -23,6 +24,7 @@ import {
   type AgentModelOverride,
   type AgentModels,
   type CreateAgentApiKeyRequest,
+  type CreateAgentProviderConfigRequest,
   type OrgAgentPolicy,
   type OrgAgentPolicyViolationListResponse,
   type PutAuthSelectionsRequest,
@@ -111,6 +113,17 @@ export function useRevokeAgentApiKey() {
       // Revoking a key can invalidate api_key selections downstream.
       void queryClient.invalidateQueries({ queryKey: agentAuthSelectionsRootKey() });
       void queryClient.invalidateQueries({ queryKey: agentAuthStateRootKey() });
+    },
+  });
+}
+
+export function useCreateAgentProviderConfig() {
+  const client = useCloudClient();
+  const queryClient = useQueryClient();
+  return useMutation<AgentApiKey, Error, CreateAgentProviderConfigRequest>({
+    mutationFn: (input) => createAgentProviderConfig(input, client),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: agentApiKeysKey() });
     },
   });
 }

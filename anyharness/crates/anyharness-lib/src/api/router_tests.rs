@@ -3,11 +3,11 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use std::{env, fs};
 
 use axum::{
-    body::{to_bytes, Body},
-    http::{header, Request, StatusCode},
+    body::{Body, to_bytes},
+    http::{Request, StatusCode, header},
 };
-use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
-use serde_json::{json, Value};
+use jsonwebtoken::{Algorithm, EncodingKey, Header, encode};
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use tower::util::ServiceExt;
 use uuid::Uuid;
@@ -15,9 +15,9 @@ use uuid::Uuid;
 use super::auth::{DirectAttachAuthConfig, DirectAttachVerificationKey};
 use super::router::build_router;
 use crate::{
-    app::{test_support, AppState},
+    app::{AppState, test_support},
     domains::agents::{
-        installer::manifest::{record_entries, ManifestArtifact},
+        installer::manifest::{ManifestArtifact, record_entries},
         model::{AgentKind, ArtifactRole},
         readiness::paths::artifact_root,
     },
@@ -893,10 +893,12 @@ async fn agent_login_terminal_routes_start_status_and_close_managed_npm_binary()
     assert_eq!(payload["agentLoginTerminal"]["kind"], "grok");
     assert_eq!(payload["agentLoginTerminal"]["status"], "running");
     let managed_binary_display = managed_binary.display().to_string();
-    assert!(payload["agentLoginTerminal"]["commandDisplay"]
-        .as_str()
-        .expect("command display")
-        .contains(&managed_binary_display));
+    assert!(
+        payload["agentLoginTerminal"]["commandDisplay"]
+            .as_str()
+            .expect("command display")
+            .contains(&managed_binary_display)
+    );
     let terminal_id = payload["agentLoginTerminal"]["id"]
         .as_str()
         .expect("terminal id");
@@ -1444,9 +1446,11 @@ async fn launch_probe_status_route_serves_one_composed_observation() {
     let payload: Value = serde_json::from_slice(&body).expect("parse response json");
 
     assert_eq!(payload["harnessKind"], json!("opencode"));
-    assert!(payload["basisRevision"]
-        .as_str()
-        .is_some_and(|value| !value.is_empty()));
+    assert!(
+        payload["basisRevision"]
+            .as_str()
+            .is_some_and(|value| !value.is_empty())
+    );
     assert_eq!(payload["revision"], json!(0));
     assert!(
         matches!(

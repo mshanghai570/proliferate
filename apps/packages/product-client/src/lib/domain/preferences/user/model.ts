@@ -4,6 +4,7 @@ import type {
   UiFontSizeId,
   WindowZoomId,
 } from "#product/lib/domain/preferences/appearance";
+import type { ImportedThemePreference } from "#product/lib/domain/preferences/vscode-theme";
 import type {
   DefaultLiveSessionControlValuesByAgentKind,
 } from "#product/lib/domain/preferences/user/session-defaults";
@@ -29,6 +30,12 @@ export type ThemePreset = "mono";
 export interface UserPreferences {
   themePreset: ThemePreset;
   colorMode: ColorMode;
+  /** Imported VSCode-compatible theme applied when the resolved mode matches. */
+  importedTheme: ImportedThemePreference | null;
+  /** Installed macOS font family for UI text, or null for the built-in stack. */
+  uiFontFamily: string | null;
+  /** Installed macOS font family for code and diffs, or null for the built-in stack. */
+  codeFontFamily: string | null;
   uiFontSizeId: UiFontSizeId;
   readableCodeFontSizeId: ReadableCodeFontSizeId;
   windowZoomId: WindowZoomId;
@@ -66,6 +73,9 @@ export interface UserPreferences {
 export const NEW_USER_DEFAULTS: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
+  importedTheme: null,
+  uiFontFamily: null,
+  codeFontFamily: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
   windowZoomId: "default",
@@ -93,6 +103,9 @@ export const NEW_USER_DEFAULTS: UserPreferences = {
 export const PERSISTED_RECORD_BACKFILL: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
+  importedTheme: null,
+  uiFontFamily: null,
+  codeFontFamily: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
   windowZoomId: "default",

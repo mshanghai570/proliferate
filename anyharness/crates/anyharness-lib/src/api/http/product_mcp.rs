@@ -1,8 +1,8 @@
 use axum::{
+    Json,
     extract::{Path, State},
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
-    Json,
 };
 use serde_json::Value;
 
@@ -11,8 +11,8 @@ use super::error::ApiError;
 use crate::app::AppState;
 use crate::integrations::mcp::capability_token::McpCapabilityTokenValidation;
 use crate::integrations::mcp::product_server::{
-    ProductMcpAuthHeader, ProductMcpContextError, ProductMcpDispatchError,
-    ProductMcpEndpointOperation, ProductMcpRequestContext, PRODUCT_MCP_TOKEN_HEADER_NAME,
+    PRODUCT_MCP_TOKEN_HEADER_NAME, ProductMcpAuthHeader, ProductMcpContextError,
+    ProductMcpDispatchError, ProductMcpEndpointOperation, ProductMcpRequestContext,
 };
 use crate::observability::PRODUCT_MCP_AUTH_REJECTED_TRACING_TARGET;
 

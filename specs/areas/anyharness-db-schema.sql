@@ -178,6 +178,22 @@ CREATE TABLE harness_launch_option_states (
     CHECK ((probe_state = 'failed') = (probe_failure_code IS NOT NULL))
 );
 
+-- table: installed_extensions
+CREATE TABLE installed_extensions (
+    namespace TEXT NOT NULL,
+    name TEXT NOT NULL,
+    version TEXT NOT NULL,
+    sha256 TEXT NOT NULL CHECK(length(sha256) = 64 AND sha256 NOT GLOB '*[^0-9a-f]*'),
+    state TEXT NOT NULL CHECK(state IN ('installing', 'installed', 'removing', 'error')),
+    error_code TEXT CHECK(error_code IN ('interrupted_install', 'package_missing', 'package_invalid')),
+    removal_id TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    PRIMARY KEY (namespace, name, version),
+    CHECK((state = 'error') = (error_code IS NOT NULL)),
+    CHECK((state = 'removing') = (removal_id IS NOT NULL))
+);
+
 -- table: local_materialization_operation
 CREATE TABLE local_materialization_operation (
     operation_id TEXT PRIMARY KEY,
@@ -681,6 +697,25 @@ CREATE TABLE terminal_command_runs (
     duration_ms INTEGER,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
+);
+
+-- table: user_mcp_servers
+CREATE TABLE user_mcp_servers (
+    id TEXT NOT NULL PRIMARY KEY,
+    server_name TEXT NOT NULL UNIQUE,
+    transport TEXT NOT NULL CHECK(transport IN ('stdio', 'http')),
+    description TEXT,
+    stdio_command TEXT,
+    stdio_args_json TEXT NOT NULL DEFAULT '[]',
+    env_sealed TEXT,
+    url TEXT,
+    headers_sealed TEXT,
+    enabled_user_default INTEGER CHECK(enabled_user_default IN (0, 1)),
+    repository_overrides_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    CHECK(transport = 'stdio' OR url IS NOT NULL),
+    CHECK(transport <> 'stdio' OR stdio_command IS NOT NULL)
 );
 
 -- table: workflow_run_docs

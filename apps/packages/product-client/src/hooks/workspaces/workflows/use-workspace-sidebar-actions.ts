@@ -73,6 +73,10 @@ export function useWorkspaceSidebarActions() {
     goToTopLevelRoute(APP_ROUTES.workflows);
   }, [goToTopLevelRoute]);
 
+  const handleGoExtensions = useCallback(() => {
+    goToTopLevelRoute(APP_ROUTES.extensions);
+  }, [goToTopLevelRoute]);
+
   const handleGoWorkspaces = useCallback(() => {
     goToTopLevelRoute(APP_ROUTES.workspaces);
   }, [goToTopLevelRoute]);
@@ -209,6 +213,7 @@ export function useWorkspaceSidebarActions() {
     handleStartWorktreeWorkspaceCreation,
     handleGoWorkflows,
     handleGoWorkspaces,
+    handleGoExtensions,
     handleSidebarIndicatorAction,
     handleOpenPullRequest,
     handleMarkWorkspaceDone,

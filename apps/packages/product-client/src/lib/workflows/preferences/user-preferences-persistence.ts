@@ -92,6 +92,9 @@ async function readLegacyUserPreferences(
   return {
     themePreset: legacyTheme.themePreset ?? defaults.themePreset,
     colorMode: legacyTheme.colorMode ?? defaults.colorMode,
+    importedTheme: defaults.importedTheme,
+    uiFontFamily: defaults.uiFontFamily,
+    codeFontFamily: defaults.codeFontFamily,
     uiFontSizeId: defaults.uiFontSizeId,
     readableCodeFontSizeId: defaults.readableCodeFontSizeId,
     windowZoomId: defaults.windowZoomId,

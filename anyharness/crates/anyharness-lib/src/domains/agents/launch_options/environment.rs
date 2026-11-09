@@ -65,12 +65,30 @@ fn capability_affecting_env_keys(descriptor: &AgentDescriptor) -> BTreeSet<Strin
 }
 
 pub(crate) fn find_capability_affecting_env_override(
+    runtime_home: &std::path::Path,
     descriptor: &AgentDescriptor,
     composed_user_env: &BTreeMap<String, String>,
 ) -> Option<String> {
-    capability_affecting_env_keys(descriptor)
-        .into_iter()
+    let mut keys = capability_affecting_env_keys(descriptor);
+    if crate::domains::agents::custom::is_custom_id(descriptor.kind.as_str()) {
+        if let Ok(Some(config)) =
+            crate::domains::agents::custom::load(runtime_home, descriptor.kind.as_str())
+        {
+            keys.extend(config.env.into_keys());
+        }
+    }
+    keys.into_iter()
         .find(|key| composed_user_env.contains_key(key))
+        .or_else(|| {
+            (descriptor.kind.as_str() == "opencode")
+                .then(|| {
+                    composed_user_env
+                        .keys()
+                        .find(|key| key.starts_with("PROLIFERATE_CUSTOM_"))
+                        .cloned()
+                })
+                .flatten()
+        })
 }
 
 #[cfg(test)]
@@ -82,6 +100,7 @@ mod tests {
     fn registry_route_and_config_keys_are_rejected_from_both_launch_layers() {
         let claude = registry::descriptor("claude").expect("claude descriptor");
         let codex = registry::descriptor("codex").expect("codex descriptor");
+        let opencode = registry::descriptor("opencode").expect("opencode descriptor");
 
         for (descriptor, key) in [
             (&claude, "ANTHROPIC_API_KEY"),
@@ -90,24 +109,38 @@ mod tests {
             (&claude, "CLAUDE_CODE_EXECUTABLE"),
             (&codex, "CODEX_HOME"),
             (&codex, "PATH"),
+            (&opencode, "OPENCODE_CONFIG_CONTENT"),
+            (&opencode, "PROLIFERATE_CUSTOM_CONNECTION_KEY"),
         ] {
             let workspace = BTreeMap::from([(key.to_string(), "workspace".to_string())]);
             assert_eq!(
-                find_capability_affecting_env_override(descriptor, &workspace),
+                find_capability_affecting_env_override(
+                    std::path::Path::new("."),
+                    descriptor,
+                    &workspace
+                ),
                 Some(key.to_string()),
                 "workspace layer must not change the probe universe"
             );
 
             let session = BTreeMap::from([(key.to_string(), "session".to_string())]);
             assert_eq!(
-                find_capability_affecting_env_override(descriptor, &session),
+                find_capability_affecting_env_override(
+                    std::path::Path::new("."),
+                    descriptor,
+                    &session
+                ),
                 Some(key.to_string()),
                 "session layer must not change the probe universe"
             );
 
             let global = BTreeMap::from([(key.to_string(), "global".to_string())]);
             assert_eq!(
-                find_capability_affecting_env_override(descriptor, &global),
+                find_capability_affecting_env_override(
+                    std::path::Path::new("."),
+                    descriptor,
+                    &global
+                ),
                 Some(key.to_string()),
                 "global secret layer must not change the probe universe"
             );
@@ -119,7 +152,7 @@ mod tests {
         let claude = registry::descriptor("claude").expect("claude descriptor");
         let workspace = BTreeMap::from([("PROJECT_FEATURE_FLAG".to_string(), "1".to_string())]);
         assert_eq!(
-            find_capability_affecting_env_override(&claude, &workspace),
+            find_capability_affecting_env_override(std::path::Path::new("."), &claude, &workspace),
             None
         );
     }

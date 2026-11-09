@@ -1,6 +1,6 @@
 use super::http::support_windows::{
-    encode_support_window, parse_support_evidence_window_query, parse_support_session_window_query,
-    EvidenceKind,
+    EvidenceKind, encode_support_window, parse_support_evidence_window_query,
+    parse_support_session_window_query,
 };
 use super::openapi::openapi_json;
 use crate::domains::sessions::service::support_windows::{
@@ -147,12 +147,14 @@ fn response_assembly_splices_the_exact_pre_serialized_item_bytes() {
     )
     .expect("assemble bounded response");
 
-    assert!(response
-        .windows(item.len())
-        .any(|window| window == item.as_slice()));
+    assert!(
+        response
+            .windows(item.len())
+            .any(|window| window == item.as_slice())
+    );
     assert_eq!(
-        serde_json::from_slice::<serde_json::Value>(&response).expect("valid response JSON")
-            ["window"]["returnedItems"],
+        serde_json::from_slice::<serde_json::Value>(&response).expect("valid response JSON")["window"]
+            ["returnedItems"],
         1
     );
 }

@@ -18,7 +18,7 @@ use crate::domains::agents::launch_options::{
     HarnessLaunchModel, HarnessLaunchOptions, HarnessLaunchOptionsService,
 };
 use crate::domains::agents::launch_probe::test_support::{
-    gateway_state, CountingPlanProducer, FakeRunner, FixedTargets, TempRuntimeHome,
+    CountingPlanProducer, FakeRunner, FixedTargets, TempRuntimeHome, gateway_state,
 };
 use crate::domains::agents::launch_probe::{
     LaunchProbeService, ProbeEngineConfig, ProbeEngineMode,

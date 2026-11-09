@@ -46,7 +46,7 @@ pub fn compute_harness_basis_revision(runtime_home: &Path, harness_kind: &str) -
         None => hash_field(&mut hasher, b"no-install-manifest"),
     }
 
-    if let Some(descriptor) = registry::descriptor(harness_kind) {
+    if let Some(descriptor) = registry::descriptor_at(runtime_home, harness_kind) {
         let resolved = resolve_agent_unrouted(&descriptor, runtime_home);
         let ambient_native_override = effective_ambient_native_override(harness_kind);
         hash_effective_native_artifact(

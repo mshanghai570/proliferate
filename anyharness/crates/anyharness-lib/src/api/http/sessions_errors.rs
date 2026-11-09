@@ -109,20 +109,23 @@ pub(super) fn map_create_session_error(error: CreateAndStartSessionError) -> Api
         CreateAndStartSessionError::Invalid(detail) => {
             ApiError::bad_request(detail, "SESSION_CREATE_FAILED")
         }
-        CreateAndStartSessionError::LaunchOptionsUnavailable {
-            agent_kind,
-            state,
-        } => ApiError::conflict(
-            format!("launch options are not available for agent '{agent_kind}' (state: {state:?})"),
-            "SESSION_LAUNCH_OPTIONS_UNAVAILABLE",
-        ),
+        CreateAndStartSessionError::LaunchOptionsUnavailable { agent_kind, state } => {
+            ApiError::conflict(
+                format!(
+                    "launch options are not available for agent '{agent_kind}' (state: {state:?})"
+                ),
+                "SESSION_LAUNCH_OPTIONS_UNAVAILABLE",
+            )
+        }
         CreateAndStartSessionError::LaunchValueUnsupported {
             agent_kind,
             key,
             value,
             state,
         } => ApiError::bad_request(
-            format!("launch value '{value}' for '{key}' is not supported for agent '{agent_kind}' (state: {state:?})"),
+            format!(
+                "launch value '{value}' for '{key}' is not supported for agent '{agent_kind}' (state: {state:?})"
+            ),
             "SESSION_LAUNCH_VALUE_UNSUPPORTED",
         ),
         CreateAndStartSessionError::AgentEnvOverrideUnsupported {

@@ -20,6 +20,7 @@
 //! harness means native behavior (empty delta), where the harness's own login
 //! owns auth. A present harness with no satisfiable sources fails closed.
 
+mod custom_providers;
 pub(crate) mod gateway_plan;
 mod gateway_probe;
 mod materialize;
@@ -193,6 +194,9 @@ pub fn resolve_profile_bridged(
     policy: AbsentHarnessPolicy,
     legacy_native_granted: bool,
 ) -> Result<AgentRuntimeAuthProfile, RouteAuthError> {
+    if crate::domains::agents::custom::is_custom_id(harness_kind) {
+        return Ok(AgentRuntimeAuthProfile::Native);
+    }
     let absent = state.is_none_or(|state| state.sources_for(harness_kind).is_none());
     if !absent {
         return resolve_profile(state, harness_kind);

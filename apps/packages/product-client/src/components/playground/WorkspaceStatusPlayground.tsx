@@ -328,6 +328,9 @@ function FullSidebarPane() {
             // every row regardless of the workflows_v2 launch gate.
             showWorkflows
             workflowsActive={false}
+            showExtensions
+            extensionsActive={false}
+            onGoExtensions={() => {}}
             supportActive={false}
             onGoWorkspaces={() => {}}
             onGoWorkflows={() => {}}

@@ -26,6 +26,7 @@ pub struct SessionMcpLaunchAssembly {
     pub mcp_servers: Vec<SessionMcpServer>,
     pub system_prompt_append: Option<String>,
     pub first_prompt_system_prompt_append: Option<String>,
+    pub launch_prompt_append: Option<String>,
     pub mcp_binding_summaries_json: Option<String>,
 }
 
@@ -68,11 +69,16 @@ pub fn assemble_session_mcp_launch(
         .first_prompt_system_prompt_append
         .append(&mut product_extras.first_prompt_system_prompt_append);
     launch_extras
+        .launch_prompt_append
+        .append(&mut product_extras.launch_prompt_append);
+    product_extras
         .mcp_servers
-        .append(&mut product_extras.mcp_servers);
-    launch_extras
+        .append(&mut launch_extras.mcp_servers);
+    launch_extras.mcp_servers = product_extras.mcp_servers;
+    product_extras
         .mcp_binding_summaries
-        .append(&mut product_extras.mcp_binding_summaries);
+        .append(&mut launch_extras.mcp_binding_summaries);
+    launch_extras.mcp_binding_summaries = product_extras.mcp_binding_summaries;
     // Both channels on purpose: most harnesses consume the systemPrompt.append
     // session meta, but Codex ignores it and only receives the first-prompt
     // channel (inlined into the first user prompt). Non-Codex harnesses never
@@ -85,6 +91,7 @@ pub fn assemble_session_mcp_launch(
         .append(&mut response_formatting::system_prompt_append());
     let first_prompt_system_prompt_append =
         join_system_prompt_append(Some(launch_extras.first_prompt_system_prompt_append));
+    let launch_prompt_append = join_system_prompt_append(Some(launch_extras.launch_prompt_append));
     let system_prompt_append = merge_system_prompt_append(
         persisted_system_prompt_append,
         launch_extras.system_prompt_append,
@@ -131,6 +138,7 @@ pub fn assemble_session_mcp_launch(
         mcp_servers,
         system_prompt_append,
         first_prompt_system_prompt_append,
+        launch_prompt_append,
         mcp_binding_summaries_json,
     })
 }
@@ -194,6 +202,9 @@ fn resolve_extension_launch_extras(
         combined
             .first_prompt_system_prompt_append
             .append(&mut extras.first_prompt_system_prompt_append);
+        combined
+            .launch_prompt_append
+            .append(&mut extras.launch_prompt_append);
         combined.mcp_servers.append(&mut extras.mcp_servers);
         combined
             .mcp_binding_summaries
@@ -384,6 +395,7 @@ mod tests {
             extras: SessionLaunchExtras {
                 system_prompt_append: vec!["product prompt".to_string()],
                 first_prompt_system_prompt_append: vec!["first prompt".to_string()],
+                launch_prompt_append: vec!["launch skill instructions".to_string()],
                 mcp_servers: vec![product_server],
                 mcp_binding_summaries: vec![summary("product-1", "product")],
             },
@@ -420,7 +432,70 @@ mod tests {
             assembled.first_prompt_system_prompt_append.as_deref(),
             Some(expected_first_prompt.as_str())
         );
+        assert_eq!(
+            assembled.launch_prompt_append.as_deref(),
+            Some("launch skill instructions")
+        );
         assert!(assembled.mcp_binding_summaries_json.is_some());
+    }
+
+    #[test]
+    fn product_servers_precede_user_extension_servers_and_summaries() {
+        let registration = ProductMcpLaunchRegistration::new(
+            &crate::domains::agent_operations::mcp::definition::DEFINITION,
+            Arc::new(|_ctx| Ok(true)),
+            Arc::new(|_, _| Ok("product-token".to_string())),
+        )
+        .with_applied_http_binding_summary();
+        let catalog = ProductMcpLaunchCatalog::new(
+            "http://127.0.0.1:4317".to_string(),
+            None,
+            vec![registration],
+        );
+        let extension: Arc<dyn SessionExtension> = Arc::new(StaticExtension {
+            extras: SessionLaunchExtras {
+                mcp_servers: vec![http_server("user:filesystem", "filesystem")],
+                mcp_binding_summaries: vec![summary("user:filesystem", "filesystem")],
+                ..SessionLaunchExtras::default()
+            },
+        });
+
+        let assembled = assemble_session_mcp_launch(
+            None,
+            &[extension],
+            &catalog,
+            &workspace_record(),
+            &session_record(),
+            None,
+        )
+        .expect("assemble launch");
+        let server_names = assembled
+            .mcp_servers
+            .iter()
+            .map(|server| match server {
+                SessionMcpServer::Http(server) => server.server_name.as_str(),
+                SessionMcpServer::Stdio(server) => server.server_name.as_str(),
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            server_names,
+            vec![
+                crate::domains::agent_operations::mcp::definition::DEFINITION.acp_server_name,
+                "filesystem"
+            ]
+        );
+
+        let summaries: Vec<SessionMcpBindingSummary> =
+            serde_json::from_str(&assembled.mcp_binding_summaries_json.expect("summaries"))
+                .expect("parse summaries");
+        assert_eq!(
+            summaries[0].id,
+            format!(
+                "internal:{}",
+                crate::domains::agent_operations::mcp::definition::DEFINITION.id
+            )
+        );
+        assert_eq!(summaries[1].id, "user:filesystem");
     }
 
     #[test]

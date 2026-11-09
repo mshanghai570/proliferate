@@ -32,6 +32,10 @@ vi.mock("#product/pages/SettingsPage", () => ({
   SettingsPage: () => null,
 }));
 
+vi.mock("#product/pages/ExtensionsPage", () => ({
+  ExtensionsPage: () => <section data-testid="extensions" />,
+}));
+
 vi.mock("#product/pages/WorkspacesPage", () => ({
   WorkspacesPage: () => <section data-testid="workspaces" />,
 }));
@@ -136,6 +140,21 @@ describe("AuthenticatedAppHost", () => {
 
     fireEvent.click(screen.getByText("Go home"));
 
+    expect(screen.getByTestId("workspace").dataset.visible).toBe("true");
+    expect(mainMounts).toBe(1);
+  });
+
+  it("opens Extensions while preserving the mounted workspace", async () => {
+    render(
+      <MemoryRouter initialEntries={["/extensions"]}>
+        <AuthenticatedAppHost MainComponent={TestMain} SettingsComponent={TestSettings} />
+      </MemoryRouter>,
+    );
+    await screen.findByTestId("extensions");
+    expect(screen.getByTestId("workspace").dataset.visible).toBe("false");
+    expect(screen.getByTestId("workspace").parentElement?.hasAttribute("inert")).toBe(true);
+    expect(mainMounts).toBe(1);
+    fireEvent.click(screen.getByText("Go home"));
     expect(screen.getByTestId("workspace").dataset.visible).toBe("true");
     expect(mainMounts).toBe(1);
   });

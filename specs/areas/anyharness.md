@@ -12,6 +12,16 @@ Scope:
 
 Use this doc first to understand AnyHarness ownership. Then read the focused guide or spec for the layer or subsystem you are changing.
 
+## Extension package source layout
+
+The [extension system](../systems/extensions/README.md) separates local VSIX
+admission under [domains/extensions](../../anyharness/crates/anyharness-lib/src/domains/extensions/)
+from snapshot, archive, staging, and publication mechanics under
+[adapters/extensions](../../anyharness/crates/anyharness-lib/src/adapters/extensions/).
+SQLite registration lives in the extension domain store; package receipts are
+filesystem evidence. Registration does not imply activation or an extension-host
+process.
+
 ## Launch-option and live-session authority
 
 `domains/agents/launch_options/` owns target-observed pre-launch state and exact validation. `domains/agents/launch_probe/` owns override-free detection. `domains/sessions/launch_intent.rs` and the session store own the atomic resolved intent. The live actor applies and confirms that intent before ready; `domains/sessions/live_config/` owns the latest full per-session snapshot and validated mutation. Catalog modules are distribution, presentation, and compatibility support only and cannot authorize executable values.

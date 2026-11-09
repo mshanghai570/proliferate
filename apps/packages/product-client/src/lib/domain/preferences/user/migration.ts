@@ -17,6 +17,10 @@ import {
 } from "#product/lib/domain/preferences/user/model";
 import { isValidWorktreeAutoDeleteLimit } from "#product/lib/domain/preferences/user/worktree-auto-delete";
 import type { LegacyUserPreferencesInput } from "#product/lib/domain/preferences/user/persisted-keys";
+import { sanitizeFontFamilyPreference } from "#product/lib/domain/preferences/font-family";
+import {
+  sanitizeImportedThemePreference,
+} from "#product/lib/domain/preferences/vscode-theme";
 import {
   normalizeReleaseTitlePair,
   normalizeReleaseVersion,
@@ -83,6 +87,23 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
   if (next.themePreset !== "mono") {
     next.themePreset = "mono";
     changed = true;
+  }
+
+  const importedTheme = sanitizeImportedThemePreference(next.importedTheme);
+  if (
+    JSON.stringify(importedTheme)
+    !== JSON.stringify(next.importedTheme)
+  ) {
+    changed = true;
+  }
+  next.importedTheme = importedTheme;
+
+  for (const fontKey of ["uiFontFamily", "codeFontFamily"] as const) {
+    const fontFamily = sanitizeFontFamilyPreference(next[fontKey]);
+    if (fontFamily !== next[fontKey]) {
+      next[fontKey] = fontFamily;
+      changed = true;
+    }
   }
 
   // "gong" was the tbpn-only turn-end easter egg; it retired with the preset.
