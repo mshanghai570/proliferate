@@ -17,5 +17,3 @@ pub mod workflows;
 pub mod workspaces;
 
 pub mod skills;
-
-pub mod mcp_servers;

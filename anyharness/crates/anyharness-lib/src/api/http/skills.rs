@@ -1,12 +1,14 @@
 use super::{blocking::run_blocking, error::ApiError};
+use crate::adapters::skills::SkillFile;
 use crate::app::AppState;
+use crate::domains::skills::SkillSummary as DomainSkillSummary;
 use anyharness_contract::v1::skills::{
     ImportSkillRequest, ListSkillsResponse, SetSkillEnabledRequest, SkillSummary,
 };
 use axum::{
-    Json,
     extract::{Path, State},
     http::StatusCode,
+    Json,
 };
 
 fn invalid(error: anyhow::Error) -> ApiError {
@@ -16,10 +18,7 @@ fn invalid(error: anyhow::Error) -> ApiError {
     {
         return unavailable();
     }
-    ApiError::bad_request(
-        "Skill operation failed. Check the package size, root SKILL.md, relative paths, and enablement scope.",
-        "SKILL_OPERATION_FAILED",
-    )
+    ApiError::bad_request("Skill operation failed. Check the package size, root SKILL.md, relative paths, and enablement scope.", "SKILL_OPERATION_FAILED")
 }
 fn unavailable() -> ApiError {
     ApiError::new(
@@ -39,7 +38,9 @@ pub async fn list_skills(
         .await
         .map_err(|_| unavailable())?
         .map_err(invalid)?;
-    Ok(Json(ListSkillsResponse { skills }))
+    Ok(Json(ListSkillsResponse {
+        skills: skills.into_iter().map(to_summary).collect(),
+    }))
 }
 
 #[utoipa::path(post, path = "/v1/skills", request_body = ImportSkillRequest, responses((status = 201, body = SkillSummary)), tag = "skills")]
@@ -48,11 +49,23 @@ pub async fn import_skill(
     Json(request): Json<ImportSkillRequest>,
 ) -> Result<(StatusCode, Json<SkillSummary>), ApiError> {
     let manager = state.skill_manager.clone();
-    let skill = run_blocking("skill_import", move || manager.import(request))
-        .await
-        .map_err(|_| unavailable())?
-        .map_err(invalid)?;
-    Ok((StatusCode::CREATED, Json(skill)))
+    let skill = run_blocking("skill_import", move || {
+        manager.import(
+            request.name,
+            request
+                .files
+                .into_iter()
+                .map(|file| SkillFile {
+                    path: file.path,
+                    content_base64: file.content_base64,
+                })
+                .collect(),
+        )
+    })
+    .await
+    .map_err(|_| unavailable())?
+    .map_err(invalid)?;
+    Ok((StatusCode::CREATED, Json(to_summary(skill))))
 }
 
 #[utoipa::path(put, path = "/v1/skills/{id}/enabled", params(("id" = String, Path)), request_body = SetSkillEnabledRequest, responses((status = 200, body = SkillSummary)), tag = "skills")]
@@ -70,12 +83,12 @@ pub async fn set_skill_enabled(
                 "Unknown repository"
             );
         }
-        manager.set_enabled(&id, request)
+        manager.set_enabled(&id, request.repository_id, request.enabled)
     })
     .await
     .map_err(|_| unavailable())?
     .map_err(invalid)?;
-    Ok(Json(skill))
+    Ok(Json(to_summary(skill)))
 }
 
 #[utoipa::path(delete, path = "/v1/skills/{id}", params(("id" = String, Path)), responses((status = 204)), tag = "skills")]
@@ -89,4 +102,14 @@ pub async fn remove_skill(
         .map_err(|_| unavailable())?
         .map_err(invalid)?;
     Ok(StatusCode::NO_CONTENT)
+}
+
+fn to_summary(skill: DomainSkillSummary) -> SkillSummary {
+    SkillSummary {
+        id: skill.id,
+        name: skill.name,
+        user_enabled: skill.user_enabled,
+        repository_overrides: skill.repository_overrides,
+        file_count: skill.file_count,
+    }
 }
