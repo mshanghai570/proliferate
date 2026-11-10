@@ -8,14 +8,13 @@ use anyharness_contract::v1::{
     RepoPullRequestStatusesResponse,
 };
 use axum::{
-    Json,
     extract::{Path, Query, State},
+    Json,
 };
 
 use super::access::{assert_workspace_exists, assert_workspace_mutable};
 use super::blocking::run_blocking;
 use super::error::ApiError;
-use crate::adapters::hosting::HostingService;
 use crate::adapters::hosting::types::{
     BranchPullRequestStatus as InternalBranchPullRequestStatus, CreatePullRequestResult,
     CurrentPullRequestResult, HostingServiceError,
@@ -24,6 +23,7 @@ use crate::adapters::hosting::types::{
     PullRequestState as InternalPullRequestState, PullRequestSummary as InternalPullRequestSummary,
     RepoPullRequestStatusesResult,
 };
+use crate::adapters::hosting::HostingService;
 use crate::app::AppState;
 use crate::domains::workspaces::operation_gate::WorkspaceOperationKind;
 
