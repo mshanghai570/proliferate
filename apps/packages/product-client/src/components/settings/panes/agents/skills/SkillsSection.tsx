@@ -1,10 +1,11 @@
 import { useRef, useState, type InputHTMLAttributes } from "react";
 import { resolveRuntimeCacheScopeKey, useAnyHarnessRuntimeContext, useRepoRootsQuery } from "@anyharness/sdk-react";
 import { Button } from "#product/primitives/Button";
+import { Input } from "#product/primitives/Input";
 import { Select } from "#product/primitives/Select";
 import { Switch } from "#product/primitives/Switch";
 import { useSkillsAccess } from "#product/hooks/access/skills/use-skills-access";
-import { importSkillFiles } from "#product/hooks/skills/workflows/import-skill-files";
+import { importSkillFile, importSkillFiles } from "#product/hooks/skills/workflows/import-skill-files";
 import { useAgentSurfaceStore } from "#product/stores/ui/agent-surface-store";
 import { NoticeBanner } from "#product/primitives/patterns/NoticeBanner";
 
@@ -21,6 +22,8 @@ function SkillControls() {
   const access = useSkillsAccess();
   const repositories = useRepoRootsQuery({ enabled: access.available });
   const input = useRef<HTMLInputElement>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [skillName, setSkillName] = useState("");
   const [repositoryId, setRepositoryId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
@@ -28,17 +31,19 @@ function SkillControls() {
   const busy = reading || access.mutation.isPending;
   const skills = access.query.data?.skills ?? [];
 
-  const importFiles = async (files: File[]) => {
+  const importFiles = async (files: File[], single = false) => {
+    if (!files.length) return;
     setError(null);
     setReading(true);
     try {
-      const request = await importSkillFiles(files);
+      const request = single ? await importSkillFile(files[0]!, skillName) : await importSkillFiles(files);
       await access.mutation.mutateAsync({ kind: "import", request });
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not import the skill. Choose the folder again.");
+      setError(cause instanceof Error ? cause.message : "Could not import the skill. Choose the file or folder again.");
     } finally {
       setReading(false);
       if (input.current) input.current.value = "";
+      if (fileInput.current) fileInput.current.value = "";
     }
   };
   const change = (id: string, enabled: boolean | null) => {
@@ -50,13 +55,22 @@ function SkillControls() {
     <div className="space-y-5">
       <div className="space-y-2">
         <h1 className="text-ui font-medium">Agent skills</h1>
-        <p className="text-ui-sm text-muted-foreground">Import a folder containing SKILL.md and its resources. Enabled skills apply when an agent starts. They grant no tools or permissions.</p>
+        <p className="text-ui-sm text-muted-foreground">Import a SKILL.md file, or a folder containing SKILL.md and its resources. Enabled skills apply when an agent starts. They grant no tools or permissions.</p>
         <Button type="button" variant="secondary" size="sm" disabled={!access.available || busy} onClick={() => input.current?.click()}>
-          {reading ? "Reading folder…" : "Import skill folder"}
+          {reading ? "Reading skill…" : "Import skill folder"}
         </Button>
         <input {...directoryInput} ref={input} type="file" multiple hidden aria-label="Skill package folder"
           onChange={(event) => { void importFiles(Array.from(event.currentTarget.files ?? [])); }} />
-        <p className="text-ui-xs text-muted-foreground">Up to 128 files and 1 MiB per package. Imports start disabled.</p>
+        <label className="block space-y-2">
+          <span className="text-ui-sm">Name for a standalone skill</span>
+          <Input value={skillName} placeholder="Code review" disabled={!access.available || busy} onChange={(event) => setSkillName(event.currentTarget.value)} />
+        </label>
+        <Button type="button" variant="secondary" size="sm" disabled={!access.available || busy || !skillName.trim()} onClick={() => fileInput.current?.click()}>
+          Import SKILL.md file
+        </Button>
+        <input ref={fileInput} type="file" accept=".md" hidden aria-label="Skill instructions file"
+          onChange={(event) => { void importFiles(Array.from(event.currentTarget.files ?? []), true); }} />
+        <p className="text-ui-xs text-muted-foreground">Instructions: 1–65,536 bytes of UTF-8 text. Folders: up to 128 files and 1 MiB per package. Imports start disabled.</p>
       </div>
       <label className="block space-y-2">
         <span className="text-ui-sm">Enablement scope</span>

@@ -2,7 +2,6 @@ export const HARNESS_PANE_COPY = {
   surfaceCloud: "Cloud",
   surfaceLocal: "Local",
   authenticationTitle: "Authentication",
-  signInTitle: "Authentication",
   runtimeTitle: "Runtime",
   runtimeDescription: (surface: "cloud" | "local") =>
     surface === "local"
@@ -218,8 +217,6 @@ export const HARNESS_PANE_COPY = {
     count === 1 ? "1 model" : `${count} models`,
   // CLI session expiry (header badge, warning tone).
   cliExpired: "Credentials expired",
-  signInDescription: (displayName: string) =>
-    `Sign in to Proliferate Cloud to manage how ${displayName} authenticates to models.`,
   authenticationDescription: (displayName: string, surface: "cloud" | "local") =>
     surface === "local"
       ? `How ${displayName} authenticates to models on this machine.`
