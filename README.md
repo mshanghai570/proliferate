@@ -41,101 +41,134 @@ Each task gets an isolated git worktree for its branch, terminal, conversation, 
 
 ## Features
 
-- 🤖 **[Native harnesses](https://proliferate.com/docs/product/agents)** - Claude Code, Codex, OpenCode, Cursor, Grok, and more
-- 🔌 **Custom AI providers** - connect OpenAI-compatible endpoints to local OpenCode sessions, including providers that run on your machine
-- 🛠️ **Custom ACP agents** - connect installed agents with their own command, arguments, and environment
-- 📚 **Agent skills** - import `SKILL.md` packages and resources, then enable them for all repositories or individual repositories
-- 🌳 **[Worktree workspaces](https://proliferate.com/docs/product/workspaces)** - an isolated branch and working directory for every task
-- 🔀 **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
-- 🪆 **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
-- 🧩 **[Integrations](https://proliferate.com/docs/product/integrations)** - connect MCP servers and supported services, then make their tools available to agent sessions through Proliferate's integration gateway
-- 🧱 **Extensions marketplace (preview)** - browse Open VSX extensions and install supported declarative packages when the preview is enabled (enabled in the Intel DMG build below); installed packages remain inactive and do not execute
-- ⏰ **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
+- **[Native harnesses](https://proliferate.com/docs/product/agents)** - Claude Code, Codex, OpenCode, Cursor, Grok, and more
+- **Local AI providers** - connect OpenAI-compatible endpoints to local OpenCode sessions with encrypted credentials on your Mac; no Proliferate sign-in is required
+- **Custom ACP agents** - connect installed agents with their own command, arguments, and environment
+- **Agent skills** - import `SKILL.md` packages and resources, then enable them for all repositories or individual repositories
+- **[Worktree workspaces](https://proliferate.com/docs/product/workspaces)** - an isolated branch and working directory for every task
+- **[Parallel agents](https://proliferate.com/docs/concepts/parallel-agents)** - run agents side by side in the same workspace, each on its own task
+- **[Subagents](https://proliferate.com/docs/features/subagents)** - agents delegate scoped work to child agents and pick the results back up when they finish
+- **[Integrations](https://proliferate.com/docs/product/integrations)** - MCPs, skills, Computer Use, Browser Use, and custom tools, configured once and shared by every agent
+- **Local project MCP servers** - configure HTTP and stdio servers for a repository's local sessions, with encrypted credentials and enable, disable, replace, and remove controls
+- **Extensions marketplace (preview)** - browse Open VSX extensions, install supported declarative packages, and apply supported app and syntax theme colors in the macOS app; extension code remains inactive
+- **[Workflows](https://proliferate.com/docs/product/workflows)** - recurring and event-driven agent runs: nightly review passes, triage on alerts, dependency bumps
 
-### Current customization scope
+Personal Intel preview builds run in GitHub Actions through
+**Build Intel preview DMG**. Feature branches can be built by manually starting
+that workflow with the desired branch. Download the DMG from that run's artifacts. The separate Preview app requires
+macOS 15+, is ad-hoc signed without notarization. Account features connect to
+`https://app.proliferate.com/api` by default. Account sign-in is optional; local
+agents, API providers, and project MCP settings use the bundled runtime.
 
-Custom AI providers are currently configured for local OpenCode sessions; they
-do not create general-purpose agents that can be selected across every harness.
-Custom ACP agents are a separate option: they must be installed locally and
-implement Agent Client Protocol. See the setup sections below.
+### Daily-driver release audit
 
-The Extensions page is an opt-in preview, enabled in a build with
-`VITE_EXTENSION_MARKETPLACE=1`. It provides Open VSX discovery and installation
-of a limited set of declarative package contributions. Installed extensions are
-registered but inactive: Proliferate does not load extension code or activate
-themes, icon themes, grammars, snippets, or language declarations. The fork's
-Intel DMG build enables it; any other build leaves it off unless you set the
-flag.
+The release target is a versioned, ad-hoc-signed DMG published on GitHub, with
+checksums and release notes. Apple notarization is unavailable for this build.
+Current qualification status:
 
-Appearance settings cover the built-in color modes and text sizing, plus an
-imported theme: **Settings → Appearance** accepts a VSCode-compatible theme
-JSON file, and its background, surface, foreground, accent, selection, and
-terminal palette apply while the matching color mode is active. Roles the
-theme does not define keep the built-in Mono palette, and editor syntax
-colors are not yet themed. Proliferate does not currently support selecting
-custom fonts from macOS, theming editor grammars from `tokenColors`, or
-project RAG and semantic indexing.
+| Area | Current state |
+| --- | --- |
+| Local agent login | In-app provider login and refresh available without a product account; client workflow checks pass. Live provider login still needs hands-on qualification. |
+| Proliferate account | Client connection and callback checks pass; hosted service returned `503 DEPLOYMENT_PAUSED` during the audit. |
+| Project RAG | Local keyword indexing, cited search, and an explicit composer picker are authored; cloud qualification is pending. |
+| Per-agent rules | Private Markdown storage, repository replacements, launch delivery, and Settings → Agents → Rules are authored; cloud qualification is pending. |
+| Marketplace, MCP, skills | Implemented scopes are described below; executable extension hosting is unavailable. |
+| Distribution | GitHub builds produce verified DMG artifacts; no versioned daily-driver release has been published. |
+
+### Agent rules and project context
+
+Settings → Agents → Rules edits Markdown instructions for any runtime agent,
+including custom ACP agents. Import `.md` or `.txt` files, save a user default,
+or replace that default for a repository and its worktrees. An empty repository
+file suppresses the default; “Use user default” removes the override. Rules
+apply on the next agent process start, including resume. Existing repository
+instruction files remain independent. Rules are limited to 64 KiB of UTF-8 text.
+
+The local chat composer’s **Project context** control explicitly indexes a Git
+workspace and searches source using SQLite FTS5 keyword ranking. Review results
+with file and line citations, select excerpts, then add them to the existing
+draft. Nothing is sent to a model until you send the prompt. Indexing uses Git
+ignores, source-file limits, credential exclusions, and symlink rejection;
+source may still contain private data. Search refreshes changed and deleted
+files. The picker exposes partial-index limits and can clear the local cache.
+This version has no vector embeddings or automatic context injection.
+
+These additions are under cloud qualification. The
+[macOS fork release procedure](guides/deploying/fork-macos.md) describes native
+DMG builds and versioned GitHub publication without Apple credentials.
+
+### Current macOS customization scope
+
+The Extensions destination is visible by default in the macOS app. It provides
+Open VSX discovery, package installation, inventory, and removal. Registry
+requests use browser-managed caching without custom headers, allowing the
+macOS webview to access the public registry under its CORS policy. Open **Details
+and versions** from an installed package to inspect its registry listing and
+version history, then return to Installed. In **Installed →
+App color themes**, copy readable core colors from a declared standalone JSON or JSONC
+theme into Appearance settings. The copy survives package removal and can be
+reset in Appearance. **Installed → Syntax themes** applies foreground token
+colors from a supported theme to source views, code blocks, and diffs, together
+with matching background/text colors. The copied theme persists across restarts and package
+removal. Reset it in **Appearance → Imported syntax colors**. Theme includes and executable extensions
+are unsupported. Extension code does not activate in the editor. Set
+`VITE_EXTENSION_MARKETPLACE=0` when building Desktop to hide the preview.
+
+Local OpenAI-compatible providers add models to local OpenCode sessions without
+a Proliferate account. They do not create standalone agents or configure every harness.
+Custom ACP agents are a separate option and must implement Agent Client
+Protocol. MCP tools are available through supported integrations and local
+project server settings described below. Appearance
+settings cover built-in color modes and text sizing. The macOS app can import
+core app colors from a readable, strict JSON color theme with `type`,
+`editor.background`, and `editor.foreground`. Syntax colors are available from
+supported installed packages through **Syntax themes**. This accepts at most 256
+token rules and 32 KiB of scope/color data per theme. Token font styles,
+semantic-token overrides, includes, and external token files are unsupported.
+Theme files must use six-digit hex color values without comments or trailing
+commas. In the macOS app, enter
+installed font family names for interface and code text under **Settings →
+Appearance**. The Mac font list offers suggestions; an unavailable manually
+entered family falls back to the built-in font. Project context retrieval and agent rules are described below; their cloud qualification is pending.
+
+A minimal file for **Settings → Appearance → Imported app colors**:
+
+```json
+{
+  "name": "Midnight",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#101820",
+    "editor.foreground": "#FFFFFF"
+  }
+}
+```
 
 ### macOS product direction
 
-The product direction is a complete coding workspace in the macOS app. The
-capabilities below are goals, not claims about what is available today. Current
-behavior is described in the sections above and in the linked product docs.
+The following goals describe work to make the macOS app a complete coding
+workspace. They are not claims about current availability.
 
-- **A first-class extension marketplace:** discover, install, update, enable,
-  disable, and remove editor extensions from one in-app catalog. Extensions
-  should integrate with the running editor, including themes, language support,
-  snippets, and other supported contributions, with clear compatibility and
-  permission information.
-- **Built-in multi-agent orchestration:** create dual-agent setups and larger
-  agent swarms from the app, assign work on the same project, review results,
-  and coordinate changes. Each agent should have its own harness, provider,
-  model, and instructions. For example, one agent could use a model configured
-  through OpenCode while another uses Codex, in the same setup. This should be
-  a native product workflow, not something users have to assemble from agent
-  skills.
-- **First-class provider and model configuration:** configure compatible model
-  providers and select them per agent, alongside native harnesses and ACP
-  agents. Provider choice should not be tied to one harness or one global
-  setting.
-- **Project knowledge with RAG:** index project content, retrieve relevant
-  context for an agent's task, and let users inspect and control what is
-  indexed and sent to a model.
-- **Built-in MCP management:** add and manage MCP servers, inspect available
-  tools, and control which agents or projects can use them.
-- **Personalized editor appearance:** additionally theme editor syntax
-  colors (beyond the shell-color import already shipped), choose custom fonts
-  installed on macOS, and adjust editor appearance from the app.
+- **Extension marketplace:** discover, install, update, enable, disable, and
+  remove editor extensions. Activate supported themes, language features,
+  snippets, and other contributions in the running editor, with visible
+  compatibility and permissions.
+- **Built-in multi-agent orchestration:** run dual-agent setups and larger
+  agent swarms on one project. Choose the harness, provider, model, and
+  instructions for each agent, then coordinate and review their work in the
+  app. One setup should be able to pair an OpenCode model with Codex without
+  requiring an agent skill to orchestrate them.
+- **Provider choice per agent:** configure compatible model providers as a
+  first-class capability alongside native harnesses and ACP agents.
+- **Project RAG:** index project content, retrieve relevant context for agent
+  tasks, and show what information is indexed and sent to a model.
+- **MCP management:** extend local project server management with connection
+  checks, tool inspection, OAuth setup, and access controls for individual agents.
+- **Editor personalization:** extend syntax themes to font styles, semantic
+  tokens, and theme includes; add font previews to the installed-family choices.
 
-These capabilities can ship in stages. README capability claims should be
-updated as each part becomes usable in the macOS app.
-
-### Daily-driver guide
-
-This is the working order for making Proliferate a complete local coding
-workspace. The accepted campaign is deliberately staged: make external tools
-usable, activate installed extensions safely, then add project knowledge.
-
-| Area | Where we are | Next |
-| --- | --- | --- |
-| Intel desktop build | `build/intel-dmg` builds the full macOS app — `Proliferate.app`, `com.proliferate.app`, `proliferate` deep link — with sign-in required and the Extensions marketplace enabled. Ad-hoc signed, no notarization, updates off. Sign-in needs a control plane at `http://127.0.0.1:8000`. | Developer signing and an update channel remain outside this fork's workflow. |
-| Marketplace | Open VSX discovery and install are enabled in the Intel desktop build. Installed packages are registered but inactive. | PR2: build the extension activation host and enable supported contributions. |
-| MCP | Product MCP integrations already provide Proliferate tools. User-managed stdio and HTTP servers are implemented in Settings, the runtime API, and future session launches; generated OpenAPI/SDK artifacts and focused runtime/client checks are complete. | Pass the product acceptance gate before calling PR1 complete. |
-| Project knowledge | Project RAG and semantic indexing are not shipped. | PR3: add codebase indexing and retrieval with user-visible control over indexed and supplied context. |
-| Skills | Runtime-local `SKILL.md` packages can be imported and enabled by default or repository override. | Continue improving this shipped capability as needed; it is not blocked on the MCP campaign. |
-| ACP agents | Local custom ACP registrations can be added and launched when the agent supports model discovery. | Broader distribution and per-agent configuration are not part of PR1–PR3. |
-| Model providers | Custom OpenAI-compatible providers work for local OpenCode sessions. | General provider/model selection across harnesses remains a separate design decision. |
-
-PR1's implementation checklist is in
-[`docs/superpowers/plans/2026-10-26-user-mcp-servers.md`](./docs/superpowers/plans/2026-10-26-user-mcp-servers.md);
-its frozen scope and acceptance gate are in
-[`delivery/daily-driver/delivery-spec-daily-driver-pr1-user-mcp-servers.md`](./delivery/daily-driver/delivery-spec-daily-driver-pr1-user-mcp-servers.md).
-The system owners are [harnesses](./specs/systems/harnesses/README.md),
-[extensions](./specs/systems/extensions/README.md), and
-[settings](./specs/systems/settings/README.md). As of 2026-10-26, the
-implementation, generated contracts, and focused Rust, SDK, and Settings
-checks are complete in the worktree. The manual product acceptance gate is
-still pending; do not treat PR1 as complete until it passes.
+These goals can ship in stages. The feature list above should grow only when
+the corresponding capability works in the macOS app.
 
 ## Supported agents
 
@@ -177,26 +210,86 @@ Proliferate runs each agent through its native harness.
 
 ## Connect a custom AI provider
 
-For local sessions, open **Settings → Agents → OpenCode → Providers** and add a
-custom provider:
+Open **Settings → Agents → LLM providers → Add API provider**. These connections
+are saved by the local runtime; no control plane or Proliferate account is needed.
+Custom ACP agents have a separate settings page.
 
-1. Enter a name and the provider's API base URL, including `/v1` if required by
-   that provider. Proliferate uses the URL as entered.
-2. Choose **Chat Completions** or **Responses** to match the provider's API.
-3. Enter an API key if required. Leave it empty for a provider without
-   authentication.
-4. Enter the model IDs supplied by the provider, one per line, and save.
+1. Choose **Custom endpoint**, **Ollama**, or **LM Studio**. Local presets fill
+   the default server address; start that server and load a model first.
+   Switching setup clears the key and model fields.
+2. Enter a name and the provider's API base URL, including its API base path,
+   such as `/v1`. Proliferate uses the URL as entered.
+3. Choose **Chat Completions** or **Responses** to match the provider's API.
+4. Enter an API key if required. Leave it empty for a keyless server.
+5. Enter model IDs, one per line, and save.
 
-Connections can be enabled or removed individually. API keys are stored in the
-encrypted credential vault. Models become selectable after the runtime discovers
-them through OpenCode; saving a connection does not verify that its endpoint is
-reachable or that every model supports coding tools. Existing provider logins
-remain available.
+Connections can be enabled, disabled, and removed independently. Credentials
+are encrypted with the runtime's data key, which the desktop app keeps in the
+Mac keychain. Inventory responses never return keys or full configurations.
+To change a saved connection, remove it and add it again. The runtime supports
+up to 32 local connections and 100 model IDs per connection.
 
-This configuration currently applies to local OpenCode sessions. It adds model
-choices to OpenCode; it does not create a standalone agent or configure model
-access for other harnesses. Other harnesses retain their own authentication and
-provider settings.
+Choose **OpenCode** when creating a chat, then select one of the runtime's
+reported models. Use **Models** on the provider page to inspect and refresh the
+list. Saving does not test connectivity or confirm coding tool support. Changes
+apply to new agent processes; running sessions retain their credentials.
+
+When a managed authentication profile is applied, local connections are paused.
+The app shows that state and permits disabling or removing local entries.
+**Runtime setup and managed provider settings** opens OpenCode's existing
+configuration page, including hosted-provider keys in the control-plane vault.
+The local vault is separate and is never uploaded by the auth-state courier.
+
+The local presets use documented compatibility endpoints for
+[Ollama](https://github.com/ollama/ollama/blob/main/docs/api/openai-compatibility.mdx)
+and [LM Studio](https://lmstudio.ai/docs/developer/openai-compat).
+
+This configuration applies to local OpenCode sessions. Other harnesses retain
+their own authentication and provider settings.
+
+## Connect a local project MCP server
+
+In the macOS app, open **Settings → Repo**, select your local repository,
+and open **Environment → Project MCP servers**. Enter a server name and its JSON
+configuration, then choose **Save server**. For example:
+
+```json
+{
+  "transport": "http",
+  "url": "http://localhost:8000/mcp",
+  "headers": {}
+}
+```
+
+For a local process, use `"transport": "stdio"`, a `command`, optional `args`
+(an array of strings), and optional `env` (an object with string values). A
+command can be an absolute executable path or a command available on the app's
+shell `PATH`; arguments are passed separately, without shell expansion.
+
+```json
+{
+  "transport": "stdio",
+  "command": "/absolute/path/to/mcp-server",
+  "args": [],
+  "env": {}
+}
+```
+
+Configurations and credentials are encrypted in the local runtime database
+using the macOS app's keychain-backed data key. Credentials cannot be read back
+from the settings screen. To edit a server, enter the same name and its complete
+configuration, then confirm replacement. Saving a replacement enables it.
+Each project supports up to 32 servers; names have 1–50 letters, digits, hyphens,
+or underscores and cannot start with `proliferate_`.
+
+Enabled servers are passed to supported agent harnesses when a session process
+starts, including sessions in that repository's worktrees. Disable or remove a
+server to exclude it from future launches. Running sessions keep their current
+tools until their process stops. Start a new session to use saved changes
+immediately. Saving does not check connectivity or discover
+tools. Harness support determines which transports and tools are usable. OAuth
+setup, tool inspection, and per-agent server selection are not yet available.
+Project MCP settings remain local and are not exported with workspace archives.
 
 ## Connect an ACP agent
 
@@ -218,11 +311,37 @@ An agent must advertise model choices through ACP to appear in the model picker.
 Removing a registration leaves running sessions alone, but sessions using it
 cannot launch again without that registration.
 
+## Sign in to local agents
+
+Local ACP agents do not require a Proliferate account. Open **Settings → Agents**,
+choose the agent, then use **Agent sign-in → Authenticate** to open its supported
+login flow on this Mac. Complete the provider's login in the terminal/browser;
+**Refresh agent sign-in** checks credentials already saved by the provider CLI.
+Agents without an in-app login command use their documented CLI login. For
+OpenCode API connections, use **Settings → Agents → LLM providers**.
+
+Proliferate account sign-in is separate: it needs a reachable, configured control
+plane. The personal preview targets Proliferate's hosted service at
+`https://app.proliferate.com/api`. Open **Settings → Account** for the sign-in
+methods supported by that service. If the service is unavailable, retry the
+account connection from the same screen; local agent login, API providers,
+skills, and project MCP settings remain available.
+
+**Account server → Connect to a server** opens server validation and confirmation
+before changing the saved endpoint and restarting the app. Existing local or
+self-hosted overrides can choose **Use Proliferate hosted service**. Overrides in
+`~/.proliferate/config.json` take precedence over the packaged default. The
+preview registers `proliferate-local://auth/callback` for browser login, separate
+from the production app's `proliferate` scheme. The service must accept this
+callback and be online for hosted sign-in to complete.
+
 ## Use agent skills
 
-Open **Settings → Agents → Skills** and import a directory with a root
-`SKILL.md`. Include any relative resources referenced by the instructions in
-the same directory. Imports are disabled initially; enable a package for all
+Open **Settings → Agents → Skills**. To import one instructions file, enter a
+skill name and choose **Import SKILL.md file**; lowercase `skill.md` is also
+accepted and stored as `SKILL.md`. Instructions must contain 1–65,536 bytes of
+UTF-8 text. Use **Import skill folder** for a directory with a root `SKILL.md`
+and any relative resources referenced by the instructions. Imports are disabled initially; enable a package for all
 repositories or choose a repository override. A repository override can also
 disable a globally enabled skill.
 
@@ -334,40 +453,27 @@ See [running locally](./guides/local/README.md) for database prerequisites and
 Tauri config, and app labels. A downloaded release does not contain uncommitted
 changes from this checkout; build from source to try these changes.
 
-## Intel DMG from GitHub
+## Intel preview DMG from GitHub
 
-The fork's **Build Intel DMG** workflow builds branch `build/intel-dmg` on a
-GitHub-hosted Intel Mac. Find the run under **Actions**, then download
-`proliferate-intel-dmg` from its artifacts. The download contains
-`Proliferate-intel.dmg`, `SHA256SUMS`, and build information identifying the
-source commit. Verify the checksum before installing:
+The fork's **Build Intel preview DMG** workflow builds branch `build/intel-dmg`
+on a GitHub-hosted Intel Mac. Find the run under **Actions**, then download
+`proliferate-preview-intel-dmg` from its artifacts. The download contains
+`Proliferate-Preview-intel.dmg`, `SHA256SUMS`, and build information identifying
+the source commit. Verify the checksum before installing:
 
 ```bash
 shasum -a 256 -c SHA256SUMS
 ```
 
-This is the full macOS app rather than a separate preview identity: it ships as
-`Proliferate.app` with the `com.proliferate.app` bundle identifier and the
-`proliferate` deep-link scheme, and it requires macOS 15 or newer. It is ad-hoc
-signed without Apple notarization and has automatic updates disabled, so macOS
-may require manual approval to open it. Ad-hoc signatures can also cause
+The preview requires macOS 15 or newer. It has its own app identifier, is
+ad-hoc signed without Apple notarization, and has automatic updates disabled.
+macOS may require manual approval to open it. Ad-hoc signatures can also cause
 Keychain permission prompts or require signing in again after a rebuild.
 
-Two inputs differ from a release build on purpose: `VITE_REQUIRE_AUTH=true`, so
-the app opens on sign-in instead of running unauthenticated, and
-`VITE_EXTENSION_MARKETPLACE=1`, so the Extensions destination and its `/extensions`
-page exist. Everything else follows
-[`release-desktop.yml`](./.github/workflows/release-desktop.yml).
-
-The app signs in against a control plane at `http://127.0.0.1:8000` and bundles
-no PostgreSQL, Redis, or API server. Start that control plane first and claim
-`http://127.0.0.1:8000/setup` once to create the owner account, as described in
-[Try the app from source](#try-the-app-from-source). Without a reachable control
-plane the login screen reports the control plane as unavailable, and there is no
-account to sign in with until the instance is claimed.
-
-This workflow uploads an artifact only; it does not publish a GitHub Release or
-an updater.
+The default control-plane URL is `http://127.0.0.1:8000`. Keep the local API
+running and sign in to use the custom-provider vault; the DMG bundles the
+runtime and agent seed, not PostgreSQL, Redis, or the API server. This workflow
+only uploads a test artifact; it does not publish a GitHub Release or an updater.
 
 ## Community
 
