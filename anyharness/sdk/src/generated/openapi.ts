@@ -20,6 +20,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/agent-auth/local-providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list_local_providers"];
+        put?: never;
+        post: operations["create_local_provider"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agent-auth/local-providers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove_local_provider"];
+        options?: never;
+        head?: never;
+        patch: operations["set_local_provider_enabled"];
+        trace?: never;
+    };
     "/v1/agent-auth/native-bridge": {
         parameters: {
             query?: never;
@@ -68,6 +100,22 @@ export interface paths {
         put: operations["put_agent_auth_state"];
         post?: never;
         delete: operations["delete_agent_auth_state"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/agent-rules/{agent_kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_agent_rules"];
+        put: operations["set_agent_rules"];
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -265,22 +313,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/ai-providers/models": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["discover_provider_models"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/auth/revoked-jtis": {
         parameters: {
             query?: never;
@@ -425,47 +457,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/mcp-servers": {
+    "/v1/extensions/{namespace}/{name}/{version}/color-themes": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["list_mcp_servers"];
+        get: operations["list_color_themes"];
         put?: never;
-        post: operations["create_mcp_server"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/mcp-servers/{id}": {
+    "/v1/extensions/{namespace}/{name}/{version}/syntax-themes": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["list_extension_syntax_themes"];
         put?: never;
-        post?: never;
-        delete: operations["remove_mcp_server"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/mcp-servers/{id}/enabled": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: operations["set_mcp_server_enabled"];
         post?: never;
         delete?: never;
         options?: never;
@@ -647,6 +663,38 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/v1/repo-roots/{repo_root_id}/mcp-servers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/repo-roots/{repo_root_id}/mcp-servers/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["put"];
+        post?: never;
+        delete: operations["remove"];
+        options?: never;
+        head?: never;
+        patch: operations["set_enabled"];
         trace?: never;
     };
     "/v1/repo-roots/{repo_root_id}/mobility/prepare-destination": {
@@ -2137,6 +2185,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/retrieval": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["get_project_retrieval"];
+        put?: never;
+        post: operations["index_project_retrieval"];
+        delete: operations["clear_project_retrieval"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/retrieval/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["search_project_context"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/reviews/code": {
         parameters: {
             query?: never;
@@ -2588,6 +2668,12 @@ export interface components {
             skipped: number;
             status: components["schemas"]["ReconcileJobStatus"];
         };
+        AgentRules: {
+            agentKind: string;
+            inherited: boolean;
+            repositoryId?: string | null;
+            text: string;
+        };
         /** @enum {string} */
         AgentSeedFailureKind: "missing_archive" | "invalid_checksum" | "invalid_manifest" | "invalid_archive" | "io" | "unsupported_target" | "verification_failed";
         AgentSeedHealth: {
@@ -3038,10 +3124,12 @@ export interface components {
             thread: components["schemas"]["CoworkThread"];
             workspace: components["schemas"]["Workspace"];
         };
-        CreateMcpServerRequest: {
-            config: components["schemas"]["McpServerConfig"];
-            description?: string | null;
-            serverName: string;
+        CreateLocalProviderRequest: {
+            apiFormat: string;
+            apiKey?: string | null;
+            endpoint: string;
+            models: string[];
+            name: string;
         };
         CreatePullRequestRequest: {
             baseBranch: string;
@@ -3176,13 +3264,6 @@ export interface components {
         DetectProjectSetupResponse: {
             hints: components["schemas"]["SetupHint"][];
         };
-        DiscoverProviderModelsRequest: {
-            endpoint: string;
-        };
-        DiscoverProviderModelsResponse: {
-            models: components["schemas"]["ProviderModel"][];
-            refreshedAt: string;
-        };
         DocTemplate: {
             body: string;
             /**
@@ -3240,10 +3321,33 @@ export interface components {
             expectedHandoffOpId?: string | null;
             requireCleanGitState?: boolean;
         };
+        ExtensionColorTheme: {
+            available: boolean;
+            /** @description Normalized light/dark mode; absent when the theme cannot be imported. */
+            colorMode?: string | null;
+            /** @description Only the six supported core app color keys are exposed. */
+            colors: {
+                [key: string]: string;
+            };
+            label: string;
+        };
         /** @enum {string} */
         ExtensionInstallationState: "installing" | "installed" | "removing" | "error";
         /** @enum {string} */
         ExtensionPackageErrorCode: "interrupted_install" | "package_missing" | "package_invalid";
+        ExtensionSyntaxRule: {
+            foreground: string;
+            scopes: string[];
+        };
+        ExtensionSyntaxTheme: {
+            available: boolean;
+            colorMode?: string | null;
+            colors: {
+                [key: string]: string;
+            };
+            label: string;
+            rules: components["schemas"]["ExtensionSyntaxRule"][];
+        };
         /** @enum {string} */
         FeedKind: "terminal_bytes" | "transcript";
         /**
@@ -3687,11 +3791,16 @@ export interface components {
         ItemStartedEvent: {
             item: components["schemas"]["TranscriptItemPayload"];
         };
+        ListExtensionColorThemesResponse: {
+            themes: components["schemas"]["ExtensionColorTheme"][];
+            truncated: boolean;
+        };
+        ListExtensionSyntaxThemesResponse: {
+            themes: components["schemas"]["ExtensionSyntaxTheme"][];
+            truncated: boolean;
+        };
         ListInstalledExtensionsResponse: {
             extensions: components["schemas"]["InstalledExtensionSummary"][];
-        };
-        ListMcpServersResponse: {
-            servers: components["schemas"]["McpServerSummary"][];
         };
         ListProposedPlansResponse: {
             plans: components["schemas"]["ProposedPlanSummary"][];
@@ -3705,6 +3814,17 @@ export interface components {
         ListWorkspaceFilesResponse: {
             directoryPath: string;
             entries: components["schemas"]["WorkspaceFileEntry"][];
+        };
+        LocalProviderSummary: {
+            enabled: boolean;
+            id: string;
+            modelCount: number;
+            name: string;
+        };
+        LocalProvidersResponse: {
+            encryptionAvailable: boolean;
+            managedAuthActive: boolean;
+            providers: components["schemas"]["LocalProviderSummary"][];
         };
         LoginCommand: {
             args: string[];
@@ -3901,51 +4021,6 @@ export interface components {
         McpElicitationUrlRevealResponse: {
             url: string;
         };
-        McpServerConfig: {
-            args?: string[];
-            command: string;
-            env?: components["schemas"]["McpServerCredential"][];
-            /** @enum {string} */
-            transport: "stdio";
-        } | {
-            headers?: components["schemas"]["McpServerCredential"][];
-            /** @enum {string} */
-            transport: "http";
-            url: string;
-        };
-        /**
-         * @description One env variable or header the user attaches to a server. The value is a
-         *     secret at rest; it never appears in summaries, logs, or listings.
-         */
-        McpServerCredential: {
-            name: string;
-            value: string;
-        };
-        McpServerRepositoryOverride: {
-            /** @description Required, but nullable: null removes only this repository override. */
-            enabled: boolean | null;
-            repoRootId: string;
-        };
-        McpServerSummary: {
-            args?: string[] | null;
-            command?: string | null;
-            createdAt: string;
-            description?: string | null;
-            envNames: string[];
-            headerNames: string[];
-            id: string;
-            repositoryOverrides: {
-                [key: string]: boolean;
-            };
-            serverName: string;
-            transport: components["schemas"]["McpServerTransport"];
-            updatedAt: string;
-            url?: string | null;
-            /** @description Null means inherited off. */
-            userEnabled?: boolean | null;
-        };
-        /** @enum {string} */
-        McpServerTransport: "stdio" | "http";
         MobilityPendingConfigChangeRecord: {
             configId: string;
             queuedAt: string;
@@ -4353,6 +4428,36 @@ export interface components {
             /** @enum {string} */
             status: "exited";
         };
+        ProjectContextExcerpt: {
+            contentHash: string;
+            endLine: number;
+            path: string;
+            startLine: number;
+            text: string;
+        };
+        ProjectContextSearchResponse: {
+            excerpts: components["schemas"]["ProjectContextExcerpt"][];
+            status: components["schemas"]["ProjectRetrievalStatus"];
+            workspaceId: string;
+        };
+        /** @description Public inventory never includes connection URLs, commands, or credentials. */
+        ProjectMcpServerSummary: {
+            enabled: boolean;
+            name: string;
+            transport: components["schemas"]["SessionMcpTransport"];
+        };
+        ProjectMcpServersResponse: {
+            encryptionAvailable: boolean;
+            servers: components["schemas"]["ProjectMcpServerSummary"][];
+        };
+        ProjectRetrievalStatus: {
+            chunks: number;
+            enabled: boolean;
+            indexedAt?: string | null;
+            indexedFiles: number;
+            skippedFiles: number;
+            truncated: boolean;
+        };
         /** @enum {string} */
         PromptAttachmentSource: "upload" | "paste";
         PromptCapabilities: {
@@ -4475,10 +4580,6 @@ export interface components {
             title: string;
             updatedAt: string;
             workspaceId: string;
-        };
-        ProviderModel: {
-            displayName?: string | null;
-            id: string;
         };
         PruneOrphanWorktreeRequest: {
             path: string;
@@ -4937,6 +5038,9 @@ export interface components {
             /** Format: double */
             pressurePercent?: number | null;
         };
+        SearchProjectContextRequest: {
+            query: string;
+        };
         SearchWorkspaceFilesResponse: {
             results: components["schemas"]["WorkspaceFileSearchResult"][];
         };
@@ -5261,7 +5365,17 @@ export interface components {
             children: components["schemas"]["SubagentRosterEntry"][];
             parent: components["schemas"]["AgentOperationsAgent"];
         };
-        SetMcpServerEnabledRequest: boolean | components["schemas"]["McpServerRepositoryOverride"];
+        SetAgentRulesRequest: {
+            repositoryId?: string | null;
+            /** @description Null removes the scope's file. An empty string explicitly disables rules. */
+            text: string | null;
+        };
+        SetLocalProviderEnabledRequest: {
+            enabled: boolean;
+        };
+        SetProjectMcpServerEnabledRequest: {
+            enabled: boolean;
+        };
         /** @description Request payload for changing a single live session config option. */
         SetSessionConfigOptionRequest: {
             /** @description Raw ACP config option identifier to mutate. */
@@ -6044,6 +6158,92 @@ export interface operations {
             };
         };
     };
+    list_local_providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProvidersResponse"];
+                };
+            };
+        };
+    };
+    create_local_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLocalProviderRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProviderSummary"];
+                };
+            };
+        };
+    };
+    remove_local_provider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_local_provider_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetLocalProviderEnabledRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalProviderSummary"];
+                };
+            };
+        };
+    };
     get_native_bridge: {
         parameters: {
             query?: never;
@@ -6178,6 +6378,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_agent_rules: {
+        parameters: {
+            query?: {
+                repositoryId?: string;
+            };
+            header?: never;
+            path: {
+                agent_kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRules"];
+                };
+            };
+        };
+    };
+    set_agent_rules: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_kind: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetAgentRulesRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRules"];
                 };
             };
         };
@@ -6717,75 +6965,6 @@ export interface operations {
             };
         };
     };
-    discover_provider_models: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DiscoverProviderModelsRequest"];
-            };
-        };
-        responses: {
-            /** @description Discovered provider models */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DiscoverProviderModelsResponse"];
-                };
-            };
-            /** @description The endpoint or credential header is invalid */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description The provider rejected its credential */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description The provider returned an unusable model list */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description The provider is unreachable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetails"];
-                };
-            };
-            /** @description The provider request timed out */
-            504: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProblemDetails"];
-                };
-            };
-        };
-    };
     push_revoked_jtis: {
         parameters: {
             query?: never;
@@ -7138,11 +7317,84 @@ export interface operations {
             };
         };
     };
-    list_mcp_servers: {
+    list_color_themes: {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                namespace: string;
+                name: string;
+                version: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Declared core app color data from an installed package */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListExtensionColorThemesResponse"];
+                };
+            };
+            /** @description Invalid extension identity */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Runtime authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension version is not installed */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Package validation failed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description Extension management unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list_extension_syntax_themes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                namespace: string;
+                name: string;
+                version: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -7152,74 +7404,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ListMcpServersResponse"];
-                };
-            };
-        };
-    };
-    create_mcp_server: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateMcpServerRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["McpServerSummary"];
-                };
-            };
-        };
-    };
-    remove_mcp_server: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    set_mcp_server_enabled: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SetMcpServerEnabledRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["McpServerSummary"];
+                    "application/json": components["schemas"]["ListExtensionSyntaxThemesResponse"];
                 };
             };
         };
@@ -7671,6 +7856,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Write-only MCP inventory for a project */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServersResponse"];
+                };
+            };
+        };
+    };
+    put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionMcpServer"];
+            };
+        };
+        responses: {
+            /** @description Server replaced and enabled; used at next session process launch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServerSummary"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Server removed; live sessions keep their current configuration */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_enabled: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                repo_root_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetProjectMcpServerEnabledRequest"];
+            };
+        };
+        responses: {
+            /** @description Server enabled state updated; used at next session process launch */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectMcpServerSummary"];
                 };
             };
         };
@@ -11853,6 +12135,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    get_project_retrieval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRetrievalStatus"];
+                };
+            };
+        };
+    };
+    index_project_retrieval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectRetrievalStatus"];
+                };
+            };
+        };
+    };
+    clear_project_retrieval: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    search_project_context: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchProjectContextRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectContextSearchResponse"];
                 };
             };
         };
