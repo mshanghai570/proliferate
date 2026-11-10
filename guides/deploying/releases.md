@@ -121,14 +121,27 @@ the collector must not contain the debug placeholder marker.
 ### Fork Intel Preview
 
 The `mshanghai570/proliferate` fork has a separate `build-intel-dmg.yml`
-workflow for personal testing. It runs on pushes to `build/intel-dmg` or a
-manual dispatch, uses `macos-15-intel`, and builds the existing Rust helpers,
-runtime SDK, bundled agent seed, and Tauri app. It uploads an Intel DMG,
+workflow for personal testing. It runs on pushes to `build/intel-dmg` or
+`codex/macos-extensions-fonts`, or a manual dispatch, uses `macos-15-intel`, and builds the existing Rust helpers,
+runtime SDK, bundled agent seed, and Tauri app. Runtime architecture checks run before compilation. Local provider and MCP
+encryption and extension package/theme checks run on the runner. An Ubuntu
+frontend job first builds from checked-in contracts and checks local agent login,
+providers, skills, and marketplace behavior. Native packaging waits for that job,
+then generates contracts and rebuilds the desktop web bundle on macOS. The same
+focused frontend checks run again against the generated contracts before native
+test compilation and packaging; the preview Tauri config reuses that bundle instead of rebuilding
+it. Generated runtime contract sources are
+retained as a separate three-day artifact. It uploads an Intel DMG,
 SHA-256 checksum, and source metadata as a 14-day Actions artifact.
 
 The preview uses `com.mshanghai570.proliferate.preview`, requires macOS 15+,
 is ad-hoc signed without notarization, disables updater artifacts and automatic
-updates, and defaults to the local API on port 8000. Its token has only
+updates, and defaults to `https://app.proliferate.com/api` for optional account
+sign-in. The preview registers `proliferate-local` and compiles its auth callback
+with the same scheme; the separate `proliferate-preview` scheme remains registered.
+Runtime config overrides still win. Account settings exposes server connection
+and supported sign-in methods, including a retry state when the service is
+unavailable. Local agents stay available without an account. Its token has only
 `contents: read`; it has no release, tag, updater, or deployment step. The
 production release matrix and signing requirements remain the authority for
 published releases.

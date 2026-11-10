@@ -8,7 +8,6 @@ The settings surface: one route (`/settings?section=…`) hosting user-scope, or
 | Appearance scaling gate and preference — target | [appearance-scaling.md](appearance-scaling.md) |
 | Billing surfaces' semantics | [BILLING.md](../billing/deep-dive.md) |
 | Agent auth panes' semantics | [AGENT_AUTH.md](../agent_auth/README.md), [MODELS.md](../harnesses/launch-options.md) |
-| Runtime-local MCP server management | [mcp-servers.md](../harnesses/mcp-servers.md) |
 | Organization invitations and members | [../organizations/invitations.md](../identity/invitations.md) |
 
 ## Purpose
@@ -24,6 +23,35 @@ Let a person (or an org admin) configure their account, appearance, agents and t
 | Drafts | Cloud-environment and repo-environment editors, harness auth editor | [use-cloud-environment-draft.ts](../../../apps/packages/product-client/src/hooks/settings/workflows/use-cloud-environment-draft.ts), [use-harness-auth-editor.ts](../../../apps/packages/product-client/src/hooks/agents/workflows/use-harness-auth-editor.ts) |
 | User/repo preferences | Appearance, zoom, worktree auto-delete adoption, repo preferences — persisted through the host | [user-preferences-store.ts](../../../apps/packages/product-client/src/stores/preferences/user-preferences-store.ts), [repo-preferences-store.ts](../../../apps/packages/product-client/src/stores/preferences/repo-preferences-store.ts) |
 | Active organization | Selected organization id for org-scoped panes | [organization-store.ts](../../../apps/packages/product-client/src/stores/organizations/organization-store.ts) |
+
+## LLM providers
+
+Settings → Agents → LLM providers manages the runtime's encrypted
+[local provider vault](../agent_auth/local-providers.md), separately from custom
+ACP agent registrations. It requires a local runtime and its encryption key,
+with no control-plane sign-in. Managed authentication takes precedence; while
+applied, local entries can be disabled or removed but cannot be newly enabled.
+
+The [provider pane](../../../apps/packages/product-client/src/components/settings/panes/agents/providers/LlmProvidersPane.tsx)
+uses metadata-only inventory, confirmation for removal, and runtime-scoped
+drafts. Switching runtime or actor discards credential drafts. Writes bypass
+the query mutation cache; successful saves close the credential form immediately.
+Failed reads block edits and offer retry. The runtime's launch-options inventory
+owns displayed model choices; saving does not establish endpoint connectivity.
+
+[Local presets](../../../apps/packages/product-client/src/config/custom-provider-presets.ts)
+fill editable Ollama or LM Studio URLs and clear keys/models when switched.
+[Draft validation](../../../apps/packages/product-client/src/lib/domain/settings/custom-provider-draft.ts)
+rejects malformed endpoints, URL credentials, substitutions, and invalid model
+lists before submission; the runtime remains authoritative. Managed provider
+configuration remains available through the OpenCode settings link.
+
+## Agent rules
+
+Settings → Agents → Rules is a local, account-independent editor over the
+[Sessions agent rules contract](../sessions/agent-rules.md). It selects catalog
+agents and repository overrides, imports Markdown/text files, and preserves
+dirty drafts until saved or discarded. The runtime owns storage and delivery.
 
 ## Public surface
 
@@ -49,8 +77,8 @@ Let a person (or an org admin) configure their account, appearance, agents and t
 | Billing (Cloud) | plan, credits, usage timeseries, checkout/portal return | [use-cloud-billing.ts](../../../apps/packages/product-client/src/hooks/access/cloud/use-cloud-billing.ts), [billing-return.ts](../../../apps/packages/product-client/src/lib/access/cloud/billing-return.ts) |
 | Agent auth + model gateway (Cloud `agent-gateway`, `auth`) | selections, enrollment, org model policy, limits/budgets, API keys | `useAuthSelections`, `useAgentGatewayEnrollment` (`@proliferate/cloud-sdk-react`); panes under [agents/harness/](../../../apps/packages/product-client/src/components/settings/panes/agents/harness/HarnessPane.tsx) |
 | Agent catalog + install (runtime `agents`) | installed harnesses, models table, install/reconcile, CLI login terminal | [use-agent-catalog.ts](../../../apps/packages/product-client/src/hooks/agents/derived/use-agent-catalog.ts), [use-harness-install-action.ts](../../../apps/packages/product-client/src/hooks/agents/workflows/use-harness-install-action.ts) |
-| User MCP servers (runtime `mcp-servers`) | local stdio/HTTP definitions, secrets, and repository enablement | [McpServersPane.tsx](../../../apps/packages/product-client/src/components/settings/panes/agents/mcp/McpServersPane.tsx); behavior belongs to [harnesses/mcp-servers.md](../harnesses/mcp-servers.md) |
 | Integrations (Cloud `integrations`) | catalog, connect (OAuth flow), health, admin definitions | [hooks/access/cloud/integrations/](../../../apps/packages/product-client/src/hooks/access/cloud/integrations/use-integration-catalog.ts) |
+| Sessions (runtime project MCP) | encrypted repository-scoped HTTP/stdio configuration, enable state, removal | [ProjectMcpSettings.tsx](../../../apps/packages/product-client/src/components/settings/panes/repo/ProjectMcpSettings.tsx), [project MCP reference](../sessions/project-mcp.md) |
 | GitHub App (Cloud `github-app`) | installation state, user authorization | [use-github-app-installation.ts](../../../apps/packages/product-client/src/hooks/settings/workflows/use-github-app-installation.ts) |
 | Secrets (Cloud `cloud-secrets`) | personal + organization secret CRUD | `PersonalSecretsPane`, `OrganizationSecretsPane` |
 | Repositories (runtime `repoRoots`, `worktrees`) | repo actions, commit instructions, worktree storage | [use-repository-settings.ts](../../../apps/packages/product-client/src/hooks/settings/workflows/use-repository-settings.ts) |
@@ -84,6 +112,21 @@ The `environments` / `repo-environment` sections edit cloud environment records 
   only; the appearance-scaling checker bans literal sizes
   ([appearance-scaling.md](appearance-scaling.md),
   [check_appearance_scaling.py](../../../scripts/check_appearance_scaling.py)).
+- **Desktop font families are local preferences.** Appearance lists installed
+  macOS font families and accepts a family name separately for interface and code text. The
+  family is validated, stored through ProductHost.storage, and applied through
+  the existing font tokens. Clearing it restores the built-in stack. The code
+  choice also updates terminal rendering and its creation grid probe. The app
+  does not install font files or assert that a manually typed family exists on the Mac;
+  CSS falls back to the built-in stack when it does not.
+- **Desktop theme import is bounded.** Appearance imports strict JSON color
+  themes with a dark/light type and readable editor foreground/background.
+  Optional sidebar and button colors must also have readable text. Only core
+  app surface tokens are overridden at runtime; the generated built-in palette
+  remains authoritative when the imported theme is reset or its mode is not
+  active. Desktop can also copy the same bounded palette from a registered
+  extension's declared JSON/JSONC theme through Extensions → Installed. The copied
+  preference survives package removal. Syntax highlighting remains separate.
 
 ## Emits
 
@@ -127,7 +170,7 @@ apps/packages/product-client/src/
 ├── components/settings/
 │   ├── screen/       SettingsScreen, scope header controls, section renderer
 │   ├── sidebar/      SettingsSidebar (scoped groups)
-│   ├── panes/        one folder or file per section: account/, agents/{harness,api-keys,mcp}/,
+│   ├── panes/        one folder or file per section: account/, agents/{harness,api-keys}/,
 │   │                 integrations/, organization/, repo/, archived/, billing/, environments/,
 │   │                 Appearance, General, Personal/Organization secrets, model policy, limits
 │   └── shared/       AdminOnlyPlaceholder, AgentHarnessConfigComposer, RunCommandHelp
@@ -165,3 +208,9 @@ Target moves (later sweep wave): `components/settings/panes/agents/**` + `hooks/
   primitives slated for rebuild as run envelopes; keep them thin.
 - The `slack-bot` section is parked in the registry comment pending the
   product Slack app.
+
+Imported syntax colors are a validated user-preference snapshot supplied by
+supported installed extension themes. Appearance shows the selected theme and
+resets syntax independently from imported app colors. The extension system owns
+admission and application; the current limits and proof are in
+[Extensions](../extensions/README.md).
