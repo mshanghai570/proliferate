@@ -1,4 +1,4 @@
-import type { ExtensionPackageIdentity, InstalledExtensionSummary, ListInstalledExtensionsResponse } from "../types/extensions.js";
+import type { ExtensionPackageIdentity, InstalledExtensionSummary, ListInstalledExtensionsResponse, ListExtensionColorThemesResponse, ListExtensionSyntaxThemesResponse } from "../types/extensions.js";
 import type { AnyHarnessRequestOptions, AnyHarnessTransport } from "./core.js";
 
 export class ExtensionsClient {
@@ -6,6 +6,19 @@ export class ExtensionsClient {
 
   list(options?: AnyHarnessRequestOptions): Promise<ListInstalledExtensionsResponse> {
     return this.transport.get("/v1/extensions", options);
+  }
+
+  colorThemes(identity: ExtensionPackageIdentity, options?: AnyHarnessRequestOptions): Promise<ListExtensionColorThemesResponse> {
+    return this.transport.get(
+      `/v1/extensions/${encodeURIComponent(identity.namespace)}/${encodeURIComponent(identity.name)}/${encodeURIComponent(identity.version)}/color-themes`,
+      options,
+    );
+  }
+
+  syntaxThemes(identity: ExtensionPackageIdentity, options?: AnyHarnessRequestOptions): Promise<ListExtensionSyntaxThemesResponse> {
+    return this.transport.get(
+      `/v1/extensions/${encodeURIComponent(identity.namespace)}/${encodeURIComponent(identity.name)}/${encodeURIComponent(identity.version)}/syntax-themes`, options,
+    );
   }
 
   uninstall(identity: ExtensionPackageIdentity, options?: AnyHarnessRequestOptions): Promise<void> {

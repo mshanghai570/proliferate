@@ -2,6 +2,25 @@ import { describe, expect, it, vi } from "vitest";
 import { AnyHarnessClient } from "./core.js";
 
 describe("extension management client", () => {
+  it("reads declared theme colors with cancellation and an encoded identity", async () => {
+    const response = { themes: [], truncated: false };
+    const fetch = vi.fn(async () => new Response(JSON.stringify(response)));
+    const client = new AnyHarnessClient({ baseUrl: "http://runtime.test", fetch });
+    const signal = new AbortController().signal;
+    expect(await client.extensions.colorThemes({ namespace: "example", name: "theme", version: "1.0.0+build" }, { signal })).toEqual(response);
+    const [url, options] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("http://runtime.test/v1/extensions/example/theme/1.0.0%2Bbuild/color-themes");
+    expect(options.signal).toBe(signal);
+  });
+  it("reads syntax themes with cancellation and an encoded exact version", async () => {
+    const fetch = vi.fn(async () => new Response(JSON.stringify({ themes: [], truncated: false })));
+    const client = new AnyHarnessClient({ baseUrl: "http://runtime.test", fetch });
+    const signal = new AbortController().signal;
+    await client.extensions.syntaxThemes({ namespace: "example", name: "theme", version: "1.0.0+build" }, { signal });
+    const [url, options] = fetch.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("http://runtime.test/v1/extensions/example/theme/1.0.0%2Bbuild/syntax-themes");
+    expect(options.signal).toBe(signal);
+  });
   it("lists registered state with authentication and cancellation", async () => {
     const response = { extensions: [{ namespace: "example", name: "theme", version: "1.0.0", sha256: "a".repeat(64), state: "installed", active: false, errorCode: null }] };
     const fetch = vi.fn(async () => new Response(JSON.stringify(response)));

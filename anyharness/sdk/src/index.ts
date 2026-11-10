@@ -23,6 +23,8 @@ export type {
   ExtensionPackageIdentity,
   InstalledExtensionSummary,
   ListInstalledExtensionsResponse,
+  ExtensionColorTheme,
+  ListExtensionColorThemesResponse,
 } from "./types/extensions.js";
 
 export type {
@@ -58,6 +60,9 @@ export type {
   AgentAuthStateDocument,
   ApplyAgentAuthStateResponse,
   NativeBridgeResponse,
+  CreateLocalProviderRequest,
+  LocalProviderSummary,
+  LocalProvidersResponse,
 } from "./types/agent-auth.js";
 
 export type {
@@ -100,6 +105,8 @@ export type {
 
 export type {
   RepoRootKind,
+  ProjectMcpServerSummary,
+  ProjectMcpServersResponse,
   RepoRoot,
   ResolveRepoRootFromPathRequest,
   PrepareRepoRootMobilityDestinationRequest,
@@ -569,10 +576,7 @@ export type {
   UpdateTerminalTitleRequest,
 } from "./types/terminals.js";
 
-export type {
-  RunCommandRequest,
-  RunCommandResponse,
-} from "./types/processes.js";
+export type { RunCommandRequest, RunCommandResponse } from "./types/processes.js";
 
 export {
   connectAgentLoginTerminal,
@@ -607,13 +611,3 @@ export type {
 } from "./streams/feeds.js";
 
 export type { SkillFile, SkillSummary, ImportSkillRequest, SetSkillEnabledRequest, ListSkillsResponse } from "./types/skills.js";
-export type {
-  CreateMcpServerRequest,
-  ListMcpServersResponse,
-  McpServerConfig,
-  McpServerCredential,
-  McpServerRepositoryOverride,
-  McpServerSummary,
-  McpServerTransport,
-  SetMcpServerEnabledRequest,
-} from "./types/mcp-servers.js";
