@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { ImportedSyntaxThemePreference } from "#product/components/settings/panes/ImportedSyntaxThemePreference";
 import { SettingsSection } from "#product/primitives/patterns/settings/SettingsSection";
 import { SettingsRow } from "#product/primitives/patterns/settings/SettingsRow";
 import { SettingsMenu } from "#product/primitives/patterns/settings/SettingsMenu";
@@ -12,10 +12,9 @@ import { UserMessage } from "#product/components/workspace/chat/transcript/UserM
 import { AssistantMessage } from "#product/components/workspace/chat/transcript/AssistantMessage";
 import { Minus, Plus } from "#product/primitives/icons/core";
 import { Switch } from "#product/primitives/Switch";
-import { parseVscodeThemeText } from "#product/lib/domain/preferences/vscode-theme";
-import { useSystemFontList } from "#product/hooks/theme/workflows/use-system-fonts";
-import { Select } from "#product/primitives/Select";
-import type { ColorMode } from "#product/config/theme";
+import { useProductHost } from "@proliferate/product-client/host/ProductHostProvider";
+import { LocalFontPreference } from "#product/components/settings/panes/LocalFontPreference";
+import { ImportedAppThemePreference } from "#product/components/settings/panes/ImportedAppThemePreference";
 import {
   READABLE_CODE_FONT_SIZE_LABELS,
   READABLE_CODE_FONT_SIZE_OPTIONS,
@@ -65,6 +64,7 @@ const CHAT_PREVIEW_RESPONSE =
   "Moving the workspace to a cloud sandbox now — your branch `pablo/ui` comes along with changes and history intact.";
 
 export function AppearancePane() {
+  const isDesktop = useProductHost().desktop != null;
   const [mode, setMode] = useColorMode();
   const transparentChromeEnabled = useUserPreferencesStore((state) => state.transparentChromeEnabled);
   const uiFontSizeId = useUserPreferencesStore((state) => state.uiFontSizeId);
@@ -80,14 +80,8 @@ export function AppearancePane() {
 
       <SettingsSection title="Theme" surface="plain">
         <ThemePreviewCards value={mode} onChange={setMode} />
-      </SettingsSection>
-
-      <SettingsSection title="Fonts" surface="plain">
-        <FontFamilyControls />
-      </SettingsSection>
-
-      <SettingsSection title="Imported theme" surface="plain">
-        <ImportedThemeControls colorMode={mode} />
+        {isDesktop && <ImportedAppThemePreference />}
+        {isDesktop && <ImportedSyntaxThemePreference />}
       </SettingsSection>
 
       <SettingsSection title="Code preview" surface="plain">
@@ -177,6 +171,10 @@ export function AppearancePane() {
             }]}
           />
         </SettingsRow>
+        {isDesktop && <>
+          <LocalFontPreference preferenceKey="uiFontFamily" label="Interface font" />
+          <LocalFontPreference preferenceKey="codeFontFamily" label="Code font" />
+        </>}
       </SettingsSection>
 
       <SettingsSection title="Advanced">
@@ -191,154 +189,5 @@ export function AppearancePane() {
         </SettingsRow>
       </SettingsSection>
     </SettingsPageBody>
-  );
-}
-
-function FontFamilyControls() {
-  const uiFontFamily = useUserPreferencesStore((state) => state.uiFontFamily);
-  const codeFontFamily = useUserPreferencesStore((state) => state.codeFontFamily);
-  const setPreference = useUserPreferencesStore((state) => state.set);
-  const { fonts, status } = useSystemFontList();
-  const unavailable = status === "unavailable" || status === "failed";
-
-  return (
-    <div className="space-y-4">
-      <SettingsRow
-        label="UI font"
-        description="App and chat text, from fonts installed on this Mac"
-      >
-        <Select
-          className={CONTROL_WIDTH_CLASS}
-          value={uiFontFamily ?? ""}
-          aria-label="UI font"
-          disabled={unavailable}
-          onChange={(event) => setPreference("uiFontFamily", event.currentTarget.value || null)}
-        >
-          <option value="">System</option>
-          {fonts.map((font) => (
-            <option key={font.familyName} value={font.familyName}>
-              {font.displayName}
-            </option>
-          ))}
-        </Select>
-      </SettingsRow>
-      <SettingsRow
-        label="Code font"
-        description="Editors, diffs, and the terminal"
-      >
-        <Select
-          className={CONTROL_WIDTH_CLASS}
-          value={codeFontFamily ?? ""}
-          aria-label="Code font"
-          disabled={unavailable}
-          onChange={(event) => setPreference("codeFontFamily", event.currentTarget.value || null)}
-        >
-          <option value="">System</option>
-          {fonts.map((font) => (
-            <option key={font.familyName} value={font.familyName}>
-              {font.displayName}
-            </option>
-          ))}
-        </Select>
-      </SettingsRow>
-      {unavailable ? (
-        <p className="text-ui-sm text-muted-foreground">
-          Custom fonts are available on macOS desktop builds. The built-in fonts
-          are used here.
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-function ImportedThemeControls({ colorMode }: { colorMode: ColorMode }) {
-  const importedTheme = useUserPreferencesStore((state) => state.importedTheme);
-  const setPreference = useUserPreferencesStore((state) => state.set);
-  const systemWantsDark = typeof window !== "undefined" && typeof window.matchMedia === "function"
-    ? window.matchMedia("(prefers-color-scheme: dark)").matches
-    : true;
-  const targetMode = colorMode === "system"
-    ? (systemWantsDark ? "dark" : "light")
-    : colorMode;
-  const input = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [reading, setReading] = useState(false);
-
-  const importFile = (file: File | null) => {
-    setReading(file ? true : false);
-    if (!file) {
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = parseVscodeThemeText(typeof reader.result === "string" ? reader.result : "");
-      if (result.ok) {
-        setPreference("importedTheme", result.theme);
-        setError(null);
-      } else {
-        setError(result.error);
-      }
-      setReading(false);
-    };
-    reader.onerror = () => {
-      setError("Could not read the file. Choose it again.");
-      setReading(false);
-    };
-    reader.readAsText(file);
-    if (input.current) {
-      input.current.value = "";
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <p className="text-ui-sm text-muted-foreground">
-        Import a VSCode-compatible theme JSON file. Its colors apply while the
-        matching color mode is active; the Mono palette covers every other
-        role.
-      </p>
-      <div className="flex items-center gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          disabled={reading}
-          onClick={() => input.current?.click()}
-        >
-          {reading ? "Reading file…" : importedTheme ? "Replace theme" : "Import theme (.json)"}
-        </Button>
-        {importedTheme ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setPreference("importedTheme", null);
-              setError(null);
-            }}
-          >
-            Use Mono
-          </Button>
-        ) : null}
-      </div>
-      <input
-        ref={input}
-        type="file"
-        accept=".json,application/json"
-        hidden
-        aria-label="Theme file"
-        onChange={(event) => importFile(event.currentTarget.files?.[0] ?? null)}
-      />
-      {importedTheme ? (
-        <p className="text-ui-sm">
-          {importedTheme.name}
-          <span className="text-muted-foreground">
-            {" "}· {importedTheme.type === "dark" ? "Dark" : "Light"}
-            {" "}· {importedTheme.type === targetMode ? "Active" : "Inactive in this mode"}
-          </span>
-        </p>
-      ) : null}
-      {error ? <p role="alert" className="text-ui-sm text-destructive">{error}</p> : null}
-    </div>
   );
 }
