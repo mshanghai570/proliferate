@@ -21,9 +21,9 @@ mod updater_owned;
 mod workspace_activity_indicator;
 
 use commands::{
-    ai_providers, anonymous_telemetry, cloud_worker, config, desktop_identity,
-    diagnostics as diagnostics_commands, drag_drop, fonts, google_workspace_mcp, keychain,
-    process, runtime, shell, support, support_snapshot, window_chrome, workspace_scratch,
+    anonymous_telemetry, cloud_worker, config, desktop_identity,
+    diagnostics as diagnostics_commands, drag_drop, fonts, google_workspace_mcp, keychain, process,
+    runtime, shell, support, support_snapshot, window_chrome, workspace_scratch,
 };
 use quit_flow::QuitFlowState;
 use tauri::Manager;
@@ -306,9 +306,9 @@ pub fn run() {
             workspace_activity_indicator::set_workspace_activity_indicator,
             drag_drop::drag_pasteboard_change_count,
             drag_drop::read_drag_drop_paths,
+            fonts::list_local_font_families,
             shell::pick_folder,
             shell::copy_text,
-            fonts::list_system_fonts,
             shell::list_available_editors,
             shell::inspect_path,
             shell::open_in_editor,
@@ -334,10 +334,6 @@ pub fn run() {
             keychain::get_pending_auth,
             keychain::set_pending_auth,
             keychain::clear_pending_auth,
-            ai_providers::prompt_ai_provider_key,
-            ai_providers::delete_ai_provider_key,
-            ai_providers::has_ai_provider_key,
-            ai_providers::discover_ai_provider_models,
             updater_owned::updater_owned_check,
             updater_owned::updater_owned_download,
             updater_owned::updater_owned_abort,

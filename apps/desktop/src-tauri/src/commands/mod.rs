@@ -1,4 +1,3 @@
-pub mod ai_providers;
 pub mod anonymous_telemetry;
 pub mod cloud_worker;
 pub mod config;
