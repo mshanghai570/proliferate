@@ -1,3 +1,4 @@
+import { sanitizeImportedSyntaxTheme } from "#product/lib/domain/preferences/imported-syntax-theme";
 import {
   resolveAppearanceSizeId,
   resolveWindowZoomId,
@@ -16,11 +17,9 @@ import {
   type UserPreferences,
 } from "#product/lib/domain/preferences/user/model";
 import { isValidWorktreeAutoDeleteLimit } from "#product/lib/domain/preferences/user/worktree-auto-delete";
+import { normalizeLocalFontFamily } from "#product/lib/domain/preferences/local-font-family";
+import { sanitizeImportedAppTheme } from "#product/lib/domain/preferences/imported-app-theme";
 import type { LegacyUserPreferencesInput } from "#product/lib/domain/preferences/user/persisted-keys";
-import { sanitizeFontFamilyPreference } from "#product/lib/domain/preferences/font-family";
-import {
-  sanitizeImportedThemePreference,
-} from "#product/lib/domain/preferences/vscode-theme";
 import {
   normalizeReleaseTitlePair,
   normalizeReleaseVersion,
@@ -41,6 +40,12 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
     defaultChatModelIdByAgentKind: {},
   } as UserPreferences;
   let changed = false;
+  if (preferences.uiFontFamily === undefined || preferences.codeFontFamily === undefined) {
+    changed = true;
+  }
+  if (preferences.importedAppTheme === undefined || preferences.importedSyntaxTheme === undefined) {
+    changed = true;
+  }
 
   const sanitizedDefaultChatAgentKind = typeof next.defaultChatAgentKind === "string"
     ? next.defaultChatAgentKind.trim()
@@ -87,23 +92,6 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
   if (next.themePreset !== "mono") {
     next.themePreset = "mono";
     changed = true;
-  }
-
-  const importedTheme = sanitizeImportedThemePreference(next.importedTheme);
-  if (
-    JSON.stringify(importedTheme)
-    !== JSON.stringify(next.importedTheme)
-  ) {
-    changed = true;
-  }
-  next.importedTheme = importedTheme;
-
-  for (const fontKey of ["uiFontFamily", "codeFontFamily"] as const) {
-    const fontFamily = sanitizeFontFamilyPreference(next[fontKey]);
-    if (fontFamily !== next[fontKey]) {
-      next[fontKey] = fontFamily;
-      changed = true;
-    }
   }
 
   // "gong" was the tbpn-only turn-end easter egg; it retired with the preset.
@@ -186,6 +174,24 @@ export function migrateUserPreferences(preferences: LegacyUserPreferencesInput):
   const readableCodeFontSizeId = resolveAppearanceSizeId(next.readableCodeFontSizeId);
   if (readableCodeFontSizeId !== next.readableCodeFontSizeId) {
     next.readableCodeFontSizeId = readableCodeFontSizeId;
+    changed = true;
+  }
+
+  for (const key of ["uiFontFamily", "codeFontFamily"] as const) {
+    const normalized = normalizeLocalFontFamily(next[key]);
+    if (normalized !== next[key]) {
+      next[key] = normalized;
+      changed = true;
+    }
+  }
+  const importedSyntaxTheme = sanitizeImportedSyntaxTheme(next.importedSyntaxTheme);
+  if (JSON.stringify(importedSyntaxTheme) !== JSON.stringify(next.importedSyntaxTheme)) {
+    next.importedSyntaxTheme = importedSyntaxTheme;
+    changed = true;
+  }
+  const importedAppTheme = sanitizeImportedAppTheme(next.importedAppTheme);
+  if (JSON.stringify(importedAppTheme) !== JSON.stringify(next.importedAppTheme)) {
+    next.importedAppTheme = importedAppTheme;
     changed = true;
   }
 

@@ -4,7 +4,6 @@ import type {
   UiFontSizeId,
   WindowZoomId,
 } from "#product/lib/domain/preferences/appearance";
-import type { ImportedThemePreference } from "#product/lib/domain/preferences/vscode-theme";
 import type {
   DefaultLiveSessionControlValuesByAgentKind,
 } from "#product/lib/domain/preferences/user/session-defaults";
@@ -15,6 +14,9 @@ import type {
 } from "#product/lib/domain/preferences/review-preferences";
 import { DEFAULT_OPEN_IN_TARGET_ID } from "#product/config/open-target-defaults";
 import type { ReleaseTitle } from "#product/lib/domain/updates/release-notice";
+import type { ImportedAppTheme } from "#product/lib/domain/preferences/imported-app-theme";
+
+import type { ImportedSyntaxTheme } from "#product/lib/domain/preferences/imported-syntax-theme";
 
 export type BranchPrefixType = "none" | "proliferate" | "github_username";
 export type TurnEndSoundId = "ding";
@@ -30,14 +32,12 @@ export type ThemePreset = "mono";
 export interface UserPreferences {
   themePreset: ThemePreset;
   colorMode: ColorMode;
-  /** Imported VSCode-compatible theme applied when the resolved mode matches. */
-  importedTheme: ImportedThemePreference | null;
-  /** Installed macOS font family for UI text, or null for the built-in stack. */
-  uiFontFamily: string | null;
-  /** Installed macOS font family for code and diffs, or null for the built-in stack. */
-  codeFontFamily: string | null;
+  importedAppTheme: ImportedAppTheme | null;
+  importedSyntaxTheme: ImportedSyntaxTheme | null;
   uiFontSizeId: UiFontSizeId;
   readableCodeFontSizeId: ReadableCodeFontSizeId;
+  uiFontFamily: string | null;
+  codeFontFamily: string | null;
   windowZoomId: WindowZoomId;
   defaultChatAgentKind: string;
   defaultChatModelIdByAgentKind: Record<string, string>;
@@ -73,11 +73,12 @@ export interface UserPreferences {
 export const NEW_USER_DEFAULTS: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
-  importedTheme: null,
-  uiFontFamily: null,
-  codeFontFamily: null,
+  importedAppTheme: null,
+  importedSyntaxTheme: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
+  uiFontFamily: null,
+  codeFontFamily: null,
   windowZoomId: "default",
   defaultChatAgentKind: "claude",
   defaultChatModelIdByAgentKind: {},
@@ -103,11 +104,12 @@ export const NEW_USER_DEFAULTS: UserPreferences = {
 export const PERSISTED_RECORD_BACKFILL: UserPreferences = {
   themePreset: "mono",
   colorMode: "dark",
-  importedTheme: null,
-  uiFontFamily: null,
-  codeFontFamily: null,
+  importedAppTheme: null,
+  importedSyntaxTheme: null,
   uiFontSizeId: "default",
   readableCodeFontSizeId: "default",
+  uiFontFamily: null,
+  codeFontFamily: null,
   windowZoomId: "default",
   defaultChatAgentKind: "",
   defaultChatModelIdByAgentKind: {},

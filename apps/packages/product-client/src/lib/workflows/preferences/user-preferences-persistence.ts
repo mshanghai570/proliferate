@@ -92,11 +92,11 @@ async function readLegacyUserPreferences(
   return {
     themePreset: legacyTheme.themePreset ?? defaults.themePreset,
     colorMode: legacyTheme.colorMode ?? defaults.colorMode,
-    importedTheme: defaults.importedTheme,
-    uiFontFamily: defaults.uiFontFamily,
-    codeFontFamily: defaults.codeFontFamily,
+    importedAppTheme: defaults.importedAppTheme,
     uiFontSizeId: defaults.uiFontSizeId,
     readableCodeFontSizeId: defaults.readableCodeFontSizeId,
+    uiFontFamily: defaults.uiFontFamily,
+    codeFontFamily: defaults.codeFontFamily,
     windowZoomId: defaults.windowZoomId,
     defaultChatAgentKind: legacyDefaultChatAgentKind ?? defaults.defaultChatAgentKind,
     ...(legacyDefaultChatModelId !== undefined
