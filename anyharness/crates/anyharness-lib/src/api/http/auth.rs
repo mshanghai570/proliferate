@@ -1,5 +1,5 @@
 use anyharness_contract::v1::{PushRevokedJtisRequest, PushRevokedJtisResponse};
-use axum::{Json, extract::State};
+use axum::{extract::State, Json};
 
 use super::error::ApiError;
 use crate::app::AppState;
