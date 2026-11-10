@@ -1,4 +1,11 @@
-use anyharness_contract::v1::skills::SkillFile;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SkillFile {
+    pub path: String,
+    pub content_base64: String,
+}
 use anyhow::{bail, Context};
 use base64::{engine::general_purpose::STANDARD, Engine};
 use std::{
