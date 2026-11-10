@@ -43,8 +43,7 @@ zip.workspace = true
 zstd.workspace = true
 fs2.workspace = true
 libc.workspace = true
-reqwest = { workspace = true, features = ["blocking", "json", "stream"] }
-zeroize.workspace = true
+reqwest = { workspace = true, features = ["blocking", "json"] }
 minisign-verify.workspace = true
 proliferate-diagnostics-client.workspace = true
 proliferate-diagnostics-protocol.workspace = true

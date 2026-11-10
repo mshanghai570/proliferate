@@ -14,7 +14,7 @@ use crate::domains::agents::auth_state::ProbePhase;
 use crate::domains::agents::launch_probe::lock::ProbeEngineLock;
 use crate::domains::agents::launch_probe::targets::{ProbeTargets, RuntimeProbeTargets};
 use crate::domains::agents::launch_probe::test_support::{
-    TempRuntimeHome, gateway_state, wait_until,
+    gateway_state, wait_until, TempRuntimeHome,
 };
 use crate::domains::agents::launch_probe::{PokeReason, ProbeEngineMode};
 
