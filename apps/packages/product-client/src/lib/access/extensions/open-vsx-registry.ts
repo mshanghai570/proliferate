@@ -6,12 +6,11 @@
  * the extension surface: no React, no query client, no product state — fetch in,
  * domain models out, failures as `ExtensionRegistryError`.
  *
- * Two behaviors here are deliberate, not incidental:
+ * Three behaviors here are deliberate, not incidental:
  *
- * - **Browser-compatible requests.** Requests use only the safelisted Accept
- *   header. Open VSX does not allow `If-None-Match` in its CORS preflight, so
- *   conditional requests would fail in a browser/WebView even when reachable.
- *   TanStack Query owns response caching above this transport adapter.
+ * - **Browser-managed caching.** Only CORS-safelisted headers are sent.
+ *   The browser owns validators and client identity; authoring User-Agent or
+ *   If-None-Match triggers a preflight the public registry does not allow.
  * - **Rate-limit backoff.** Responses carry `X-RateLimit-*`, and a 429 carries
  *   `Retry-After`. A 429 is retried a bounded number of times after the
  *   registry's own delay; exhausting the budget raises `rate-limited` with the
@@ -180,11 +179,11 @@ export class OpenVsxRegistry implements ExtensionRegistry {
   private async requestText(url: string, signal?: AbortSignal): Promise<TextResponse> {
     for (let attempt = 0; ; attempt += 1) {
       signal?.throwIfAborted();
-      const headers: Record<string, string> = { accept: "application/json" };
+      const headers = { accept: "application/json" };
 
       let response: Response;
       try {
-        response = await this.fetchImpl(url, { headers, signal, credentials: "omit" });
+        response = await this.fetchImpl(url, { headers, signal, credentials: "omit", cache: "no-cache" });
       } catch (error) {
         if (signal?.aborted || (error instanceof Error && error.name === "AbortError")) throw error;
         throw new ExtensionRegistryError("network-error", `Could not reach the registry at ${url}`);

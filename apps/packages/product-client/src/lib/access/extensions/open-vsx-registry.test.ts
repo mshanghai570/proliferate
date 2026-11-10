@@ -111,35 +111,23 @@ describe("OpenVsxRegistry.search", () => {
     expect(new URL(requests[0]!.url).search).toBe("");
   });
 
-  it("uses only CORS-safelisted request headers", async () => {
-    const { fetchImpl, requests } = createFetchStub(() => jsonResponse(SEARCH_BODY));
-    await new OpenVsxRegistry({ fetchImpl }).search({});
-    expect(requests[0]!.headers).toEqual({ accept: "application/json" });
+  it("uses only CORS-safelisted headers and delegates revalidation to the browser", async () => {
+    const fetchImpl = vi.fn(async (_input: string, _init?: RequestInit) => jsonResponse(SEARCH_BODY, { headers: { etag: '"abc"' } }));
+    const registry = new OpenVsxRegistry({ fetchImpl });
+    await registry.search({});
+    await registry.search({});
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    for (const [, init] of fetchImpl.mock.calls) {
+      expect(init?.headers).toEqual({ accept: "application/json" });
+      expect(init?.cache).toBe("no-cache");
+      expect(init?.credentials).toBe("omit");
+    }
   });
 
   it("honors a custom registry origin", async () => {
     const { fetchImpl, requests } = createFetchStub(() => jsonResponse(SEARCH_BODY));
     await new OpenVsxRegistry({ fetchImpl, baseUrl: "https://vsx.internal.example/" }).search({});
     expect(requests[0]!.url.startsWith("https://vsx.internal.example/api/-/search")).toBe(true);
-  });
-});
-
-describe("OpenVsxRegistry cross-origin requests", () => {
-  it("does not send ETag validators that trigger a denied CORS preflight", async () => {
-    const { fetchImpl, requests } = createFetchStub(() =>
-      jsonResponse(SEARCH_BODY, { headers: { etag: '"abc123"' } }),
-    );
-    const registry = new OpenVsxRegistry({ fetchImpl });
-
-    const first = await registry.search({ query: "python" });
-    const second = await registry.search({ query: "python" });
-
-    expect(requests).toHaveLength(2);
-    expect(requests.map((request) => request.headers)).toEqual([
-      { accept: "application/json" },
-      { accept: "application/json" },
-    ]);
-    expect(second).toEqual(first);
   });
 });
 
@@ -308,15 +296,6 @@ describe("marketplace request lifecycle", () => {
     const abort = new DOMException("Aborted", "AbortError");
     const registry = new OpenVsxRegistry({ fetchImpl: async () => { throw abort; } });
     await expect(registry.search({})).rejects.toBe(abort);
-  });
-
-  it("relies on query caching rather than cross-origin ETag validators", async () => {
-    const { fetchImpl, requests } = createFetchStub(() => jsonResponse(SEARCH_BODY, { headers: { etag: '"a"' } }));
-    const registry = new OpenVsxRegistry({ fetchImpl });
-    await registry.search({ query: "first" });
-    await registry.search({ query: "second" });
-    await registry.search({ query: "first" });
-    expect(requests.every((request) => request.headers["if-none-match"] === undefined)).toBe(true);
   });
 
   it("surfaces a long Retry-After without leaving a request asleep indefinitely", async () => {
