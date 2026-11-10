@@ -6,6 +6,74 @@ use super::model::ExtensionState;
 use crate::persistence::Db;
 
 #[test]
+fn color_themes_read_only_declared_core_colors_from_registered_packages() {
+    use super::installer_tests::archive_with_content;
+    let home = TestDirectory::new();
+    let manager = ExtensionManager::new(Db::open(&home.0).unwrap(), home.0.clone());
+    assert!(matches!(
+        manager.color_themes(&identity("1.0.0")),
+        Err(super::manager::ManagementError::NotInstalled)
+    ));
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"][0]["uiTheme"] = serde_json::json!("vs-dark");
+    let (archive, digest) = archive_with_content(&home.0, &raw, "extension/themes/demo.json", br##"{
+        "colors":{"editor.background":"#171717","editor.foreground":"#ffffff","secret":"do not expose"},
+        "tokenColors":[{"scope":"comment"}]
+    }"##);
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let (themes, truncated) = manager.color_themes(&identity("1.0.0")).unwrap();
+    assert!(!truncated);
+    assert_eq!(themes.len(), 1);
+    assert_eq!(themes[0].label, "Demo");
+    assert_eq!(themes[0].color_mode, Some("dark"));
+    assert!(themes[0].available);
+    assert_eq!(themes[0].colors.len(), 2);
+    assert_eq!(themes[0].colors["editor.foreground"], "#ffffff");
+    fs::write(home.0.join("extensions/packages/example.demo-1.0.0/extension/themes/demo.json"), br##"{"include":"../../outside.json","colors":{"editor.background":"#171717","editor.foreground":"#ffffff"}}"##).unwrap();
+    assert!(!manager.color_themes(&identity("1.0.0")).unwrap().0[0].available);
+    fs::write(
+        home.0
+            .join("extensions/packages/example.demo-1.0.0/extension/themes/demo.json"),
+        b"// no theme object",
+    )
+    .unwrap();
+    let (themes, _) = manager.color_themes(&identity("1.0.0")).unwrap();
+    assert!(!themes[0].available);
+    assert!(themes[0].colors.is_empty());
+    let resource = home
+        .0
+        .join("extensions/packages/example.demo-1.0.0/extension/themes/demo.json");
+    fs::write(&resource, vec![b' '; 1_048_577]).unwrap();
+    assert!(!manager.color_themes(&identity("1.0.0")).unwrap().0[0].available);
+    #[cfg(unix)]
+    {
+        let outside = home.0.join("outside.json");
+        fs::write(&outside, br##"{"type":"dark","colors":{"editor.background":"#171717","editor.foreground":"#ffffff"}}"##).unwrap();
+        fs::remove_file(&resource).unwrap();
+        std::os::unix::fs::symlink(outside, resource).unwrap();
+        assert!(manager.color_themes(&identity("1.0.0")).is_err());
+    }
+}
+
+#[test]
+fn color_theme_inventory_is_bounded() {
+    let home = TestDirectory::new();
+    let manager = ExtensionManager::new(Db::open(&home.0).unwrap(), home.0.clone());
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"] =
+        serde_json::Value::Array(vec![raw["contributes"]["themes"][0].clone(); 33]);
+    let (archive, digest) = archive(&home.0, &raw, "extension/themes/demo.json");
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let (themes, truncated) = manager.color_themes(&identity("1.0.0")).unwrap();
+    assert_eq!(themes.len(), 32);
+    assert!(truncated);
+}
+
+#[test]
 fn registered_install_survives_restart_and_uninstall_removes_only_selected_version() {
     let home = TestDirectory::new();
     let db = Db::open(&home.0).unwrap();
@@ -336,4 +404,76 @@ fn contribution_resource_parent_symlink_is_rejected_after_restart() {
     );
     manager.uninstall(&identity("1.0.0")).unwrap();
     assert!(outside.0.join("demo.json").exists());
+}
+
+#[test]
+fn syntax_theme_reads_require_registered_valid_packages_and_never_follow_includes() {
+    use super::installer_tests::archive_with_content;
+    let home = TestDirectory::new();
+    let manager = ExtensionManager::new(Db::open(&home.0).unwrap(), home.0.clone());
+    assert!(matches!(
+        manager.syntax_themes(&identity("1.0.0")),
+        Err(super::manager::ManagementError::NotInstalled)
+    ));
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"][0]["uiTheme"] = serde_json::json!("vs-dark");
+    let content = br##"{"colors":{"editor.background":"#101820","editor.foreground":"#FFFFFF"},"tokenColors":[{"scope":"comment","settings":{"foreground":"#AA55CC","fontStyle":"italic"}}],"private":"not exposed"}"##;
+    let (archive, digest) =
+        archive_with_content(&home.0, &raw, "extension/themes/demo.json", content);
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let (themes, truncated) = manager.syntax_themes(&identity("1.0.0")).unwrap();
+    assert!(!truncated);
+    assert!(themes[0].theme.available);
+    assert_eq!(themes[0].rules[0].scopes, vec!["comment"]);
+    assert_eq!(themes[0].rules[0].foreground, "#AA55CC");
+    let resource = home
+        .0
+        .join("extensions/packages/example.demo-1.0.0/extension/themes/demo.json");
+    fs::write(&resource, br##"{"include":"../../private.json","colors":{"editor.background":"#101820","editor.foreground":"#FFFFFF"},"tokenColors":[{"scope":"comment","settings":{"foreground":"#AA55CC"}}]}"##).unwrap();
+    let (themes, _) = manager.syntax_themes(&identity("1.0.0")).unwrap();
+    assert!(!themes[0].theme.available);
+    assert!(themes[0].rules.is_empty());
+    #[cfg(unix)]
+    {
+        let outside = home.0.join("outside.json");
+        fs::write(&outside, content).unwrap();
+        fs::remove_file(&resource).unwrap();
+        std::os::unix::fs::symlink(outside, resource).unwrap();
+        assert!(manager.syntax_themes(&identity("1.0.0")).is_err());
+    }
+}
+
+#[test]
+fn syntax_themes_admit_jsonc_scope_groups_and_use_readable_editor_colors_only() {
+    use super::installer_tests::archive_with_content;
+    let home = TestDirectory::new();
+    let manager = ExtensionManager::new(Db::open(&home.0).unwrap(), home.0.clone());
+    let mut raw = manifest("1.0.0");
+    raw["contributes"]["themes"][0]["uiTheme"] = serde_json::json!("vs-dark");
+    let scopes = vec![format!("meta.{}", "x".repeat(613)); 26];
+    let source = serde_json::json!({"colors":{"editor.background":"#1a1b26","editor.foreground":"#a9b1d6","button.background":"#3d59a1dd","button.foreground":"#ffffff"},"tokenColors":[{"scope":scopes,"settings":{"foreground":"#AA55CC"}}]});
+    let mut content = source.to_string();
+    content.pop();
+    let content = format!("/* theme resource */ {content},}} // end");
+    let (archive, digest) = archive_with_content(
+        &home.0,
+        &raw,
+        "extension/themes/demo.json",
+        content.as_bytes(),
+    );
+    manager
+        .install(&archive, &identity("1.0.0"), &digest)
+        .unwrap();
+    let (themes, _) = manager.syntax_themes(&identity("1.0.0")).unwrap();
+    assert!(themes[0].theme.available);
+    assert_eq!(themes[0].rules[0].scopes.len(), 26);
+    assert_eq!(themes[0].theme.colors.len(), 2);
+    assert!(!themes[0].theme.colors.contains_key("button.background"));
+    assert!(manager
+        .list()
+        .unwrap()
+        .iter()
+        .all(|extension| !extension.active));
 }

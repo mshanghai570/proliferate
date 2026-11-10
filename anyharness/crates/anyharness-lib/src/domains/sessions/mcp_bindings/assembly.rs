@@ -3,7 +3,6 @@ use std::sync::Arc;
 
 use anyharness_contract::v1::SessionMcpBindingSummary;
 
-use super::crypto::SessionDataCipher;
 use super::model::SessionMcpServer;
 use super::product_catalog::ProductMcpLaunchCatalog;
 use super::product_launch::ProductMcpLaunchError;
@@ -17,6 +16,7 @@ use crate::domains::sessions::extensions::{
 use crate::domains::sessions::model::SessionRecord;
 use crate::domains::sessions::response_formatting;
 use crate::domains::workspaces::model::WorkspaceRecord;
+use crate::persistence::data_cipher::DataCipher;
 
 pub const SESSION_RESTART_REQUIRED_DETAIL: &str =
     "This session's MCP bindings can't be decrypted. Please restart the session.";
@@ -39,7 +39,7 @@ pub enum SessionMcpLaunchAssemblyError {
 }
 
 pub fn assemble_session_mcp_launch(
-    _cipher: Option<&SessionDataCipher>,
+    _cipher: Option<&DataCipher>,
     session_extensions: &[Arc<dyn SessionExtension>],
     product_mcp_launch_catalog: &ProductMcpLaunchCatalog,
     workspace: &WorkspaceRecord,
@@ -71,14 +71,12 @@ pub fn assemble_session_mcp_launch(
     launch_extras
         .launch_prompt_append
         .append(&mut product_extras.launch_prompt_append);
-    product_extras
+    launch_extras
         .mcp_servers
-        .append(&mut launch_extras.mcp_servers);
-    launch_extras.mcp_servers = product_extras.mcp_servers;
-    product_extras
+        .append(&mut product_extras.mcp_servers);
+    launch_extras
         .mcp_binding_summaries
-        .append(&mut launch_extras.mcp_binding_summaries);
-    launch_extras.mcp_binding_summaries = product_extras.mcp_binding_summaries;
+        .append(&mut product_extras.mcp_binding_summaries);
     // Both channels on purpose: most harnesses consume the systemPrompt.append
     // session meta, but Codex ignores it and only receives the first-prompt
     // channel (inlined into the first user prompt). Non-Codex harnesses never
@@ -283,6 +281,7 @@ mod tests {
     use crate::origin::OriginContext;
 
     mod binding_summaries;
+    mod project_mcp;
     mod workspace_attachment;
 
     #[derive(Clone)]
@@ -299,9 +298,8 @@ mod tests {
         }
     }
 
-    fn sample_cipher() -> SessionDataCipher {
-        SessionDataCipher::from_env_value("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=")
-            .expect("cipher")
+    fn sample_cipher() -> DataCipher {
+        DataCipher::from_env_value("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=").expect("cipher")
     }
 
     fn workspace_record() -> WorkspaceRecord {
@@ -324,6 +322,50 @@ mod tests {
             created_at: "2026-03-25T00:00:00Z".to_string(),
             updated_at: "2026-03-25T00:00:00Z".to_string(),
         }
+    }
+
+    #[test]
+    fn agent_rules_launch_context_is_agent_scoped_and_refreshes_on_resume() {
+        let home =
+            std::env::temp_dir().join(format!("agent-rules-launch-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir(&home).unwrap();
+        let manager = crate::domains::sessions::agent_rules::AgentRulesManager::new(home.clone());
+        manager
+            .set("claude", None, Some("# Initial rules\n"))
+            .unwrap();
+        let workspace = workspace_record();
+        let mut session = session_record();
+        let initial = manager
+            .resolve_launch_extras(&SessionLaunchContext {
+                workspace: &workspace,
+                session: &session,
+            })
+            .unwrap();
+        assert!(initial.launch_prompt_append[0].ends_with("# Initial rules\n"));
+        assert!(initial.system_prompt_append.is_empty());
+        assert!(initial.mcp_servers.is_empty());
+        manager
+            .set("claude", None, Some("# Updated rules\n"))
+            .unwrap();
+        session.native_session_id = Some("resume-id".into());
+        let resumed = manager
+            .resolve_launch_extras(&SessionLaunchContext {
+                workspace: &workspace,
+                session: &session,
+            })
+            .unwrap();
+        assert!(resumed.launch_prompt_append[0].ends_with("# Updated rules\n"));
+        assert!(initial.launch_prompt_append[0].ends_with("# Initial rules\n"));
+        session.agent_kind = "codex".into();
+        assert!(manager
+            .resolve_launch_extras(&SessionLaunchContext {
+                workspace: &workspace,
+                session: &session
+            })
+            .unwrap()
+            .launch_prompt_append
+            .is_empty());
+        std::fs::remove_dir_all(home).unwrap();
     }
 
     fn session_record() -> SessionRecord {
@@ -437,65 +479,6 @@ mod tests {
             Some("launch skill instructions")
         );
         assert!(assembled.mcp_binding_summaries_json.is_some());
-    }
-
-    #[test]
-    fn product_servers_precede_user_extension_servers_and_summaries() {
-        let registration = ProductMcpLaunchRegistration::new(
-            &crate::domains::agent_operations::mcp::definition::DEFINITION,
-            Arc::new(|_ctx| Ok(true)),
-            Arc::new(|_, _| Ok("product-token".to_string())),
-        )
-        .with_applied_http_binding_summary();
-        let catalog = ProductMcpLaunchCatalog::new(
-            "http://127.0.0.1:4317".to_string(),
-            None,
-            vec![registration],
-        );
-        let extension: Arc<dyn SessionExtension> = Arc::new(StaticExtension {
-            extras: SessionLaunchExtras {
-                mcp_servers: vec![http_server("user:filesystem", "filesystem")],
-                mcp_binding_summaries: vec![summary("user:filesystem", "filesystem")],
-                ..SessionLaunchExtras::default()
-            },
-        });
-
-        let assembled = assemble_session_mcp_launch(
-            None,
-            &[extension],
-            &catalog,
-            &workspace_record(),
-            &session_record(),
-            None,
-        )
-        .expect("assemble launch");
-        let server_names = assembled
-            .mcp_servers
-            .iter()
-            .map(|server| match server {
-                SessionMcpServer::Http(server) => server.server_name.as_str(),
-                SessionMcpServer::Stdio(server) => server.server_name.as_str(),
-            })
-            .collect::<Vec<_>>();
-        assert_eq!(
-            server_names,
-            vec![
-                crate::domains::agent_operations::mcp::definition::DEFINITION.acp_server_name,
-                "filesystem"
-            ]
-        );
-
-        let summaries: Vec<SessionMcpBindingSummary> =
-            serde_json::from_str(&assembled.mcp_binding_summaries_json.expect("summaries"))
-                .expect("parse summaries");
-        assert_eq!(
-            summaries[0].id,
-            format!(
-                "internal:{}",
-                crate::domains::agent_operations::mcp::definition::DEFINITION.id
-            )
-        );
-        assert_eq!(summaries[1].id, "user:filesystem");
     }
 
     #[test]

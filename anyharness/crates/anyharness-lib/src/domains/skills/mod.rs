@@ -1,13 +1,20 @@
-use crate::adapters::skills::{private_directory, stage_in_workspace, validate_files};
+use crate::adapters::skills::{private_directory, stage_in_workspace, validate_files, SkillFile};
 use crate::domains::sessions::extensions::{
     SessionExtension, SessionLaunchContext, SessionLaunchExtras,
-};
-use anyharness_contract::v1::skills::{
-    ImportSkillRequest, SetSkillEnabledRequest, SkillFile, SkillSummary,
 };
 use anyhow::{bail, Context};
 use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, fs, path::PathBuf, sync::Mutex};
+
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SkillSummary {
+    pub id: String,
+    pub name: String,
+    pub user_enabled: bool,
+    pub repository_overrides: BTreeMap<String, bool>,
+    pub file_count: usize,
+}
 
 #[derive(Clone, Serialize, Deserialize)]
 struct Package {
@@ -92,12 +99,12 @@ impl SkillManager {
             .collect())
     }
 
-    pub fn import(&self, request: ImportSkillRequest) -> anyhow::Result<SkillSummary> {
-        let name = request.name.trim();
+    pub fn import(&self, name: String, files: Vec<SkillFile>) -> anyhow::Result<SkillSummary> {
+        let name = name.trim();
         if name.is_empty() || name.len() > 100 || name.chars().any(char::is_control) {
             bail!("Skill name must contain 1–100 printable bytes");
         }
-        validate_files(&request.files)?;
+        validate_files(&files)?;
         let _guard = self
             .gate
             .lock()
@@ -111,11 +118,11 @@ impl SkillManager {
             name: name.to_owned(),
             user_enabled: false,
             repository_overrides: BTreeMap::new(),
-            file_count: request.files.len(),
+            file_count: files.len(),
         };
         packages.push(Package {
             summary: summary.clone(),
-            files: request.files,
+            files,
         });
         self.write(&packages)?;
         tracing::info!(
@@ -129,10 +136,10 @@ impl SkillManager {
     pub fn set_enabled(
         &self,
         id: &str,
-        request: SetSkillEnabledRequest,
+        repository_id: Option<String>,
+        enabled: Option<bool>,
     ) -> anyhow::Result<SkillSummary> {
-        if request
-            .repository_id
+        if repository_id
             .as_ref()
             .is_some_and(|id| id.is_empty() || id.len() > 128 || id.chars().any(char::is_control))
         {
@@ -147,8 +154,8 @@ impl SkillManager {
             .iter_mut()
             .find(|package| package.summary.id == id)
             .context("Unknown skill")?;
-        match request.repository_id {
-            Some(repository) => match request.enabled {
+        match repository_id {
+            Some(repository) => match enabled {
                 Some(enabled) => {
                     package
                         .summary
@@ -160,9 +167,8 @@ impl SkillManager {
                 }
             },
             None => {
-                package.summary.user_enabled = request
-                    .enabled
-                    .context("User enablement requires a boolean")?
+                package.summary.user_enabled =
+                    enabled.context("User enablement requires a boolean")?
             }
         }
         let summary = package.summary.clone();
