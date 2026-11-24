@@ -15,7 +15,11 @@ import {
   setStoredAuthSession,
   type StoredAuthSession,
 } from "@/lib/access/tauri/auth";
-import { isDevAuthBypassed } from "@proliferate/product-client/internal/lib/domain/auth/auth-mode";
+import {
+  createDevBypassSession,
+  isDevAuthBypassed,
+  isProductAuthRequired,
+} from "@proliferate/product-client/internal/lib/domain/auth/auth-mode";
 import { getCurrentAuthSession } from "@proliferate/product-client/internal/lib/domain/auth/current-auth-session";
 import { getProliferateApiBaseUrl } from "@/lib/infra/proliferate-api";
 import {
@@ -34,7 +38,21 @@ async function loadValidSession(): Promise<StoredAuthSession | null> {
   const current = getCurrentAuthSession();
   const stored = await getStoredAuthSession();
   const candidate = current ?? stored;
-  if (!candidate) return null;
+  if (!candidate) {
+    // When auth is not required, automatically provision a dev bypass session
+    // so cloud workspaces can be used without signing in.
+    if (!isProductAuthRequired()) {
+      const devSession = createDevBypassSession();
+      try {
+        await setStoredAuthSession(devSession);
+      } catch {
+        // Native storage may be unavailable; the dev bypass session is still
+        // usable in memory for this request.
+      }
+      return devSession;
+    }
+    return null;
+  }
   if (!isSessionExpiring(candidate)) {
     return candidate;
   }

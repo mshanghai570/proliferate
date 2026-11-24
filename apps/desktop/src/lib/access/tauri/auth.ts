@@ -111,7 +111,12 @@ function clearBrowserPendingAuth(): void {
 
 export async function getStoredAuthSession(): Promise<StoredAuthSession | null> {
   try {
-    return await invoke<StoredAuthSession | null>("get_auth_session")
+    const native = await invoke<StoredAuthSession | null>("get_auth_session")
+    if (native) return native
+    // Native returned no session (file missing or empty). Fall back to the
+    // browser persistence so a session written there by a prior build/profile
+    // is still recoverable.
+    return readBrowserSession()
   } catch (error) {
     reportKeychainFailure("get_auth_session", error)
     return readBrowserSession()
@@ -119,23 +124,26 @@ export async function getStoredAuthSession(): Promise<StoredAuthSession | null> 
 }
 
 export async function setStoredAuthSession(session: StoredAuthSession): Promise<void> {
+  let nativeError: unknown = null
   try {
     await invoke("set_auth_session", { session })
-    return
   } catch (error) {
+    nativeError = error
     reportKeychainFailure("set_auth_session", error)
-    writeBrowserSession(session)
   }
+  // Always mirror to browser storage as a backup so the session survives
+  // native path changes (re-signing, profile switches, deleted native file).
+  writeBrowserSession(session)
+  if (nativeError) throw nativeError
 }
 
 export async function clearStoredAuthSession(): Promise<void> {
   try {
     await invoke("clear_auth_session")
-    return
   } catch (error) {
     reportKeychainFailure("clear_auth_session", error)
-    clearBrowserSession()
   }
+  clearBrowserSession()
 }
 
 export async function getStoredPendingAuthSession(): Promise<StoredPendingAuthSession | null> {
